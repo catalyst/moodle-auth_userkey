@@ -42,6 +42,8 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
      */
     public function setUp() {
         global $CFG;
+
+        require_once($CFG->libdir . "/externallib.php");
         require_once($CFG->dirroot . '/auth/userkey/tests/fake_userkey_manager.php');
         require_once($CFG->dirroot . '/auth/userkey/auth.php');
 
@@ -216,6 +218,68 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
 
         $expected = $CFG->wwwroot . '/auth/userkey/login.php?key=' . $actualkey->value;
 
+        $this->assertEquals($expected, $actual);
+    }
+
+    public function test_get_allowed_mapping_fields_list() {
+        $expected = array(
+            'username' => 'username',
+            'email' => 'email',
+            'idnumber' => 'idnumber',
+        );
+
+        $actual = $this->auth->get_allowed_mapping_fields();
+
+        $this->assertEquals($expected, $actual);
+    }
+
+    public function test_get_request_login_url_user_parameters() {
+        // Check email as it should be set by default.
+        $expected = array(
+            'email' => new external_value(
+                PARAM_EMAIL,
+                'A valid email address'
+            ),
+        );
+
+        $actual = $this->auth->get_request_login_url_user_parameters();
+        $this->assertEquals($expected, $actual);
+
+        // Check username.
+        set_config('mappingfield', 'username', 'auth_userkey');
+        $this->auth = new auth_plugin_userkey();
+
+        $expected = array(
+            'username' => new external_value(
+                PARAM_USERNAME,
+                'Username'
+            ),
+        );
+
+        $actual = $this->auth->get_request_login_url_user_parameters();
+        $this->assertEquals($expected, $actual);
+
+        // Check idnumber.
+        set_config('mappingfield', 'idnumber', 'auth_userkey');
+        $this->auth = new auth_plugin_userkey();
+
+        $expected = array(
+            'idnumber' => new external_value(
+                PARAM_RAW,
+                'An arbitrary ID code number perhaps from the institution'
+            ),
+        );
+
+        $actual = $this->auth->get_request_login_url_user_parameters();
+        $this->assertEquals($expected, $actual);
+
+        // Check some junk field name.
+        set_config('mappingfield', 'junkfield', 'auth_userkey');
+        $this->auth = new auth_plugin_userkey();
+
+        $expected = array();
+
+        $actual = $this->auth->get_request_login_url_user_parameters();
         $this->assertEquals($expected, $actual);
     }
 

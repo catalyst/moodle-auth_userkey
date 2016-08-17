@@ -28,49 +28,16 @@ require_once($CFG->dirroot . "/auth/userkey/auth.php");
 class auth_userkey_external extends external_api {
 
     public function request_login_url_parameters() {
-        // TODO based on settings set required parameter for one of the following: username, email, idnumber.
         return new external_function_parameters(
             array(
                 'user' => new external_single_structure(
-                    array(
-                        'username' => new external_value(
-                            PARAM_USERNAME,
-                            'Username policy is defined in Moodle security config.'
-                        ),
-                        'email' => new external_value(
-                            PARAM_EMAIL,
-                            'A valid and unique email address'
-                        ),
-                        'idnumber' => new external_value(
-                            PARAM_RAW,
-                            'An arbitrary ID code number perhaps from the institution'
-                        ),
-                        'firstname' => new external_value(
-                            PARAM_NOTAGS,
-                            'The first name(s) of the user',
-                            VALUE_OPTIONAL
-                        ),
-                        'lastname' => new external_value(
-                            PARAM_NOTAGS,
-                            'The family name of the user',
-                            VALUE_OPTIONAL
-                        ),
-                        'customfields' => new external_multiple_structure(
-                            new external_single_structure(
-                                array(
-                                    'type'  => new external_value(PARAM_ALPHANUMEXT, 'The name of the custom field'),
-                                    'value' => new external_value(PARAM_RAW, 'The value of the custom field')
-                                )
-                            ), 'User custom fields (also known as user profile fields)', VALUE_OPTIONAL
-                        ),
-                    )
+                    get_auth_plugin('auth_userkey')->get_request_login_url_user_parameters()
                 )
             )
         );
     }
 
     public function request_login_url($user) {
-
         $auth = get_auth_plugin('auth_userkey');
         $loginurl = $auth->get_login_url($user);
 

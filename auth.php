@@ -27,6 +27,7 @@ defined('MOODLE_INTERNAL') || die();
 use auth_userkey\core_userkey_manager;
 use auth_userkey\userkey_manager_interface;
 
+require_once($CFG->libdir . "/externallib.php");
 require_once($CFG->libdir.'/authlib.php');
 
 /**
@@ -182,4 +183,81 @@ class auth_plugin_userkey extends auth_plugin_base {
         return $CFG->wwwroot . '/auth/userkey/login.php?key=' . $userkey;
     }
 
+    /**
+     * Return a list of mapping fields.
+     *
+     * @return array
+     */
+    public function get_allowed_mapping_fields() {
+        return array(
+            'username' => 'username',
+            'email' => 'email',
+            'idnumber' => 'idnumber',
+        );
+    }
+
+    /**
+     * Return a mapping parameter for request_login_url_parameters().
+     *
+     * @return array
+     */
+    protected function get_mapping_parameter() {
+        $mappingfield = $this->get_mapping_field();
+
+        switch ($mappingfield) {
+            case 'username':
+                $parameter = array(
+                    'username' => new external_value(
+                        PARAM_USERNAME,
+                        'Username'
+                    ),
+                );
+                break;
+
+            case 'email':
+                $parameter = array(
+                    'email' => new external_value(
+                        PARAM_EMAIL,
+                        'A valid email address'
+                    ),
+                );
+                break;
+
+            case 'idnumber':
+                $parameter = array(
+                    'idnumber' => new external_value(
+                        PARAM_RAW,
+                        'An arbitrary ID code number perhaps from the institution'
+                    ),
+                );
+                break;
+
+            default:
+                $parameter = array();
+                break;
+        }
+
+        return $parameter;
+    }
+
+    /**
+     * Return user fields parameters for request_login_url_parameters().
+     *
+     * @return array
+     */
+    protected function get_user_fields_parameters() {
+        // TODO: add more fields here when we implement user creation.
+        return array();
+    }
+
+    /**
+     * Return parameters for request_login_url_parameters().
+     *
+     * @return array
+     */
+    public function get_request_login_url_user_parameters() {
+        $parameters = array_merge($this->get_mapping_parameter(), $this->get_user_fields_parameters());
+
+        return $parameters;
+    }
 }
