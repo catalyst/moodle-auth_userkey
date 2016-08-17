@@ -34,7 +34,11 @@ require_once($CFG->libdir.'/authlib.php');
  */
 class auth_plugin_userkey extends auth_plugin_base {
 
+    /**
+     * Default mapping field.
+     */
     const DEFAULT_MAPPING_FIELD = 'email';
+
     /**
      * User key manager.
      *
@@ -48,11 +52,6 @@ class auth_plugin_userkey extends auth_plugin_base {
     public function __construct() {
         $this->authtype = 'userkey';
         $this->config = get_config('auth_userkey');
-
-        //$this->config->mappingfield string
-        //$this->config->iprestriction bool
-        //$this->config->keylifetime string
-        //$this->config->createuser bool
     }
 
     /**
@@ -95,14 +94,17 @@ class auth_plugin_userkey extends auth_plugin_base {
     }
 
     /**
+     * Set userkey manager.
+     *
      * @param \auth_userkey\userkey_manager_interface $keymanager
      */
     public function set_userkey_manager(userkey_manager_interface $keymanager) {
         $this->userkeymanager = $keymanager;
     }
 
-
     /**
+     * Return mapping field to find a lms user.
+     *
      * @return string
      */
     public function get_mapping_field() {
@@ -113,29 +115,71 @@ class auth_plugin_userkey extends auth_plugin_base {
         return self::DEFAULT_MAPPING_FIELD;
     }
 
+    /**
+     * Check if we need to create a new user.
+     *
+     * @return bool
+     */
+    protected function should_create_user() {
+        if (isset($this->config->createuser)) {
+            return $this->config->createuser;
+        }
+
+        return false;
+    }
+
+    /**
+     * Create a new user.
+     */
+    protected function create_user() {
+        // TODO:
+        // 1. Validate user
+        // 2. Create user.
+        // 3. Throw exception if something went wrong.
+    }
+
+    /**
+     * Return login URL.
+     *
+     * @param array|stdClass $user User data.
+     *
+     * @return string Login URL.
+     *
+     * @throws \invalid_parameter_exception
+     */
     public function get_login_url($user) {
         global $CFG, $DB;
 
+        $user = (array)$user;
         $mappingfield = $this->get_mapping_field();
 
         if (!isset($user[$mappingfield]) || empty($user[$mappingfield])) {
-            throw new invalid_parameter_exception('User field "' . $mappingfield . '" is not set or empty.');
+            throw new invalid_parameter_exception('Required field "' . $mappingfield . '" is not set or empty.');
         }
 
-//        $params = array($mappingfield => $user[$mappingfield], 'mnethostid' => $CFG->mnet_localhost_id);
-//
-//        if (!$user = $DB->get_record('user', $params) ) {
-//            throw new invalid_parameter_exception('User is not exist');
-//        }
-//
-//        if (!isset($this->userkeymanager)) {
-//            $keymanager = new auth_userkey\core_userkey_manager($user->id, $this->config);
-//            $this->set_userkey_manager($keymanager);
-//        }
-//
-//        $userkey = $this->userkeymanager->create_key();
-//
-//        return $CFG->wwwroot . '/auth/userkey/login.php?key=' . $userkey;
+        $params = array(
+            $mappingfield => $user[$mappingfield],
+            'mnethostid' => $CFG->mnet_localhost_id,
+        );
+
+        $user = $DB->get_record('user', $params);
+
+        if (empty($user)) {
+            if (!$this->should_create_user()) {
+                throw new invalid_parameter_exception('User is not exist');
+            } else {
+                $user = $this->create_user();
+            }
+        }
+
+        if (!isset($this->userkeymanager)) {
+            $userkeymanager = new core_userkey_manager($user->id, $this->config);
+            $this->set_userkey_manager($userkeymanager);
+        }
+
+        $userkey = $this->userkeymanager->create_key();
+
+        return $CFG->wwwroot . '/auth/userkey/login.php?key=' . $userkey;
     }
 
 }
