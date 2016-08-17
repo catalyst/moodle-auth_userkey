@@ -33,7 +33,16 @@ use auth_userkey\core_userkey_manager;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class core_userkey_manager_testcase extends advanced_testcase {
+    /**
+     * Test user object.
+     * @var
+     */
     protected $user;
+
+    /**
+     * Test config object.
+     * @var
+     */
     protected $config;
 
     /**
@@ -45,6 +54,9 @@ class core_userkey_manager_testcase extends advanced_testcase {
         $this->config = new stdClass();
     }
 
+    /**
+     * Test that core_userkey_manager implements userkey_manager_interface interface.
+     */
     public function test_implements_userkey_manager_interface() {
         $manager = new core_userkey_manager($this->user->id, $this->config);
 
@@ -53,6 +65,7 @@ class core_userkey_manager_testcase extends advanced_testcase {
     }
 
     /**
+     * Test that exception gets thrown if user is not exist.
      *
      * @expectedException \Exception
      */
@@ -61,7 +74,10 @@ class core_userkey_manager_testcase extends advanced_testcase {
         $manager = new core_userkey_manager($brokenuserid, $this->config);
     }
 
-    public function test_create_correct_key_if_iprestriction_not_set() {
+    /**
+     * Test that key gets created correctly if config option iprestriction is not set.
+     */
+    public function test_create_correct_key_if_iprestriction_is_not_set() {
         global $DB;
 
         $_SERVER['HTTP_CLIENT_IP'] = '192.168.1.1';
@@ -85,6 +101,9 @@ class core_userkey_manager_testcase extends advanced_testcase {
         $this->assertEquals($expectedvaliduntil, $actualkey->validuntil);
     }
 
+    /**
+     * Test that key gets created correctly if config option iprestriction is set to true.
+     */
     public function test_create_correct_key_if_iprestriction_is_true() {
         global $DB;
 
@@ -110,6 +129,9 @@ class core_userkey_manager_testcase extends advanced_testcase {
         $this->assertEquals($expectedvaliduntil, $actualkey->validuntil);
     }
 
+    /**
+     * Test that key gets created correctly if config option iprestriction is set to false.
+     */
     public function test_create_correct_key_if_iprestriction_is_false() {
         global $DB;
 
@@ -135,6 +157,9 @@ class core_userkey_manager_testcase extends advanced_testcase {
         $this->assertEquals($expectedvaliduntil, $actualkey->validuntil);
     }
 
+    /**
+     * Test that key gets created correctly if config option iprestriction is set to a string.
+     */
     public function test_create_correct_key_if_iprestriction_is_string() {
         global $DB;
 
@@ -160,7 +185,10 @@ class core_userkey_manager_testcase extends advanced_testcase {
         $this->assertEquals($expectedvaliduntil, $actualkey->validuntil);
     }
 
-    public function test_create_correct_key_if_keylifetime_is_not_set()  {
+    /**
+     * Test that key gets created correctly if config option keylifetime is not set.
+     */
+    public function test_create_correct_key_if_keylifetime_is_not_set() {
         global $DB;
 
         $manager = new core_userkey_manager($this->user->id, $this->config);
@@ -183,7 +211,10 @@ class core_userkey_manager_testcase extends advanced_testcase {
         $this->assertEquals($expectedvaliduntil, $actualkey->validuntil);
     }
 
-    public function test_create_correct_key_if_keylifetime_is_set_to_integer()  {
+    /**
+     * Test that key gets created correctly if config option keylifetime is set to integer.
+     */
+    public function test_create_correct_key_if_keylifetime_is_set_to_integer() {
         global $DB;
 
         $this->config->keylifetime = 3000;
@@ -209,7 +240,10 @@ class core_userkey_manager_testcase extends advanced_testcase {
 
     }
 
-    public function test_create_correct_key_if_keylifetime_is_set_to_string()  {
+    /**
+     * Test that key gets created correctly if config option keylifetime is set to a string.
+     */
+    public function test_create_correct_key_if_keylifetime_is_set_to_string() {
         global $DB;
 
         $this->config->keylifetime = '3000';
@@ -234,6 +268,9 @@ class core_userkey_manager_testcase extends advanced_testcase {
         $this->assertEquals($expectedvaliduntil, $actualkey->validuntil);
     }
 
+    /**
+     * Test that we can delete created key.
+     */
     public function test_can_delete_created_key() {
         global $DB;
 
@@ -249,14 +286,17 @@ class core_userkey_manager_testcase extends advanced_testcase {
         $this->assertEquals(0, count($keys));
     }
 
+    /**
+     * Test that we can delete all existing keys.
+     */
     public function test_can_delete_all_existing_keys() {
         global $DB;
 
         $manager = new core_userkey_manager($this->user->id, $this->config);
 
-        create_user_key('auth/userkey', $this->user->id, $instance=null, $iprestriction=null, $validuntil=null);
-        create_user_key('auth/userkey', $this->user->id, $instance=null, $iprestriction=null, $validuntil=null);
-        create_user_key('auth/userkey', $this->user->id, $instance=null, $iprestriction=null, $validuntil=null);
+        create_user_key('auth/userkey', $this->user->id);
+        create_user_key('auth/userkey', $this->user->id);
+        create_user_key('auth/userkey', $this->user->id);
 
         $keys = $DB->get_records('user_private_key', array('userid' => $this->user->id));
         $this->assertEquals(3, count($keys));
@@ -267,14 +307,17 @@ class core_userkey_manager_testcase extends advanced_testcase {
         $this->assertEquals(0, count($keys));
     }
 
+    /**
+     * Test that we create only one key.
+     */
     public function test_create_only_one_key() {
         global $DB;
 
         $manager = new core_userkey_manager($this->user->id, $this->config);
 
-        create_user_key('auth/userkey', $this->user->id, $instance=null, $iprestriction=null, $validuntil=null);
-        create_user_key('auth/userkey', $this->user->id, $instance=null, $iprestriction=null, $validuntil=null);
-        create_user_key('auth/userkey', $this->user->id, $instance=null, $iprestriction=null, $validuntil=null);
+        create_user_key('auth/userkey', $this->user->id);
+        create_user_key('auth/userkey', $this->user->id);
+        create_user_key('auth/userkey', $this->user->id);
 
         $keys = $DB->get_records('user_private_key', array('userid' => $this->user->id));
         $this->assertEquals(3, count($keys));
