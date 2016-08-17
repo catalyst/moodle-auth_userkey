@@ -42,6 +42,7 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
      */
     public function setUp() {
         global $CFG;
+        require_once($CFG->dirroot . '/auth/userkey/tests/fake_userkey_manager.php');
         require_once($CFG->dirroot . '/auth/userkey/auth.php');
 
         $this->auth = new auth_plugin_userkey();
@@ -119,7 +120,7 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
             $actual = $this->auth->get_login_url($user);
         } catch (\invalid_parameter_exception $e) {
             $actual = $e->getMessage();
-            $expected = 'Invalid parameter value detected (User field "email" is not set or empty.)';
+            $expected = 'Invalid parameter value detected (Required field "email" is not set or empty.)';
 
             $this->assertEquals($expected, $actual);
         }
@@ -130,22 +131,92 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
             $actual = $this->auth->get_login_url($user);
         } catch (\invalid_parameter_exception $e) {
             $actual = $e->getMessage();
-            $expected = 'Invalid parameter value detected (User field "username" is not set or empty.)';
+            $expected = 'Invalid parameter value detected (Required field "username" is not set or empty.)';
 
             $this->assertEquals($expected, $actual);
         }
     }
 
+    /**
+     *
+     * @expectedException \invalid_parameter_exception
+     */
+    public function test_throwing_exception_if_user_is_not_exist() {
+        $user = array();
+        $user['email'] = 'notexists@test.com';
+
+        $actual = $this->auth->get_login_url($user);
+    }
+
+    /**
+     *
+     */
+    public function test_return_correct_login_url_if_user_is_array() {
+        global $CFG;
+
+        $user = array();
+        $user['username'] = 'username';
+        $user['email'] = 'exists@test.com';
+
+        self::getDataGenerator()->create_user($user);
+
+        $userkeymanager = new \auth_userkey\fake_userkey_manager();
+        $this->auth->set_userkey_manager($userkeymanager);
+
+        $expected = $CFG->wwwroot . '/auth/userkey/login.php?key=FaKeKeyFoRtEsTiNg';
+        $actual = $this->auth->get_login_url($user);
+
+        $this->assertEquals($expected, $actual);
+    }
+
+    /**
+     *
+     */
+    public function test_return_correct_login_url_if_user_is_object() {
+        global $CFG;
+
+        $user = new stdClass();
+        $user->username = 'username';
+        $user->email = 'exists@test.com';
+
+        self::getDataGenerator()->create_user($user);
+
+        $userkeymanager = new \auth_userkey\fake_userkey_manager();
+        $this->auth->set_userkey_manager($userkeymanager);
+
+        $expected = $CFG->wwwroot . '/auth/userkey/login.php?key=FaKeKeyFoRtEsTiNg';
+        $actual = $this->auth->get_login_url($user);
+
+        $this->assertEquals($expected, $actual);
+    }
 
 
-//    public function test_throwing_exception_if_matching_field_is_not_provided() {
-//        global $CFG;
-//
-//        $user = array();
-//
-//        $expected = $CFG->wwwroot . '/auth/userkey/login.php?key=';
-//        $actual = $this->auth->get_login_url($user);
-//
-//        $this->assertEquals($expected, $actual);
-//    }
+    public function test_return_correct_login_url_if_user_is_object_using_default_keymanager() {
+        global $DB, $CFG;
+
+        $user = array();
+        $user['username'] = 'username';
+        $user['email'] = 'exists@test.com';
+
+        $user = self::getDataGenerator()->create_user($user);
+
+        create_user_key('auth/userkey', $user->id);
+        create_user_key('auth/userkey', $user->id);
+        create_user_key('auth/userkey', $user->id);
+        $keys = $DB->get_records('user_private_key', array('userid' => $user->id));
+
+        $this->assertEquals(3, count($keys));
+
+        $actual = $this->auth->get_login_url($user);
+
+        $keys = $DB->get_records('user_private_key', array('userid' => $user->id));
+        $this->assertEquals(1, count($keys));
+
+        $actualkey = $DB->get_record('user_private_key', array('userid' => $user->id));
+
+        $expected = $CFG->wwwroot . '/auth/userkey/login.php?key=' . $actualkey->value;
+
+        $this->assertEquals($expected, $actual);
+    }
+
 }
