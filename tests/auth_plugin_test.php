@@ -87,6 +87,9 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
         $this->assertFalse($this->auth->can_change_password());
     }
 
+    /**
+     * Test that default mapping field gets returned correctly.
+     */
     public function test_get_default_mapping_field() {
         $expected = 'email';
         $actual = $this->auth->get_mapping_field();
@@ -94,6 +97,9 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
         $this->assertEquals($expected, $actual);
     }
 
+    /**
+     * Test that configured mapping field gets returned correctly.
+     */
     public function test_get_mapping_field() {
         set_config('mappingfield', 'username', 'auth_userkey');
         $this->auth = new auth_plugin_userkey();
@@ -105,43 +111,49 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
     }
 
     /**
+     * Test that auth plugin throws correct exception if default mapping field is not provided.
+     *
      * @expectedException \invalid_parameter_exception
+     * @expectedExceptionMessage Invalid parameter value detected (Required field "email" is not set or empty.)
      */
-    public function test_throwing_exception_if_mapping_field_is_not_provided() {
+    public function test_throwing_exception_if_default_mapping_field_is_not_provided() {
         $user = array();
         $actual = $this->auth->get_login_url($user);
     }
 
     /**
+     * Test that auth plugin throws correct exception if username mapping field is not provided, but set in configs.
      *
+     * @expectedException \invalid_parameter_exception
+     * @expectedExceptionMessage Invalid parameter value detected (Required field "username" is not set or empty.)
      */
-    public function test_text_of_throwing_exception_if_mapping_field_is_not_provided() {
+    public function test_throwing_exception_if_mapping_field_username_is_not_provided() {
         $user = array();
-
-        try {
-            $actual = $this->auth->get_login_url($user);
-        } catch (\invalid_parameter_exception $e) {
-            $actual = $e->getMessage();
-            $expected = 'Invalid parameter value detected (Required field "email" is not set or empty.)';
-
-            $this->assertEquals($expected, $actual);
-        }
-
         set_config('mappingfield', 'username', 'auth_userkey');
         $this->auth = new auth_plugin_userkey();
-        try {
-            $actual = $this->auth->get_login_url($user);
-        } catch (\invalid_parameter_exception $e) {
-            $actual = $e->getMessage();
-            $expected = 'Invalid parameter value detected (Required field "username" is not set or empty.)';
 
-            $this->assertEquals($expected, $actual);
-        }
+        $actual = $this->auth->get_login_url($user);
     }
 
     /**
+     * Test that auth plugin throws correct exception if idnumber mapping field is not provided, but set in configs.
      *
      * @expectedException \invalid_parameter_exception
+     * @expectedExceptionMessage Invalid parameter value detected (Required field "idnumber" is not set or empty.)
+     */
+    public function test_throwing_exception_if_mapping_field_idnumber_is_not_provided() {
+        $user = array();
+        set_config('mappingfield', 'idnumber', 'auth_userkey');
+        $this->auth = new auth_plugin_userkey();
+
+        $actual = $this->auth->get_login_url($user);
+    }
+
+    /**
+     * Test that auth plugin throws correct exception if we trying to request not existing user.
+     *
+     * @expectedException \invalid_parameter_exception
+     * @expectedExceptionMessage Invalid parameter value detected (User is not exist)
      */
     public function test_throwing_exception_if_user_is_not_exist() {
         $user = array();
@@ -151,7 +163,7 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
     }
 
     /**
-     *
+     * Test that we can request a user provided user data as an array.
      */
     public function test_return_correct_login_url_if_user_is_array() {
         global $CFG;
@@ -172,7 +184,7 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
     }
 
     /**
-     *
+     * Test that we can request a user provided user data as an object.
      */
     public function test_return_correct_login_url_if_user_is_object() {
         global $CFG;
@@ -192,7 +204,9 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
         $this->assertEquals($expected, $actual);
     }
 
-
+    /**
+     * Test that we can get login url if we do not use fake keymanager.
+     */
     public function test_return_correct_login_url_if_user_is_object_using_default_keymanager() {
         global $DB, $CFG;
 
@@ -221,6 +235,9 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
         $this->assertEquals($expected, $actual);
     }
 
+    /**
+     * Test that we can return correct allowed mapping fields.
+     */
     public function test_get_allowed_mapping_fields_list() {
         $expected = array(
             'username' => 'username',
@@ -233,7 +250,10 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
         $this->assertEquals($expected, $actual);
     }
 
-    public function test_get_request_login_url_user_parameters() {
+    /**
+     * Test that we can get correct request parameters based on the plugin configuration.
+     */
+    public function test_get_request_login_url_user_parameters_based_on_plugin_config() {
         // Check email as it should be set by default.
         $expected = array(
             'email' => new external_value(
