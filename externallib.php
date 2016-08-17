@@ -27,18 +27,31 @@ require_once($CFG->dirroot . "/auth/userkey/auth.php");
 
 class auth_userkey_external extends external_api {
 
-    public function request_login_url_parameters() {
+    /**
+     * Return request_login_url webservice parameters.
+     *
+     * @return \external_function_parameters
+     */
+    public static function request_login_url_parameters() {
         return new external_function_parameters(
             array(
                 'user' => new external_single_structure(
-                    get_auth_plugin('auth_userkey')->get_request_login_url_user_parameters()
+                    get_auth_plugin('userkey')->get_request_login_url_user_parameters()
                 )
             )
         );
     }
 
-    public function request_login_url($user) {
-        $auth = get_auth_plugin('auth_userkey');
+    /**
+     * Return login url array.
+     *
+     * @param array $user
+     *
+     * @return array
+     */
+    public static function request_login_url($user) {
+
+        $auth = get_auth_plugin('userkey');
         $loginurl = $auth->get_login_url($user);
 
         return array(
@@ -46,6 +59,11 @@ class auth_userkey_external extends external_api {
         );
     }
 
+    /**
+     * Describe request_login_url webservice return structure.
+     *
+     * @return \external_single_structure
+     */
     public static function request_login_url_returns() {
         return new external_single_structure(
             array(
