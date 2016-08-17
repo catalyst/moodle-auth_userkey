@@ -83,4 +83,69 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
     public function test_auth_plugin_does_not_allow_to_change_passwords() {
         $this->assertFalse($this->auth->can_change_password());
     }
+
+    public function test_get_default_mapping_field() {
+        $expected = 'email';
+        $actual = $this->auth->get_mapping_field();
+
+        $this->assertEquals($expected, $actual);
+    }
+
+    public function test_get_mapping_field() {
+        set_config('mappingfield', 'username', 'auth_userkey');
+        $this->auth = new auth_plugin_userkey();
+
+        $expected = 'username';
+        $actual = $this->auth->get_mapping_field();
+
+        $this->assertEquals($expected, $actual);
+    }
+
+    /**
+     * @expectedException \invalid_parameter_exception
+     */
+    public function test_throwing_exception_if_mapping_field_is_not_provided() {
+        $user = array();
+        $actual = $this->auth->get_login_url($user);
+    }
+
+    /**
+     *
+     */
+    public function test_text_of_throwing_exception_if_mapping_field_is_not_provided() {
+        $user = array();
+
+        try {
+            $actual = $this->auth->get_login_url($user);
+        } catch (\invalid_parameter_exception $e) {
+            $actual = $e->getMessage();
+            $expected = 'Invalid parameter value detected (User field "email" is not set or empty.)';
+
+            $this->assertEquals($expected, $actual);
+        }
+
+        set_config('mappingfield', 'username', 'auth_userkey');
+        $this->auth = new auth_plugin_userkey();
+        try {
+            $actual = $this->auth->get_login_url($user);
+        } catch (\invalid_parameter_exception $e) {
+            $actual = $e->getMessage();
+            $expected = 'Invalid parameter value detected (User field "username" is not set or empty.)';
+
+            $this->assertEquals($expected, $actual);
+        }
+    }
+
+
+
+//    public function test_throwing_exception_if_matching_field_is_not_provided() {
+//        global $CFG;
+//
+//        $user = array();
+//
+//        $expected = $CFG->wwwroot . '/auth/userkey/login.php?key=';
+//        $actual = $this->auth->get_login_url($user);
+//
+//        $this->assertEquals($expected, $actual);
+//    }
 }

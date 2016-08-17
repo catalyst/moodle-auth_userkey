@@ -24,6 +24,9 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+use auth_userkey\core_userkey_manager;
+use auth_userkey\userkey_manager_interface;
+
 require_once($CFG->libdir.'/authlib.php');
 
 /**
@@ -31,12 +34,25 @@ require_once($CFG->libdir.'/authlib.php');
  */
 class auth_plugin_userkey extends auth_plugin_base {
 
+    const DEFAULT_MAPPING_FIELD = 'email';
+    /**
+     * User key manager.
+     *
+     * @var userkey_manager_interface
+     */
+    private $userkeymanager;
+
     /**
      * Constructor.
      */
     public function __construct() {
         $this->authtype = 'userkey';
-        $this->config = get_config('auth/userkey');
+        $this->config = get_config('auth_userkey');
+
+        //$this->config->mappingfield string
+        //$this->config->iprestriction bool
+        //$this->config->keylifetime string
+        //$this->config->createuser bool
     }
 
     /**
@@ -77,4 +93,49 @@ class auth_plugin_userkey extends auth_plugin_base {
     public function can_change_password() {
         return false;
     }
+
+    /**
+     * @param \auth_userkey\userkey_manager_interface $keymanager
+     */
+    public function set_userkey_manager(userkey_manager_interface $keymanager) {
+        $this->userkeymanager = $keymanager;
+    }
+
+
+    /**
+     * @return string
+     */
+    public function get_mapping_field() {
+        if (isset($this->config->mappingfield) && !empty($this->config->mappingfield)) {
+            return $this->config->mappingfield;
+        }
+
+        return self::DEFAULT_MAPPING_FIELD;
+    }
+
+    public function get_login_url($user) {
+        global $CFG, $DB;
+
+        $mappingfield = $this->get_mapping_field();
+
+        if (!isset($user[$mappingfield]) || empty($user[$mappingfield])) {
+            throw new invalid_parameter_exception('User field "' . $mappingfield . '" is not set or empty.');
+        }
+
+//        $params = array($mappingfield => $user[$mappingfield], 'mnethostid' => $CFG->mnet_localhost_id);
+//
+//        if (!$user = $DB->get_record('user', $params) ) {
+//            throw new invalid_parameter_exception('User is not exist');
+//        }
+//
+//        if (!isset($this->userkeymanager)) {
+//            $keymanager = new auth_userkey\core_userkey_manager($user->id, $this->config);
+//            $this->set_userkey_manager($keymanager);
+//        }
+//
+//        $userkey = $this->userkeymanager->create_key();
+//
+//        return $CFG->wwwroot . '/auth/userkey/login.php?key=' . $userkey;
+    }
+
 }
