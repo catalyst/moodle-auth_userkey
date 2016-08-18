@@ -38,6 +38,12 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
     protected $auth;
 
     /**
+     * User object.
+     * @var
+     */
+    protected $user;
+
+    /**
      * Initial set up.
      */
     public function setUp() {
@@ -48,6 +54,8 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
         require_once($CFG->dirroot . '/auth/userkey/auth.php');
 
         $this->auth = new auth_plugin_userkey();
+        $this->user = self::getDataGenerator()->create_user();
+
         $this->resetAfterTest();
     }
 
@@ -366,6 +374,200 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
         $this->assertEquals('email', $config->mappingfield);
         $this->assertEquals(100, $config->keylifetime);
         $this->assertEquals(0, $config->iprestriction);
+    }
+
+    /**
+     * Test required parameter exception gets thrown id try to login, but key is not set.
+     *
+     * @expectedException moodle_exception
+     * @expectedExceptionMessage A required parameter (key) was missing
+     */
+    public function test_required_parameter_exception_thrown_if_key_not_set() {
+        $this->auth->user_login_userkey();
+    }
+
+    /**
+     * Test that incorrect key exception gets thrown if a key is incorrect.
+     *
+     * @expectedException moodle_exception
+     * @expectedExceptionMessage Incorrect key
+     */
+    public function test_invalid_key_exception_thrown_if_invalid_key() {
+        $_POST['key'] = 'InvalidKey';
+        $this->auth->user_login_userkey();
+    }
+
+    /**
+     * Test that expired key exception gets thrown if a key is expired.
+     *
+     * @expectedException moodle_exception
+     * @expectedExceptionMessage Expired key
+     */
+    public function test_expired_key_exception_thrown_if_expired_key() {
+        global $DB;
+
+        $key = new stdClass();
+        $key->value = 'ExpiredKey';
+        $key->script = 'auth/userkey';
+        $key->userid = $this->user->id;
+        $key->instance = $this->user->id;
+        $key->iprestriction = null;
+        $key->validuntil    = time() - 3000;
+        $key->timecreated   = time();
+        $DB->insert_record('user_private_key', $key);
+
+        $_POST['key'] = 'ExpiredKey';
+        $this->auth->user_login_userkey();
+    }
+
+    /**
+     * Test that IP address mismatch exception gets thrown if incorrect IP.
+     *
+     * @expectedException moodle_exception
+     * @expectedExceptionMessage Client IP address mismatch
+     */
+    public function test_ipmismatch_exception_thrown_if_ip_is_incorrect() {
+        global $DB;
+
+        $key = new stdClass();
+        $key->value = 'IpmismatchKey';
+        $key->script = 'auth/userkey';
+        $key->userid = $this->user->id;
+        $key->instance = $this->user->id;
+        $key->iprestriction = '192.168.1.1';
+        $key->validuntil    = time() + 300;
+        $key->timecreated   = time();
+        $DB->insert_record('user_private_key', $key);
+
+        $_POST['key'] = 'IpmismatchKey';
+        $_SERVER['HTTP_CLIENT_IP'] = '192.168.1.2';
+        $this->auth->user_login_userkey();
+    }
+
+    /**
+     * Test that IP address mismatch exception gets thrown if incorrect IP.
+     *
+     * @expectedException moodle_exception
+     * @expectedExceptionMessage Invalid user id
+     */
+    public function test_invalid_user_exception_thrown_if_ip_is_incorrect() {
+        global $DB;
+
+        $key = new stdClass();
+        $key->value = 'InvalidUser';
+        $key->script = 'auth/userkey';
+        $key->userid = 777;
+        $key->instance = 777;
+        $key->iprestriction = '192.168.1.1';
+        $key->validuntil    = time() + 300;
+        $key->timecreated   = time();
+        $DB->insert_record('user_private_key', $key);
+
+        $_POST['key'] = 'InvalidUser';
+        $_SERVER['HTTP_CLIENT_IP'] = '192.168.1.1';
+        $this->auth->user_login_userkey();
+    }
+
+    /**
+     * Test that key gets removed after a user logged in.
+     */
+    public function test_that_key_gets_removed_after_user_logged_in() {
+        global $DB;
+
+        $key = new stdClass();
+        $key->value = 'RemoveKey';
+        $key->script = 'auth/userkey';
+        $key->userid = $this->user->id;
+        $key->instance = $this->user->id;
+        $key->iprestriction = '192.168.1.1';
+        $key->validuntil    = time() + 300;
+        $key->timecreated   = time();
+        $DB->insert_record('user_private_key', $key);
+
+        $_POST['key'] = 'RemoveKey';
+        $_SERVER['HTTP_CLIENT_IP'] = '192.168.1.1';
+
+        // Using @ is the only way to test this. Thanks moodle!
+        @$this->auth->user_login_userkey();
+
+        $keyexists = $DB->record_exists('user_private_key', array('value' => 'RemoveKey'));
+        $this->assertFalse($keyexists);
+    }
+
+    /**
+     * Test that a user loggs in correctly.
+     */
+    public function test_that_user_logged_in() {
+        global $DB, $USER;
+
+        $key = new stdClass();
+        $key->value = 'UserLogin';
+        $key->script = 'auth/userkey';
+        $key->userid = $this->user->id;
+        $key->instance = $this->user->id;
+        $key->iprestriction = null;
+        $key->validuntil    = time() + 300;
+        $key->timecreated   = time();
+        $DB->insert_record('user_private_key', $key);
+
+        $_POST['key'] = 'UserLogin';
+
+        // Using @ is the only way to test this. Thanks moodle!
+        $redirect = @$this->auth->user_login_userkey();
+
+        $this->assertEquals('/', $redirect);
+        $this->assertEquals($this->user->id, $USER->id);
+        $this->assertSame(sesskey(), $USER->sesskey);
+    }
+
+    /**
+     * Test that wantsurl URL gets returned after user logged in if wantsurl's set.
+     */
+    public function test_that_return_wantsurl() {
+        global $DB;
+
+        $key = new stdClass();
+        $key->value = 'WantsUrl';
+        $key->script = 'auth/userkey';
+        $key->userid = $this->user->id;
+        $key->instance = $this->user->id;
+        $key->iprestriction = null;
+        $key->validuntil    = time() + 300;
+        $key->timecreated   = time();
+        $DB->insert_record('user_private_key', $key);
+
+        $_POST['key'] = 'WantsUrl';
+        $_POST['wantsurl'] = '/course/index.php';
+
+        // Using @ is the only way to test this. Thanks moodle!
+        $redirect = @$this->auth->user_login_userkey();
+
+        $this->assertEquals('/course/index.php', $redirect);
+    }
+
+    /**
+     * Test that wantsurl URL gets returned after user logged in if wantsurl's set to external URL.
+     */
+    public function test_that_return_wantsurl_if_it_is_external_url() {
+        global $DB;
+
+        $key = new stdClass();
+        $key->value = 'WantsUrlExternal';
+        $key->script = 'auth/userkey';
+        $key->userid = $this->user->id;
+        $key->instance = $this->user->id;
+        $key->iprestriction = null;
+        $key->validuntil    = time() + 300;
+        $key->timecreated   = time();
+        $DB->insert_record('user_private_key', $key);
+
+        $_POST['key'] = 'WantsUrlExternal';
+        $_POST['wantsurl'] = 'http://test.com/course/index.php';
+
+        // Using @ is the only way to test this. Thanks moodle!
+        $redirect = @$this->auth->user_login_userkey();
+
+        $this->assertEquals('http://test.com/course/index.php', $redirect);
     }
 
 }
