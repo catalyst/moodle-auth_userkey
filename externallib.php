@@ -51,6 +51,9 @@ class auth_userkey_external extends external_api {
      */
     public static function request_login_url($user) {
 
+        $context = context_system::instance();
+        require_capability('auth/userkey:generatekey', $context);
+
         $auth = get_auth_plugin('userkey');
         $loginurl = $auth->get_login_url($user);
 

@@ -44,8 +44,6 @@ class auth_userkey_externallib_testcase extends advanced_testcase {
 
         $this->resetAfterTest();
 
-        $this->setAdminUser();
-
         $user = array();
         $user['username'] = 'username';
         $user['email'] = 'exists@test.com';
@@ -58,6 +56,8 @@ class auth_userkey_externallib_testcase extends advanced_testcase {
      */
     public function test_successful_webservice_calls() {
         global $DB, $CFG;
+
+        $this->setAdminUser();
 
         // Email.
         $params = array(
@@ -117,6 +117,8 @@ class auth_userkey_externallib_testcase extends advanced_testcase {
      * @expectedExceptionMessage Invalid parameter value detected (Required field "email" is not set or empty.)
      */
     public function test_request_incorrect_parameters() {
+        $this->setAdminUser();
+
         $params = array(
             'bla' => 'exists@test.com',
         );
@@ -132,6 +134,8 @@ class auth_userkey_externallib_testcase extends advanced_testcase {
      * @expectedExceptionMessage Invalid parameter value detected (User is not exist)
      */
     public function test_request_not_existing_user() {
+        $this->setAdminUser();
+
         $params = array(
             'email' => 'notexists@test.com',
         );
