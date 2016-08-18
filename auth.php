@@ -80,15 +80,17 @@ class auth_plugin_userkey extends auth_plugin_base {
     }
 
     /**
-     * Login user using userkey.
+     * Login user using userkey and return URL to redirect after.
      *
-     * This is basically customised core require_user_key_login().
+     * @return mixed|string URL to redirect.
+     *
+     * @throws \moodle_exception If something went wrong.
      */
     public function user_login_userkey() {
         global $DB;
 
         $keyvalue = required_param('key', PARAM_ALPHANUM);
-        $wantsurl = optional_param('wantsurl', '', PARAM_LOCALURL);
+        $wantsurl = optional_param('wantsurl', '', PARAM_URL);
 
         $options = array(
             'script' => core_userkey_manager::CORE_USER_KEY_MANAGER_SCRIPT,
@@ -126,9 +128,9 @@ class auth_plugin_userkey extends auth_plugin_base {
         complete_user_login($user);
 
         if (!empty($wantsurl)) {
-            redirect($wantsurl);
+            return $wantsurl;
         } else {
-            redirect('/');
+            return '/';
         }
     }
 
