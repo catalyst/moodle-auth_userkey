@@ -33,3 +33,4 @@ $string['keylifetime_desc'] = 'Life time in seconds of the each user login key.'
 $string['createuser'] = 'Crete user?';
 $string['createuser_desc'] = 'If enabled, a new user will be created if fail to find one in LMS.';
 $string['userkey:generatekey'] = 'Generate login user key';
+$string['pluginisdisabled'] = 'The userkey authentication plugin is disabled.';

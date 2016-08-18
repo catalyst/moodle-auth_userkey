@@ -56,7 +56,7 @@ class auth_userkey_external extends external_api {
     public static function request_login_url($user) {
 
         if (!is_enabled_auth('userkey')) {
-            throw new webservice_access_exception('The userkey authentication plugin is disabled.');
+            throw new webservice_access_exception(get_string('pluginisdisabled', 'auth_userkey'));
         }
 
         $context = context_system::instance();
