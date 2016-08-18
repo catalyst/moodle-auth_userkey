@@ -93,7 +93,7 @@ class core_userkey_manager implements userkey_manager_interface {
             $this->iprestriction = getremoteaddr(null);
         }
 
-        if (isset($config->keylifetime) && is_int($config->keylifetime)) {
+        if (isset($config->keylifetime) && (int)$config->keylifetime > 0) {
             $this->validuntil = time() + $config->keylifetime;
         } else {
             $this->validuntil = time() + self::DEFAULT_KEY_LIFE_TIME_IN_SECONDS;

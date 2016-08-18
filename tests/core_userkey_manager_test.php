@@ -258,7 +258,7 @@ class core_userkey_manager_testcase extends advanced_testcase {
         $expectedscript = 'auth/userkey';
         $expectedinstance = $this->user->id;
         $expectediprestriction = null;
-        $expectedvaliduntil = time() + 60;
+        $expectedvaliduntil = time() + 3000;
 
         $this->assertEquals($expectedvalue, $actualkey->value);
         $this->assertEquals($expecteduserid, $actualkey->userid);
