@@ -80,6 +80,59 @@ class auth_plugin_userkey extends auth_plugin_base {
     }
 
     /**
+     * Login user using userkey.
+     *
+     * This is basically customised core require_user_key_login().
+     */
+    public function user_login_userkey() {
+        global $DB;
+
+        $keyvalue = required_param('key', PARAM_ALPHANUM);
+        $wantsurl = optional_param('wantsurl', '', PARAM_LOCALURL);
+
+        $options = array(
+            'script' => core_userkey_manager::CORE_USER_KEY_MANAGER_SCRIPT,
+            'value' => $keyvalue
+        );
+
+        if (!$key = $DB->get_record('user_private_key', $options)) {
+            print_error('invalidkey');
+        }
+
+        if (!empty($key->validuntil) and $key->validuntil < time()) {
+            print_error('expiredkey');
+        }
+
+        if ($key->iprestriction) {
+            $remoteaddr = getremoteaddr(null);
+            if (empty($remoteaddr) or !address_in_subnet($remoteaddr, $key->iprestriction)) {
+                print_error('ipmismatch');
+            }
+        }
+
+        if (!$user = $DB->get_record('user', array('id' => $key->userid))) {
+            print_error('invaliduserid');
+        }
+
+        if (!isset($this->userkeymanager)) {
+            $userkeymanager = new core_userkey_manager($user->id, $this->config);
+            $this->set_userkey_manager($userkeymanager);
+        }
+
+        $this->userkeymanager->delete_key();
+
+        $user = get_complete_user_data('id', $user->id);
+
+        complete_user_login($user);
+
+        if (!empty($wantsurl)) {
+            redirect($wantsurl);
+        } else {
+            redirect('/');
+        }
+    }
+
+    /**
      * Don't store local passwords.
      *
      * @return bool True.
