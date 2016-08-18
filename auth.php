@@ -45,7 +45,19 @@ class auth_plugin_userkey extends auth_plugin_base {
      *
      * @var userkey_manager_interface
      */
-    private $userkeymanager;
+    protected $userkeymanager;
+
+    /**
+     * Defaults for config form.
+     *
+     * @var array
+     */
+    protected $defaults = array(
+        'mappingfield' => self::DEFAULT_MAPPING_FIELD,
+        'keylifetime' => 60,
+        'iprestriction' => 0,
+        //'createuser' => 0, // TODO: use this field when implementing user creation.
+    );
 
     /**
      * Constructor.
@@ -92,6 +104,53 @@ class auth_plugin_userkey extends auth_plugin_base {
      */
     public function can_change_password() {
         return false;
+    }
+
+    /**
+     * Prints a form for configuring this authentication plugin.
+     *
+     * This function is called from admin/auth.php, and outputs a full page with
+     * a form for configuring this plugin.
+     *
+     * @param object $config
+     * @param object $err
+     */
+    public function config_form($config, $err, $user_fields) {
+        global $CFG, $OUTPUT;
+        $config = (object) array_merge($this->defaults, (array) $config );
+        include("settings.html");
+    }
+
+    /**
+     * A chance to validate form data, and last chance to
+     * do stuff before it is inserted in config_plugin
+     *
+     * @param object $form with submitted configuration settings (without system magic quotes)
+     * @param array $err array of error messages
+     *
+     * @return array of any errors
+     */
+    public function validate_form($form, &$err) {
+        if ((int)$form->keylifetime == 0) {
+            $err['keylifetime'] = 'User key life time should be a number.';
+        }
+    }
+
+    /**
+     * Process and stores configuration data for this authentication plugin.
+     *
+     * @param object $config Config object from the form.
+     *
+     * @return bool
+     */
+    public function process_config($config) {
+        foreach ($this->defaults as $key => $value) {
+            if (!isset($this->config->$key) || $config->$key != $this->config->$key) {
+                set_config($key, $config->$key, 'auth_userkey');
+            }
+        }
+
+        return true;
     }
 
     /**
@@ -190,9 +249,9 @@ class auth_plugin_userkey extends auth_plugin_base {
      */
     public function get_allowed_mapping_fields() {
         return array(
-            'username' => 'username',
-            'email' => 'email',
-            'idnumber' => 'idnumber',
+            'username' => get_string('username'),
+            'email' => get_string('email'),
+            'idnumber' => get_string('idnumber'),
         );
     }
 

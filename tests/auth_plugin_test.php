@@ -240,9 +240,9 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
      */
     public function test_get_allowed_mapping_fields_list() {
         $expected = array(
-            'username' => 'username',
-            'email' => 'email',
-            'idnumber' => 'idnumber',
+            'username' => 'Username',
+            'email' => 'Email address',
+            'idnumber' => 'ID number',
         );
 
         $actual = $this->auth->get_allowed_mapping_fields();
@@ -301,6 +301,71 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
 
         $actual = $this->auth->get_request_login_url_user_parameters();
         $this->assertEquals($expected, $actual);
+    }
+
+    /**
+     * Test that we can validate config form correctly.
+     */
+    public function test_validate_config_form() {
+        $form = new stdClass();
+
+        $form->keylifetime = '';
+        $err = array();
+        $this->auth->validate_form($form, $err);
+        $this->assertEquals('User key life time should be a number.', $err['keylifetime']);
+
+
+        $form->keylifetime = '0';
+        $err = array();
+        $this->auth->validate_form($form, $err);
+        $this->assertEquals('User key life time should be a number.', $err['keylifetime']);
+
+        $form->keylifetime = '1';
+        $err = array();
+        $this->auth->validate_form($form, $err);
+        $this->assertFalse(array_key_exists('keylifetime', $err));
+
+        $form->keylifetime = 0;
+        $err = array();
+        $this->auth->validate_form($form, $err);
+        $this->assertEquals('User key life time should be a number.', $err['keylifetime']);
+
+        $form->keylifetime = 1;
+        $err = array();
+        $this->auth->validate_form($form, $err);
+        $this->assertFalse(array_key_exists('keylifetime', $err));
+
+        $form->keylifetime = 'rkjflj';
+        $err = array();
+        $this->auth->validate_form($form, $err);
+        $this->assertEquals('User key life time should be a number.', $err['keylifetime']);
+    }
+
+    /**
+     * Test that we can process config form.
+     */
+    public function test_process_config_form() {
+        $config = get_config('auth_userkey');
+
+        $this->assertObjectNotHasAttribute('mappingfield', $config);
+        $this->assertObjectNotHasAttribute('keylifetime', $config);
+        $this->assertObjectNotHasAttribute('iprestriction', $config);
+
+        $formconfig = new stdClass();
+        $formconfig->mappingfield = 'email';
+        $formconfig->keylifetime = 100;
+        $formconfig->iprestriction = 0;
+
+        $this->auth->process_config($formconfig);
+
+        $config = get_config('auth_userkey');
+        $this->assertObjectHasAttribute('mappingfield', $config);
+        $this->assertObjectHasAttribute('keylifetime', $config);
+        $this->assertObjectHasAttribute('iprestriction', $config);
+
+        $this->assertEquals('email', $config->mappingfield);
+        $this->assertEquals(100, $config->keylifetime);
+        $this->assertEquals(0, $config->iprestriction);
     }
 
 }
