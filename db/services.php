@@ -28,7 +28,8 @@ $functions = array(
         'methodname'  => 'request_login_url',
         'classpath'   => 'auth/userkey/externallib.php',
         'description' => 'Return one time key based login URL',
-        'type'        => 'read',
+        'type'        => 'write',
+        'capabilities'  => 'auth/userkey:generatekey',
     )
 );
 
