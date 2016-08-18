@@ -23,6 +23,7 @@
  */
 
 require_once($CFG->libdir . "/externallib.php");
+require_once($CFG->dirroot . "/webservice/lib.php");
 require_once($CFG->dirroot . "/auth/userkey/auth.php");
 
 class auth_userkey_external extends external_api {
@@ -48,8 +49,15 @@ class auth_userkey_external extends external_api {
      * @param array $user
      *
      * @return array
+     * @throws \dml_exception
+     * @throws \required_capability_exception
+     * @throws \webservice_access_exception
      */
     public static function request_login_url($user) {
+
+        if (!is_enabled_auth('userkey')) {
+            throw new webservice_access_exception('The userkey authentication plugin is disabled.');
+        }
 
         $context = context_system::instance();
         require_capability('auth/userkey:generatekey', $context);

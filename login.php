@@ -24,4 +24,8 @@
 
 require_once(dirname(__FILE__) . '/../../config.php');
 
+if (!is_enabled_auth('userkey')) {
+    print_error('The userkey authentication plugin is disabled.');
+}
+
 get_auth_plugin('userkey')->user_login_userkey();
