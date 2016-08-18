@@ -38,7 +38,7 @@ $fields = get_auth_plugin('userkey')->get_allowed_mapping_fields();
     <tr valign="top">
         <?php $field = 'keylifetime' ?>
         <td align="right"><label for="<?php echo $field ?>"><?php print_string($field, 'auth_userkey') ?></label></td>
-        <td><input type="text" size="40" name="<?php echo $field ?>" value="<?php print $config->$field ?>" placeholder="60"><br>
+        <td><input type="text" size="4" name="<?php echo $field ?>" value="<?php print $config->$field ?>" placeholder="60"><br>
             <?php if (isset($err[$field])) { echo $OUTPUT->notification($err[$field], 'notifyfailure'); } ?>
             <?php print_string($field.'_desc', 'auth_userkey') ?></td>
     </tr>
