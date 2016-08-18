@@ -200,7 +200,7 @@ class auth_userkey_externallib_testcase extends advanced_testcase {
         $CFG->auth = "userkey";
 
         $context = context_system::instance();
-        $studentrole = $DB->get_record('role', array('shortname'=>'student'), '*', MUST_EXIST);
+        $studentrole = $DB->get_record('role', array('shortname' => 'student'), '*', MUST_EXIST);
         assign_capability('auth/userkey:generatekey', CAP_ALLOW, $studentrole->id, $context->id);
         role_assign($studentrole->id, $this->user->id, $context->id);
 

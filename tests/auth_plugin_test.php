@@ -322,7 +322,6 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
         $this->auth->validate_form($form, $err);
         $this->assertEquals('User key life time should be a number.', $err['keylifetime']);
 
-
         $form->keylifetime = '0';
         $err = array();
         $this->auth->validate_form($form, $err);

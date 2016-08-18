@@ -56,7 +56,7 @@ class auth_plugin_userkey extends auth_plugin_base {
         'mappingfield' => self::DEFAULT_MAPPING_FIELD,
         'keylifetime' => 60,
         'iprestriction' => 0,
-        //'createuser' => 0, // TODO: use this field when implementing user creation.
+        // TODO: use this field when implementing user creation. 'createuser' => 0.
     );
 
     /**
@@ -169,9 +169,9 @@ class auth_plugin_userkey extends auth_plugin_base {
      *
      * @param object $config
      * @param object $err
+     * @param array $userfields
      */
-    public function config_form($config, $err, $user_fields) {
-        global $CFG, $OUTPUT;
+    public function config_form($config, $err, $userfields) {
         $config = (object) array_merge($this->defaults, (array) $config );
         include("settings.html");
     }
