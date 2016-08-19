@@ -23,11 +23,12 @@
  */
 
 $string['pluginname'] = 'User key authentication';
-$string['auth_userkeydescription'] = ''; // TODO: create descripton.
+$string['auth_userkeydescription'] = 'Log in to Moodle using one time user key.';
 $string['mappingfield'] = 'Mapping field';
 $string['mappingfield_desc'] = 'This user field will be used to find relevant user in the LMS.';
 $string['iprestriction'] = 'IP restriction';
-$string['iprestriction_desc'] = 'If enabled, a user should use the same remote ip to get login URL and logging to to LMS.';
+$string['iprestriction_desc'] = 'If enabled, a web call has to contain "ip" parameter when requesting login URL.
+A user has to have provided IP to be able to use a key to login to LMS.';
 $string['keylifetime'] = 'User key life time';
 $string['keylifetime_desc'] = 'Life time in seconds of the each user login key.';
 $string['incorrectkeylifetime'] = 'User key life time should be a number';

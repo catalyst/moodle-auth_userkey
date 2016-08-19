@@ -10,13 +10,12 @@ URL to be log in to Moodle without typing username and password.
 Using
 -----
 1. Install the plugin as usual.
-2. Enable and configure just installed plugin. Set required Mapping field, User key life time,
-User key life time and Redirect after logout.
-3. Configure Moodle web services as described here http://docs.moodle.org/en/Web_services
-4. Add function "auth_userkey_request_login_url" to your enabled web service.
-5. Configure your external application to make a web call to get login URL.
-6. Redirect your users to this URL to be logged in to Moodle.
-
+2. Enable and configure just installed plugin. Set required Mapping field, User key life time, IP restriction and Logout redirect URL.
+3. Enable web service advance feature (Admin > Advanced features), more info http://docs.moodle.org/en/Web_services
+4. Enable one of the supported protocols (Admin > Plugins > Web services > Manage protocols)
+5. Create a token for a specific user and for the service 'Request login URL Service' (Admin > Plugins > Web services > Manage tokens)
+6. Configure your external application to make a web call to get login URL.
+7. Redirect your users to this URL to be logged in to Moodle.
 
 Configuration
 -------------
@@ -75,10 +74,10 @@ get an error.
 
 **IP restriction**
 
-If this setting is set to yes, then user have to use the same remote IP address to generate a user key (make
-a web call) as well as then log in using this key. If IP address is different a user will get an error.
+If this setting is set to yes, then your web application has to provie user's ip address to generate a user key. Then
+the user should have provided ip when using this key. If ip address is different a user will get an error.
 
-**Redirect after logout**
+**Logout redirect URL**
 
 You can set URL to redirect users after they logged out from Moodle. For example you can redirect them
 to logout script of your web application to log users out from it as well. This setting is optional.
