@@ -102,6 +102,13 @@ class auth_plugin_userkey extends auth_plugin_base {
             print_error('invalidkey');
         }
 
+        if (!isset($this->userkeymanager)) {
+            $userkeymanager = new core_userkey_manager($key->userid, $this->config);
+            $this->set_userkey_manager($userkeymanager);
+        }
+
+        $this->userkeymanager->delete_key();
+
         if (!empty($key->validuntil) and $key->validuntil < time()) {
             print_error('expiredkey');
         }
@@ -117,15 +124,7 @@ class auth_plugin_userkey extends auth_plugin_base {
             print_error('invaliduserid');
         }
 
-        if (!isset($this->userkeymanager)) {
-            $userkeymanager = new core_userkey_manager($user->id, $this->config);
-            $this->set_userkey_manager($userkeymanager);
-        }
-
-        $this->userkeymanager->delete_key();
-
         $user = get_complete_user_data('id', $user->id);
-
         complete_user_login($user);
 
         if (!empty($wantsurl)) {
