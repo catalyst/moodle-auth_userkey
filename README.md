@@ -37,19 +37,19 @@ For example XML-RPC (PHP structure) description for different mapping field sett
 
 ***Email Address***
 
-[user] =>
-    Array
-        (
-        [email] => string
-        )
+    [user] =>
+        Array
+            (
+            [email] => string
+            )
 
 ***ID number***
 
-[user] =>
-    Array
-        (
-        [idnumber] => string
-        )
+    [user] =>
+        Array
+            (
+            [idnumber] => string
+            )
 
 ***Web service will return follwiong structure or error message.***
 
@@ -79,6 +79,6 @@ a web call) as well as then log in using this key. If IP address is different a 
 
 **Redirect after logout**
 
-You can set URL to redirect user to after they logged out from Moodle. For example you can redirect them
-to logout script of your web application to log users out from there as well. This setting is optional.
+You can set URL to redirect users after they logged out from Moodle. For example you can redirect them
+to logout script of your web application to log users out from it as well. This setting is optional.
 
