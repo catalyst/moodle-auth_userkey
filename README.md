@@ -3,8 +3,8 @@ Log in to Moodle using one time user key.
 
 Auth plugin for organising simple one way SSO(single sign on) between moodle and your external web
 application. The main idea is to make a web call to moodle and provide one of the possible matching
-fields to find required user and generate one time login URL. The user can be redirected to this
-URL to automatically log in to Moodle without typing username and password.
+fields to find required user and generate one time login URL. A user can be redirected to this
+URL to be log in to Moodle without typing username and password.
 
 
 Using
@@ -28,6 +28,7 @@ Required data structure for web call is related to mapping field you configured.
 For example XML-RPC (PHP structure) description for different mapping field settings:
 
 ***User name***
+
 [user] =>
     Array
         (
@@ -35,6 +36,7 @@ For example XML-RPC (PHP structure) description for different mapping field sett
         )
 
 ***Email Address***
+
 [user] =>
     Array
         (
@@ -42,6 +44,7 @@ For example XML-RPC (PHP structure) description for different mapping field sett
         )
 
 ***ID number***
+
 [user] =>
     Array
         (
@@ -49,6 +52,7 @@ For example XML-RPC (PHP structure) description for different mapping field sett
         )
 
 ***Web service will return follwiong structure or error message.***
+
     Array
         (
         [loginurl] => string
@@ -57,7 +61,11 @@ For example XML-RPC (PHP structure) description for different mapping field sett
 Please navigate to API documentation to get full description for "auth_userkey_request_login_url" function.
 e.g. http://yourmoodle.com/admin/webservice/documentation.php
 
-You can amend this URL by wantsurl
+You can amend login URL by "wantsurl" parameter to redirect user after theu logged in to Moodle.
+E.g. http://yourmoodle.com/auth/userkey/login.php?key=uniquekey&wantsurl=http://yourmoodle.com/course/view.php?id=3
+
+Wantsurl maybe internal and external.
+
 
 **User key life time**
 
