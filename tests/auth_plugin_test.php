@@ -106,6 +106,33 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
     }
 
     /**
+     * Test that logout page hook sets global redirect variable correctly.
+     */
+    public function test_logoutpage_hook_sets_global_redirect_correctly() {
+        global $redirect, $SESSION;
+
+        $this->auth->logoutpage_hook();
+        $this->assertEquals('', $redirect);
+
+        $SESSION->userkey = true;
+        $this->auth = new auth_plugin_userkey();
+        $this->auth->logoutpage_hook();
+        $this->assertEquals('', $redirect);
+
+        unset($SESSION->userkey);
+        set_config('redirecturl', 'http://example.com', 'auth_userkey');
+        $this->auth = new auth_plugin_userkey();
+        $this->auth->logoutpage_hook();
+        $this->assertEquals('', $redirect);
+
+        $SESSION->userkey = true;
+        set_config('redirecturl', 'http://example.com', 'auth_userkey');
+        $this->auth = new auth_plugin_userkey();
+        $this->auth->logoutpage_hook();
+        $this->assertEquals('http://example.com', $redirect);
+    }
+
+    /**
      * Test that configured mapping field gets returned correctly.
      */
     public function test_get_mapping_field() {
