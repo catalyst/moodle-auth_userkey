@@ -87,19 +87,12 @@ class core_userkey_manager_testcase extends advanced_testcase {
 
         $actualkey = $DB->get_record('user_private_key', array('userid' => $this->user->id));
 
-        $expectedvalue = $value;
-        $expecteduserid = $this->user->id;
-        $expectedscript = 'auth/userkey';
-        $expectedinstance = $this->user->id;
-        $expectediprestriction = null;
-        $expectedvaliduntil = time() + 60;
-
-        $this->assertEquals($expectedvalue, $actualkey->value);
-        $this->assertEquals($expecteduserid, $actualkey->userid);
-        $this->assertEquals($expectedscript, $actualkey->script);
-        $this->assertEquals($expectedinstance, $actualkey->instance);
-        $this->assertEquals($expectediprestriction, $actualkey->iprestriction);
-        $this->assertEquals($expectedvaliduntil, $actualkey->validuntil);
+        $this->assertEquals($value, $actualkey->value);
+        $this->assertEquals($this->user->id, $actualkey->userid);
+        $this->assertEquals('auth/userkey', $actualkey->script);
+        $this->assertEquals($this->user->id, $actualkey->instance);
+        $this->assertEquals(null, $actualkey->iprestriction);
+        $this->assertEquals(time() + 60, $actualkey->validuntil);
     }
 
     /**
@@ -115,19 +108,12 @@ class core_userkey_manager_testcase extends advanced_testcase {
 
         $actualkey = $DB->get_record('user_private_key', array('userid' => $this->user->id));
 
-        $expectedvalue = $value;
-        $expecteduserid = $this->user->id;
-        $expectedscript = 'auth/userkey';
-        $expectedinstance = $this->user->id;
-        $expectediprestriction = '192.168.1.1';
-        $expectedvaliduntil = time() + 60;
-
-        $this->assertEquals($expectedvalue, $actualkey->value);
-        $this->assertEquals($expecteduserid, $actualkey->userid);
-        $this->assertEquals($expectedscript, $actualkey->script);
-        $this->assertEquals($expectedinstance, $actualkey->instance);
-        $this->assertEquals($expectediprestriction, $actualkey->iprestriction);
-        $this->assertEquals($expectedvaliduntil, $actualkey->validuntil);
+        $this->assertEquals($value, $actualkey->value);
+        $this->assertEquals($this->user->id, $actualkey->userid);
+        $this->assertEquals('auth/userkey', $actualkey->script);
+        $this->assertEquals($this->user->id, $actualkey->instance);
+        $this->assertEquals('192.168.1.1', $actualkey->iprestriction);
+        $this->assertEquals(time() + 60, $actualkey->validuntil);
     }
 
     /**
@@ -142,19 +128,12 @@ class core_userkey_manager_testcase extends advanced_testcase {
 
         $actualkey = $DB->get_record('user_private_key', array('userid' => $this->user->id));
 
-        $expectedvalue = $value;
-        $expecteduserid = $this->user->id;
-        $expectedscript = 'auth/userkey';
-        $expectedinstance = $this->user->id;
-        $expectediprestriction = '192.168.1.3';
-        $expectedvaliduntil = time() + 60;
-
-        $this->assertEquals($expectedvalue, $actualkey->value);
-        $this->assertEquals($expecteduserid, $actualkey->userid);
-        $this->assertEquals($expectedscript, $actualkey->script);
-        $this->assertEquals($expectedinstance, $actualkey->instance);
-        $this->assertEquals($expectediprestriction, $actualkey->iprestriction);
-        $this->assertEquals($expectedvaliduntil, $actualkey->validuntil);
+        $this->assertEquals($value, $actualkey->value);
+        $this->assertEquals($this->user->id, $actualkey->userid);
+        $this->assertEquals('auth/userkey', $actualkey->script);
+        $this->assertEquals($this->user->id, $actualkey->instance);
+        $this->assertEquals('192.168.1.3', $actualkey->iprestriction);
+        $this->assertEquals(time() + 60, $actualkey->validuntil);
     }
 
     /**
@@ -170,19 +149,12 @@ class core_userkey_manager_testcase extends advanced_testcase {
 
         $actualkey = $DB->get_record('user_private_key', array('userid' => $this->user->id));
 
-        $expectedvalue = $value;
-        $expecteduserid = $this->user->id;
-        $expectedscript = 'auth/userkey';
-        $expectedinstance = $this->user->id;
-        $expectediprestriction = null;
-        $expectedvaliduntil = time() + 60;
-
-        $this->assertEquals($expectedvalue, $actualkey->value);
-        $this->assertEquals($expecteduserid, $actualkey->userid);
-        $this->assertEquals($expectedscript, $actualkey->script);
-        $this->assertEquals($expectedinstance, $actualkey->instance);
-        $this->assertEquals($expectediprestriction, $actualkey->iprestriction);
-        $this->assertEquals($expectedvaliduntil, $actualkey->validuntil);
+        $this->assertEquals($value, $actualkey->value);
+        $this->assertEquals($this->user->id, $actualkey->userid);
+        $this->assertEquals('auth/userkey', $actualkey->script);
+        $this->assertEquals($this->user->id, $actualkey->instance);
+        $this->assertEquals(null, $actualkey->iprestriction);
+        $this->assertEquals(time() + 60, $actualkey->validuntil);
     }
 
     /**
@@ -198,19 +170,12 @@ class core_userkey_manager_testcase extends advanced_testcase {
 
         $actualkey = $DB->get_record('user_private_key', array('userid' => $this->user->id));
 
-        $expectedvalue = $value;
-        $expecteduserid = $this->user->id;
-        $expectedscript = 'auth/userkey';
-        $expectedinstance = $this->user->id;
-        $expectediprestriction = null;
-        $expectedvaliduntil = time() + 60;
-
-        $this->assertEquals($expectedvalue, $actualkey->value);
-        $this->assertEquals($expecteduserid, $actualkey->userid);
-        $this->assertEquals($expectedscript, $actualkey->script);
-        $this->assertEquals($expectedinstance, $actualkey->instance);
-        $this->assertEquals($expectediprestriction, $actualkey->iprestriction);
-        $this->assertEquals($expectedvaliduntil, $actualkey->validuntil);
+        $this->assertEquals($value, $actualkey->value);
+        $this->assertEquals($this->user->id, $actualkey->userid);
+        $this->assertEquals('auth/userkey', $actualkey->script);
+        $this->assertEquals($this->user->id, $actualkey->instance);
+        $this->assertEquals(null, $actualkey->iprestriction);
+        $this->assertEquals(time() + 60, $actualkey->validuntil);
     }
 
     /**
@@ -226,19 +191,12 @@ class core_userkey_manager_testcase extends advanced_testcase {
 
         $actualkey = $DB->get_record('user_private_key', array('userid' => $this->user->id));
 
-        $expectedvalue = $value;
-        $expecteduserid = $this->user->id;
-        $expectedscript = 'auth/userkey';
-        $expectedinstance = $this->user->id;
-        $expectediprestriction = '192.168.1.1';
-        $expectedvaliduntil = time() + 60;
-
-        $this->assertEquals($expectedvalue, $actualkey->value);
-        $this->assertEquals($expecteduserid, $actualkey->userid);
-        $this->assertEquals($expectedscript, $actualkey->script);
-        $this->assertEquals($expectedinstance, $actualkey->instance);
-        $this->assertEquals($expectediprestriction, $actualkey->iprestriction);
-        $this->assertEquals($expectedvaliduntil, $actualkey->validuntil);
+        $this->assertEquals($value, $actualkey->value);
+        $this->assertEquals($this->user->id, $actualkey->userid);
+        $this->assertEquals('auth/userkey', $actualkey->script);
+        $this->assertEquals($this->user->id, $actualkey->instance);
+        $this->assertEquals('192.168.1.1', $actualkey->iprestriction);
+        $this->assertEquals(time() + 60, $actualkey->validuntil);
     }
 
     /**
@@ -252,19 +210,12 @@ class core_userkey_manager_testcase extends advanced_testcase {
 
         $actualkey = $DB->get_record('user_private_key', array('userid' => $this->user->id));
 
-        $expectedvalue = $value;
-        $expecteduserid = $this->user->id;
-        $expectedscript = 'auth/userkey';
-        $expectedinstance = $this->user->id;
-        $expectediprestriction = null;
-        $expectedvaliduntil = time() + 60;
-
-        $this->assertEquals($expectedvalue, $actualkey->value);
-        $this->assertEquals($expecteduserid, $actualkey->userid);
-        $this->assertEquals($expectedscript, $actualkey->script);
-        $this->assertEquals($expectedinstance, $actualkey->instance);
-        $this->assertEquals($expectediprestriction, $actualkey->iprestriction);
-        $this->assertEquals($expectedvaliduntil, $actualkey->validuntil);
+        $this->assertEquals($value, $actualkey->value);
+        $this->assertEquals($this->user->id, $actualkey->userid);
+        $this->assertEquals('auth/userkey', $actualkey->script);
+        $this->assertEquals($this->user->id, $actualkey->instance);
+        $this->assertEquals(null, $actualkey->iprestriction);
+        $this->assertEquals(time() + 60, $actualkey->validuntil);
     }
 
     /**
@@ -280,19 +231,12 @@ class core_userkey_manager_testcase extends advanced_testcase {
 
         $actualkey = $DB->get_record('user_private_key', array('userid' => $this->user->id));
 
-        $expectedvalue = $value;
-        $expecteduserid = $this->user->id;
-        $expectedscript = 'auth/userkey';
-        $expectedinstance = $this->user->id;
-        $expectediprestriction = null;
-        $expectedvaliduntil = time() + 3000;
-
-        $this->assertEquals($expectedvalue, $actualkey->value);
-        $this->assertEquals($expecteduserid, $actualkey->userid);
-        $this->assertEquals($expectedscript, $actualkey->script);
-        $this->assertEquals($expectedinstance, $actualkey->instance);
-        $this->assertEquals($expectediprestriction, $actualkey->iprestriction);
-        $this->assertEquals($expectedvaliduntil, $actualkey->validuntil);
+        $this->assertEquals($value, $actualkey->value);
+        $this->assertEquals($this->user->id, $actualkey->userid);
+        $this->assertEquals('auth/userkey', $actualkey->script);
+        $this->assertEquals($this->user->id, $actualkey->instance);
+        $this->assertEquals(null, $actualkey->iprestriction);
+        $this->assertEquals(time() + 3000, $actualkey->validuntil);
 
     }
 
@@ -309,19 +253,13 @@ class core_userkey_manager_testcase extends advanced_testcase {
 
         $actualkey = $DB->get_record('user_private_key', array('userid' => $this->user->id));
 
-        $expectedvalue = $value;
-        $expecteduserid = $this->user->id;
-        $expectedscript = 'auth/userkey';
-        $expectedinstance = $this->user->id;
-        $expectediprestriction = null;
-        $expectedvaliduntil = time() + 3000;
+        $this->assertEquals($value, $actualkey->value);
+        $this->assertEquals($this->user->id, $actualkey->userid);
+        $this->assertEquals('auth/userkey', $actualkey->script);
+        $this->assertEquals($this->user->id, $actualkey->instance);
+        $this->assertEquals(null, $actualkey->iprestriction);
+        $this->assertEquals(time() + 3000, $actualkey->validuntil);
 
-        $this->assertEquals($expectedvalue, $actualkey->value);
-        $this->assertEquals($expecteduserid, $actualkey->userid);
-        $this->assertEquals($expectedscript, $actualkey->script);
-        $this->assertEquals($expectedinstance, $actualkey->instance);
-        $this->assertEquals($expectediprestriction, $actualkey->iprestriction);
-        $this->assertEquals($expectedvaliduntil, $actualkey->validuntil);
     }
 
     /**
