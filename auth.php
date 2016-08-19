@@ -88,7 +88,7 @@ class auth_plugin_userkey extends auth_plugin_base {
      * @throws \moodle_exception If something went wrong.
      */
     public function user_login_userkey() {
-        global $DB;
+        global $DB, $SESSION;
 
         $keyvalue = required_param('key', PARAM_ALPHANUM);
         $wantsurl = optional_param('wantsurl', '', PARAM_URL);
@@ -126,6 +126,9 @@ class auth_plugin_userkey extends auth_plugin_base {
 
         $user = get_complete_user_data('id', $user->id);
         complete_user_login($user);
+
+        // Identify this session as using user key auth method.
+        $SESSION->userkey = true;
 
         if (!empty($wantsurl)) {
             return $wantsurl;
@@ -379,5 +382,20 @@ class auth_plugin_userkey extends auth_plugin_base {
         $parameters = array_merge($this->get_mapping_parameter(), $this->get_user_fields_parameters());
 
         return $parameters;
+    }
+
+    /**
+     * Logout page hook.
+     *
+     * Override redirect URL after logout.
+     *
+     * @see auth_plugin_base::logoutpage_hook()
+     */
+    public function logoutpage_hook() {
+        global $redirect, $SESSION;
+
+        if (!empty($this->config->redirecturl) && isset($SESSION->userkey)) {
+            $redirect = $this->config->redirecturl;
+        }
     }
 }
