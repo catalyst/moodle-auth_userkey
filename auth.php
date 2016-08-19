@@ -385,6 +385,29 @@ class auth_plugin_userkey extends auth_plugin_base {
     }
 
     /**
+     * Check if we should redirect a user after logout.
+     *
+     * @return bool
+     */
+    protected function should_redirect() {
+        global $SESSION;
+
+        if (!isset($SESSION->userkey)) {
+            return false;
+        }
+
+        if (!isset($this->config->redirecturl)) {
+            return false;
+        }
+
+        if (empty($this->config->redirecturl)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
      * Logout page hook.
      *
      * Override redirect URL after logout.
@@ -392,9 +415,9 @@ class auth_plugin_userkey extends auth_plugin_base {
      * @see auth_plugin_base::logoutpage_hook()
      */
     public function logoutpage_hook() {
-        global $redirect, $SESSION;
+        global $redirect;
 
-        if (!empty($this->config->redirecturl) && isset($SESSION->userkey)) {
+        if ($this->should_redirect()) {
             $redirect = $this->config->redirecturl;
         }
     }
