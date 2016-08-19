@@ -536,12 +536,12 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
         $DB->insert_record('user_private_key', $key);
 
         $_POST['key'] = 'WantsUrl';
-        $_POST['wantsurl'] = '/course/index.php';
+        $_POST['wantsurl'] = '/course/index.php?id=12&key=134';
 
         // Using @ is the only way to test this. Thanks moodle!
         $redirect = @$this->auth->user_login_userkey();
 
-        $this->assertEquals('/course/index.php', $redirect);
+        $this->assertEquals('/course/index.php?id=12&key=134', $redirect);
     }
 
     /**
@@ -561,12 +561,12 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
         $DB->insert_record('user_private_key', $key);
 
         $_POST['key'] = 'WantsUrlExternal';
-        $_POST['wantsurl'] = 'http://test.com/course/index.php';
+        $_POST['wantsurl'] = 'http://test.com/course/index.php?id=12&key=134';
 
         // Using @ is the only way to test this. Thanks moodle!
         $redirect = @$this->auth->user_login_userkey();
 
-        $this->assertEquals('http://test.com/course/index.php', $redirect);
+        $this->assertEquals('http://test.com/course/index.php?id=12&key=134', $redirect);
     }
 
 }
