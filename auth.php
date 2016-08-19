@@ -56,6 +56,7 @@ class auth_plugin_userkey extends auth_plugin_base {
         'mappingfield' => self::DEFAULT_MAPPING_FIELD,
         'keylifetime' => 60,
         'iprestriction' => 0,
+        'redirecturl' => '',
         // TODO: use this field when implementing user creation. 'createuser' => 0.
     );
 
@@ -172,6 +173,8 @@ class auth_plugin_userkey extends auth_plugin_base {
      * @param array $userfields
      */
     public function config_form($config, $err, $userfields) {
+        global $CFG, $OUTPUT;
+
         $config = (object) array_merge($this->defaults, (array) $config );
         include("settings.html");
     }
@@ -188,6 +191,10 @@ class auth_plugin_userkey extends auth_plugin_base {
     public function validate_form($form, &$err) {
         if ((int)$form->keylifetime == 0) {
             $err['keylifetime'] = 'User key life time should be a number.';
+        }
+
+        if (!empty($form->redirecturl) && filter_var($form->redirecturl, FILTER_VALIDATE_URL) === false) {
+            $err['redirecturl'] = get_string('incorrectredirecturl', 'auth_userkey');
         }
     }
 
