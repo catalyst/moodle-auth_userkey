@@ -36,7 +36,7 @@ $functions = array(
 $services = array(
     'Request login URL Service' => array(
         'functions' => array ('auth_userkey_request_login_url'),
-        'restrictedusers' => 0,
+        'restrictedusers' => 1,
         'enabled' => 1,
     )
 );
