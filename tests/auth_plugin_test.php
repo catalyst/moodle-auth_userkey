@@ -312,20 +312,22 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
     }
 
     /**
-     * Test that we can validate config form correctly.
+     * Test that we can validate keylifetime for config form correctly.
      */
-    public function test_validate_config_form() {
+    public function test_validate_keylifetime_for_config_form() {
         $form = new stdClass();
+
+        $form->redirecturl = '';
 
         $form->keylifetime = '';
         $err = array();
         $this->auth->validate_form($form, $err);
-        $this->assertEquals('User key life time should be a number.', $err['keylifetime']);
+        $this->assertEquals('User key life time should be a number', $err['keylifetime']);
 
         $form->keylifetime = '0';
         $err = array();
         $this->auth->validate_form($form, $err);
-        $this->assertEquals('User key life time should be a number.', $err['keylifetime']);
+        $this->assertEquals('User key life time should be a number', $err['keylifetime']);
 
         $form->keylifetime = '1';
         $err = array();
@@ -335,7 +337,7 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
         $form->keylifetime = 0;
         $err = array();
         $this->auth->validate_form($form, $err);
-        $this->assertEquals('User key life time should be a number.', $err['keylifetime']);
+        $this->assertEquals('User key life time should be a number', $err['keylifetime']);
 
         $form->keylifetime = 1;
         $err = array();
@@ -345,7 +347,57 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
         $form->keylifetime = 'rkjflj';
         $err = array();
         $this->auth->validate_form($form, $err);
-        $this->assertEquals('User key life time should be a number.', $err['keylifetime']);
+        $this->assertEquals('User key life time should be a number', $err['keylifetime']);
+    }
+
+    /**
+     * Test that we can validate redirecturl for config form correctly.
+     */
+    public function test_validate_redirecturl_for_config_form() {
+        $form = new stdClass();
+
+        $form->keylifetime = 10;
+
+        $form->redirecturl = '';
+        $err = array();
+        $this->auth->validate_form($form, $err);
+        $this->assertFalse(array_key_exists('redirecturl', $err));
+
+        $form->redirecturl = 'http://google.com/';
+        $err = array();
+        $this->auth->validate_form($form, $err);
+        $this->assertFalse(array_key_exists('redirecturl', $err));
+
+
+        $form->redirecturl = 'https://google.com';
+        $err = array();
+        $this->auth->validate_form($form, $err);
+        $this->assertFalse(array_key_exists('redirecturl', $err));
+
+        $form->redirecturl = 'http://some.very.long.and.silly.domain/with/a/path/';
+        $err = array();
+        $this->auth->validate_form($form, $err);
+        $this->assertFalse(array_key_exists('redirecturl', $err));
+
+        $form->redirecturl = 'http://0.255.1.1/numericip.php';
+        $err = array();
+        $this->auth->validate_form($form, $err);
+        $this->assertFalse(array_key_exists('redirecturl', $err));
+
+        $form->redirecturl = '/just/a/path';
+        $err = array();
+        $this->auth->validate_form($form, $err);
+        $this->assertEquals('You should provide valid URL', $err['redirecturl']);
+
+        $form->redirecturl = 'random string';
+        $err = array();
+        $this->auth->validate_form($form, $err);
+        $this->assertEquals('You should provide valid URL', $err['redirecturl']);
+
+        $form->redirecturl = 123456;
+        $err = array();
+        $this->auth->validate_form($form, $err);
+        $this->assertEquals('You should provide valid URL', $err['redirecturl']);
     }
 
     /**
@@ -362,6 +414,7 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
         $formconfig->mappingfield = 'email';
         $formconfig->keylifetime = 100;
         $formconfig->iprestriction = 0;
+        $formconfig->redirecturl = 'http://google.com/';
 
         $this->auth->process_config($formconfig);
 
@@ -373,6 +426,7 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
         $this->assertEquals('email', $config->mappingfield);
         $this->assertEquals(100, $config->keylifetime);
         $this->assertEquals(0, $config->iprestriction);
+        $this->assertEquals('http://google.com/', $config->redirecturl);
     }
 
     /**
