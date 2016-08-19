@@ -62,6 +62,7 @@ Please navigate to API documentation to get full description for "auth_userkey_r
 e.g. http://yourmoodle.com/admin/webservice/documentation.php
 
 You can amend login URL by "wantsurl" parameter to redirect user after theu logged in to Moodle.
+
 E.g. http://yourmoodle.com/auth/userkey/login.php?key=uniquekey&wantsurl=http://yourmoodle.com/course/view.php?id=3
 
 Wantsurl maybe internal and external.
@@ -82,3 +83,9 @@ a web call) as well as then log in using this key. If IP address is different a 
 You can set URL to redirect users after they logged out from Moodle. For example you can redirect them
 to logout script of your web application to log users out from it as well. This setting is optional.
 
+
+TODO:
+-----
+1. Add users provisioning.
+2. Implement logout webservice to be able to call it from external application.
+3. Add a test client code to README.
