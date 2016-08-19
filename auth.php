@@ -31,7 +31,7 @@ require_once($CFG->libdir . "/externallib.php");
 require_once($CFG->libdir.'/authlib.php');
 
 /**
- * Shibboleth authentication plugin.
+ * User key authentication plugin.
  */
 class auth_plugin_userkey extends auth_plugin_base {
 
