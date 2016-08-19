@@ -65,13 +65,14 @@ class core_userkey_manager_testcase extends advanced_testcase {
     }
 
     /**
-     * Test that exception gets thrown if user is not exist.
-     *
-     * @expectedException \Exception
+     * Test that we can use user ID of not existing user.
      */
-    public function test_throws_exception_if_user_is_not_exists() {
+    public function test_that_manager_does_not_care_if_user_is_not_exists() {
         $brokenuserid = 500;
         $manager = new core_userkey_manager($brokenuserid, $this->config);
+
+        $expected = 'auth_userkey\userkey_manager_interface';
+        $this->assertInstanceOf($expected, $manager);
     }
 
     /**

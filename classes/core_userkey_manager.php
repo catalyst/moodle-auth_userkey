@@ -80,12 +80,6 @@ class core_userkey_manager implements userkey_manager_interface {
      * @throws \Exception If there is no user with provided userid.
      */
     public function __construct($userid, \stdClass $config) {
-        global $DB;
-
-        if (!$DB->record_exists('user', array('id' => $userid))) {
-            throw new \Exception('Invalid user id');
-        }
-
         $this->userid = $userid;
         $this->config = $config;
 
