@@ -34,7 +34,7 @@ $functions = array(
 );
 
 $services = array(
-    'Request login URL Service' => array(
+    'User key authentication web service' => array(
         'functions' => array ('auth_userkey_request_login_url'),
         'restrictedusers' => 1,
         'enabled' => 1,
