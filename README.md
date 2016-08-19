@@ -29,11 +29,11 @@ For example XML-RPC (PHP structure) description for different mapping field sett
 
 ***User name***
 
-[user] =>
-    Array
-        (
-        [username] => string
-        )
+    [user] =>
+        Array
+            (
+            [username] => string
+            )
 
 ***Email Address***
 
@@ -51,7 +51,7 @@ For example XML-RPC (PHP structure) description for different mapping field sett
             [idnumber] => string
             )
 
-***Web service will return follwiong structure or error message.***
+***Web service will return following structure or standard Moodle webservice error message.***
 
     Array
         (
