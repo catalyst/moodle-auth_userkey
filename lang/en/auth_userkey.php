@@ -30,6 +30,7 @@ $string['iprestriction'] = 'IP restriction';
 $string['iprestriction_desc'] = 'If enabled, a user should use the same remote ip to get login URL and logging to to LMS.';
 $string['keylifetime'] = 'User key life time';
 $string['keylifetime_desc'] = 'Life time in seconds of the each user login key.';
+$string['incorrectkeylifetime'] = 'User key life time should be a number';
 $string['createuser'] = 'Crete user?';
 $string['createuser_desc'] = 'If enabled, a new user will be created if fail to find one in LMS.';
 $string['redirecturl'] = 'Logout redirect URL';

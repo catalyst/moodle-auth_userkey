@@ -190,7 +190,7 @@ class auth_plugin_userkey extends auth_plugin_base {
      */
     public function validate_form($form, &$err) {
         if ((int)$form->keylifetime == 0) {
-            $err['keylifetime'] = 'User key life time should be a number.';
+            $err['keylifetime'] = get_string('incorrectkeylifetime', 'auth_userkey');
         }
 
         if (!empty($form->redirecturl) && filter_var($form->redirecturl, FILTER_VALIDATE_URL) === false) {
