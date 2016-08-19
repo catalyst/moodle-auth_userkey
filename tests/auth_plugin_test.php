@@ -395,7 +395,6 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
         $this->auth->validate_form($form, $err);
         $this->assertFalse(array_key_exists('redirecturl', $err));
 
-
         $form->redirecturl = 'https://google.com';
         $err = array();
         $this->auth->validate_form($form, $err);
