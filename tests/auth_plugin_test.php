@@ -198,6 +198,22 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
     }
 
     /**
+     * Test that auth plugin throws correct exception if we trying to request user,
+     * but ip field is not set and iprestriction is enabled.
+     *
+     * @expectedException \invalid_parameter_exception
+     * @expectedExceptionMessage Invalid parameter value detected (Required parameter "ip" is not set.)
+     */
+    public function test_throwing_exception_if_iprestriction_is_enabled_but_ip_is_missing_in_data() {
+        $user = array();
+        $user['email'] = 'exists@test.com';
+        set_config('iprestriction', true, 'auth_userkey');
+        $this->auth = new auth_plugin_userkey();
+
+        $actual = $this->auth->get_login_url($user);
+    }
+
+    /**
      * Test that we can request a user provided user data as an array.
      */
     public function test_return_correct_login_url_if_user_is_array() {
@@ -227,6 +243,28 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
         $user = new stdClass();
         $user->username = 'username';
         $user->email = 'exists@test.com';
+
+        self::getDataGenerator()->create_user($user);
+
+        $userkeymanager = new \auth_userkey\fake_userkey_manager();
+        $this->auth->set_userkey_manager($userkeymanager);
+
+        $expected = $CFG->wwwroot . '/auth/userkey/login.php?key=FaKeKeyFoRtEsTiNg';
+        $actual = $this->auth->get_login_url($user);
+
+        $this->assertEquals($expected, $actual);
+    }
+
+    /**
+     * Test that we can request a user provided user data as an object.
+     */
+    public function test_return_correct_login_url_if_iprestriction_is_enabled_and_data_is_correct() {
+        global $CFG;
+
+        $user = new stdClass();
+        $user->username = 'username';
+        $user->email = 'exists@test.com';
+        $user->ip = '192.168.1.1';
 
         self::getDataGenerator()->create_user($user);
 
@@ -336,6 +374,26 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
 
         $actual = $this->auth->get_request_login_url_user_parameters();
         $this->assertEquals($expected, $actual);
+
+        // Check IP if iprestriction disabled.
+        set_config('iprestriction', false, 'auth_userkey');
+        $this->auth = new auth_plugin_userkey();
+        $expected = array();
+        $actual = $this->auth->get_request_login_url_user_parameters();
+        $this->assertEquals($expected, $actual);
+
+        // Check IP if iprestriction enabled.
+        set_config('iprestriction', true, 'auth_userkey');
+        $this->auth = new auth_plugin_userkey();
+        $expected = array(
+            'ip' => new external_value(
+                PARAM_HOST,
+                'User IP address'
+            ),
+        );
+        $actual = $this->auth->get_request_login_url_user_parameters();
+        $this->assertEquals($expected, $actual);
+
     }
 
     /**
@@ -524,12 +582,12 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
     }
 
     /**
-     * Test that IP address mismatch exception gets thrown if incorrect IP.
+     * Test that IP address mismatch exception gets thrown if user id is incorrect.
      *
      * @expectedException moodle_exception
      * @expectedExceptionMessage Invalid user id
      */
-    public function test_invalid_user_exception_thrown_if_ip_is_incorrect() {
+    public function test_invalid_user_exception_thrown_if_user_is_invalid() {
         global $DB;
 
         $key = new stdClass();

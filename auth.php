@@ -253,6 +253,19 @@ class auth_plugin_userkey extends auth_plugin_base {
     }
 
     /**
+     * Check if restriction by IP is enabled.
+     *
+     * @return bool
+     */
+    protected function is_iprestriction_enabled() {
+        if (isset($this->config->iprestriction) && $this->config->iprestriction == true) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
      * Create a new user.
      */
     protected function create_user() {
@@ -265,24 +278,28 @@ class auth_plugin_userkey extends auth_plugin_base {
     /**
      * Return login URL.
      *
-     * @param array|stdClass $user User data.
+     * @param array|stdClass $data User data.
      *
      * @return string Login URL.
      *
      * @throws \invalid_parameter_exception
      */
-    public function get_login_url($user) {
+    public function get_login_url($data) {
         global $CFG, $DB;
 
-        $user = (array)$user;
+        $data = (array)$data;
         $mappingfield = $this->get_mapping_field();
 
-        if (!isset($user[$mappingfield]) || empty($user[$mappingfield])) {
+        if (!isset($data[$mappingfield]) || empty($data[$mappingfield])) {
             throw new invalid_parameter_exception('Required field "' . $mappingfield . '" is not set or empty.');
         }
 
+        if ($this->is_iprestriction_enabled() && !isset($data['ip'])) {
+            throw new invalid_parameter_exception('Required parameter "ip" is not set.');
+        }
+
         $params = array(
-            $mappingfield => $user[$mappingfield],
+            $mappingfield => $data[$mappingfield],
             'mnethostid' => $CFG->mnet_localhost_id,
         );
 
@@ -297,7 +314,8 @@ class auth_plugin_userkey extends auth_plugin_base {
         }
 
         if (!isset($this->userkeymanager)) {
-            $userkeymanager = new core_userkey_manager($user->id, $this->config);
+            $ips = isset($data['ip']) ? $data['ip'] : null;
+            $userkeymanager = new core_userkey_manager($user->id, $this->config, $ips);
             $this->set_userkey_manager($userkeymanager);
         }
 
@@ -369,8 +387,18 @@ class auth_plugin_userkey extends auth_plugin_base {
      * @return array
      */
     protected function get_user_fields_parameters() {
+        $parameters = array();
+
+        if ($this->is_iprestriction_enabled()) {
+            $parameters['ip'] = new external_value(
+                PARAM_HOST,
+                'User IP address'
+            );
+        }
+
         // TODO: add more fields here when we implement user creation.
-        return array();
+
+        return $parameters;
     }
 
     /**

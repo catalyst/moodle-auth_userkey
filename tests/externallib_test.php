@@ -126,15 +126,34 @@ class auth_userkey_externallib_testcase extends advanced_testcase {
         $this->assertTrue(is_array($result));
         $this->assertTrue(key_exists('loginurl', $result));
         $this->assertEquals($expectedurl, $result['loginurl']);
+
+        // IP restriction.
+        set_config('iprestriction', true, 'auth_userkey');
+        set_config('mappingfield', 'idnumber', 'auth_userkey');
+        $params = array(
+            'idnumber' => 'idnumber',
+            'ip' => '192.168.1.1',
+        );
+
+        // Simulate the web service server.
+        $result = auth_userkey_external::request_login_url($params);
+        $result = external_api::clean_returnvalue(auth_userkey_external::request_login_url_returns(), $result);
+
+        $actualkey = $DB->get_record('user_private_key', array('userid' => $this->user->id));
+        $expectedurl = $CFG->wwwroot . '/auth/userkey/login.php?key=' . $actualkey->value;
+
+        $this->assertTrue(is_array($result));
+        $this->assertTrue(key_exists('loginurl', $result));
+        $this->assertEquals($expectedurl, $result['loginurl']);
     }
 
     /**
-     * Test call with incorrect required parameter.
+     * Test call with missing email required parameter.
      *
      * @expectedException invalid_parameter_exception
      * @expectedExceptionMessage Invalid parameter value detected (Required field "email" is not set or empty.)
      */
-    public function test_request_incorrect_parameters() {
+    public function test_exception_thrown_if_required_parameter_email_is_not_seе() {
         global $CFG;
 
         $this->setAdminUser();
@@ -143,9 +162,29 @@ class auth_userkey_externallib_testcase extends advanced_testcase {
         $params = array(
             'bla' => 'exists@test.com',
         );
-        // Simulate the web service server.
-        $result = auth_userkey_external::request_login_url($params);
-        $result = external_api::clean_returnvalue(auth_userkey_external::request_login_url_returns(), $result);
+
+        auth_userkey_external::request_login_url($params);
+    }
+
+    /**
+     * Test call with missing ip required parameter.
+     *
+     * @expectedException invalid_parameter_exception
+     * @expectedExceptionMessage Invalid parameter value detected (Required parameter "ip" is not set.)
+     */
+    public function test_exception_thrown_if_required_parameter_ip_is_not_seе() {
+        global $CFG;
+
+        $this->setAdminUser();
+        $CFG->auth = "userkey";
+
+        set_config('iprestriction', true, 'auth_userkey');
+
+        $params = array(
+            'email' => 'exists@test.com',
+        );
+
+        auth_userkey_external::request_login_url($params);
     }
 
     /**
