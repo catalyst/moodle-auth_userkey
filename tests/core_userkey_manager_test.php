@@ -131,6 +131,33 @@ class core_userkey_manager_testcase extends advanced_testcase {
     }
 
     /**
+     * Test that key gets created correctly if config option iprestriction is set to true and we set allowedips.
+     */
+    public function test_create_correct_key_if_iprestriction_is_true_and_we_set_allowedips() {
+        global $DB;
+
+        $this->config->iprestriction = true;
+        $manager = new core_userkey_manager($this->user->id, $this->config, '192.168.1.3');
+        $value = $manager->create_key();
+
+        $actualkey = $DB->get_record('user_private_key', array('userid' => $this->user->id));
+
+        $expectedvalue = $value;
+        $expecteduserid = $this->user->id;
+        $expectedscript = 'auth/userkey';
+        $expectedinstance = $this->user->id;
+        $expectediprestriction = '192.168.1.3';
+        $expectedvaliduntil = time() + 60;
+
+        $this->assertEquals($expectedvalue, $actualkey->value);
+        $this->assertEquals($expecteduserid, $actualkey->userid);
+        $this->assertEquals($expectedscript, $actualkey->script);
+        $this->assertEquals($expectedinstance, $actualkey->instance);
+        $this->assertEquals($expectediprestriction, $actualkey->iprestriction);
+        $this->assertEquals($expectedvaliduntil, $actualkey->validuntil);
+    }
+
+    /**
      * Test that key gets created correctly if config option iprestriction is set to false.
      */
     public function test_create_correct_key_if_iprestriction_is_false() {
@@ -139,6 +166,34 @@ class core_userkey_manager_testcase extends advanced_testcase {
         $this->config->iprestriction = false;
         $_SERVER['HTTP_CLIENT_IP'] = '192.168.1.1';
         $manager = new core_userkey_manager($this->user->id, $this->config);
+        $value = $manager->create_key();
+
+        $actualkey = $DB->get_record('user_private_key', array('userid' => $this->user->id));
+
+        $expectedvalue = $value;
+        $expecteduserid = $this->user->id;
+        $expectedscript = 'auth/userkey';
+        $expectedinstance = $this->user->id;
+        $expectediprestriction = null;
+        $expectedvaliduntil = time() + 60;
+
+        $this->assertEquals($expectedvalue, $actualkey->value);
+        $this->assertEquals($expecteduserid, $actualkey->userid);
+        $this->assertEquals($expectedscript, $actualkey->script);
+        $this->assertEquals($expectedinstance, $actualkey->instance);
+        $this->assertEquals($expectediprestriction, $actualkey->iprestriction);
+        $this->assertEquals($expectedvaliduntil, $actualkey->validuntil);
+    }
+
+    /**
+     * Test that key gets created correctly if config option iprestriction is set to false and we set allowedips.
+     */
+    public function test_create_correct_key_if_iprestriction_is_falseand_we_set_allowedips() {
+        global $DB;
+
+        $this->config->iprestriction = false;
+        $_SERVER['HTTP_CLIENT_IP'] = '192.168.1.1';
+        $manager = new core_userkey_manager($this->user->id, $this->config, '192.168.1.1');
         $value = $manager->create_key();
 
         $actualkey = $DB->get_record('user_private_key', array('userid' => $this->user->id));

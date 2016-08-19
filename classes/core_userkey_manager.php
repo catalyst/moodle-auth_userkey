@@ -76,15 +76,20 @@ class core_userkey_manager implements userkey_manager_interface {
      *
      * @param $userid
      * @param \stdClass $config
+     * @param null|string $allowedips
      *
      * @throws \Exception If there is no user with provided userid.
      */
-    public function __construct($userid, \stdClass $config) {
+    public function __construct($userid, \stdClass $config, $allowedips = null) {
         $this->userid = $userid;
         $this->config = $config;
 
         if (isset($config->iprestriction) && !empty($config->iprestriction)) {
-            $this->iprestriction = getremoteaddr(null);
+            if ($allowedips) {
+                $this->iprestriction = $allowedips;
+            } else {
+                $this->iprestriction = getremoteaddr($this->iprestriction);
+            }
         }
 
         if (isset($config->keylifetime) && (int)$config->keylifetime > 0) {
