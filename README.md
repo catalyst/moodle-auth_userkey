@@ -13,7 +13,7 @@ Using
 2. Enable and configure just installed plugin. Set required Mapping field, User key life time, IP restriction and Logout redirect URL.
 3. Enable web service advance feature (Admin > Advanced features), more info http://docs.moodle.org/en/Web_services
 4. Enable one of the supported protocols (Admin > Plugins > Web services > Manage protocols)
-5. Create a token for a specific user and for the service 'Request login URL Service' (Admin > Plugins > Web services > Manage tokens)
+5. Create a token for a specific user and for the service 'User key authentication web service' (Admin > Plugins > Web services > Manage tokens)
 6. Configure your external application to make a web call to get login URL.
 7. Redirect your users to this URL to be logged in to Moodle.
 
@@ -60,7 +60,7 @@ For example XML-RPC (PHP structure) description for different mapping field sett
 Please navigate to API documentation to get full description for "auth_userkey_request_login_url" function.
 e.g. http://yourmoodle.com/admin/webservice/documentation.php
 
-You can amend login URL by "wantsurl" parameter to redirect user after theu logged in to Moodle.
+You can amend login URL by "wantsurl" parameter to redirect user after they logged in to Moodle.
 
 E.g. http://yourmoodle.com/auth/userkey/login.php?key=uniquekey&wantsurl=http://yourmoodle.com/course/view.php?id=3
 
