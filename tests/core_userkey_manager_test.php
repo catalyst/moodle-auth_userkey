@@ -29,6 +29,9 @@ use auth_userkey\core_userkey_manager;
 /**
  * Tests for core_userkey_manager class.
  *
+ * Key validation is fully covered in auth_plugin_test.php file.
+ * TODO: write tests for validate_key() function.
+ *
  * @copyright  2016 Dmitrii Metelkin (dmitriim@catalyst-au.net)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -58,18 +61,7 @@ class core_userkey_manager_testcase extends advanced_testcase {
      * Test that core_userkey_manager implements userkey_manager_interface interface.
      */
     public function test_implements_userkey_manager_interface() {
-        $manager = new core_userkey_manager($this->user->id, $this->config);
-
-        $expected = 'auth_userkey\userkey_manager_interface';
-        $this->assertInstanceOf($expected, $manager);
-    }
-
-    /**
-     * Test that we can use user ID of not existing user.
-     */
-    public function test_that_manager_does_not_care_if_user_is_not_exists() {
-        $brokenuserid = 500;
-        $manager = new core_userkey_manager($brokenuserid, $this->config);
+        $manager = new core_userkey_manager($this->config);
 
         $expected = 'auth_userkey\userkey_manager_interface';
         $this->assertInstanceOf($expected, $manager);
@@ -82,8 +74,8 @@ class core_userkey_manager_testcase extends advanced_testcase {
         global $DB;
 
         $_SERVER['HTTP_CLIENT_IP'] = '192.168.1.1';
-        $manager = new core_userkey_manager($this->user->id, $this->config);
-        $value = $manager->create_key();
+        $manager = new core_userkey_manager($this->config);
+        $value = $manager->create_key($this->user->id);
 
         $actualkey = $DB->get_record('user_private_key', array('userid' => $this->user->id));
 
@@ -103,8 +95,8 @@ class core_userkey_manager_testcase extends advanced_testcase {
 
         $this->config->iprestriction = true;
         $_SERVER['HTTP_CLIENT_IP'] = '192.168.1.1';
-        $manager = new core_userkey_manager($this->user->id, $this->config);
-        $value = $manager->create_key();
+        $manager = new core_userkey_manager($this->config);
+        $value = $manager->create_key($this->user->id);
 
         $actualkey = $DB->get_record('user_private_key', array('userid' => $this->user->id));
 
@@ -123,8 +115,8 @@ class core_userkey_manager_testcase extends advanced_testcase {
         global $DB;
 
         $this->config->iprestriction = true;
-        $manager = new core_userkey_manager($this->user->id, $this->config, '192.168.1.3');
-        $value = $manager->create_key();
+        $manager = new core_userkey_manager($this->config);
+        $value = $manager->create_key($this->user->id, '192.168.1.3');
 
         $actualkey = $DB->get_record('user_private_key', array('userid' => $this->user->id));
 
@@ -144,8 +136,8 @@ class core_userkey_manager_testcase extends advanced_testcase {
 
         $this->config->iprestriction = false;
         $_SERVER['HTTP_CLIENT_IP'] = '192.168.1.1';
-        $manager = new core_userkey_manager($this->user->id, $this->config);
-        $value = $manager->create_key();
+        $manager = new core_userkey_manager($this->config);
+        $value = $manager->create_key($this->user->id);
 
         $actualkey = $DB->get_record('user_private_key', array('userid' => $this->user->id));
 
@@ -165,8 +157,8 @@ class core_userkey_manager_testcase extends advanced_testcase {
 
         $this->config->iprestriction = false;
         $_SERVER['HTTP_CLIENT_IP'] = '192.168.1.1';
-        $manager = new core_userkey_manager($this->user->id, $this->config, '192.168.1.1');
-        $value = $manager->create_key();
+        $manager = new core_userkey_manager($this->config);
+        $value = $manager->create_key($this->user->id, '192.168.1.1');
 
         $actualkey = $DB->get_record('user_private_key', array('userid' => $this->user->id));
 
@@ -186,8 +178,8 @@ class core_userkey_manager_testcase extends advanced_testcase {
 
         $this->config->iprestriction = 'string';
         $_SERVER['HTTP_CLIENT_IP'] = '192.168.1.1';
-        $manager = new core_userkey_manager($this->user->id, $this->config);
-        $value = $manager->create_key();
+        $manager = new core_userkey_manager($this->config);
+        $value = $manager->create_key($this->user->id);
 
         $actualkey = $DB->get_record('user_private_key', array('userid' => $this->user->id));
 
@@ -205,8 +197,8 @@ class core_userkey_manager_testcase extends advanced_testcase {
     public function test_create_correct_key_if_keylifetime_is_not_set() {
         global $DB;
 
-        $manager = new core_userkey_manager($this->user->id, $this->config);
-        $value = $manager->create_key();
+        $manager = new core_userkey_manager($this->config);
+        $value = $manager->create_key($this->user->id);
 
         $actualkey = $DB->get_record('user_private_key', array('userid' => $this->user->id));
 
@@ -226,8 +218,8 @@ class core_userkey_manager_testcase extends advanced_testcase {
 
         $this->config->keylifetime = 3000;
 
-        $manager = new core_userkey_manager($this->user->id, $this->config);
-        $value = $manager->create_key();
+        $manager = new core_userkey_manager($this->config);
+        $value = $manager->create_key($this->user->id);
 
         $actualkey = $DB->get_record('user_private_key', array('userid' => $this->user->id));
 
@@ -248,8 +240,8 @@ class core_userkey_manager_testcase extends advanced_testcase {
 
         $this->config->keylifetime = '3000';
 
-        $manager = new core_userkey_manager($this->user->id, $this->config);
-        $value = $manager->create_key();
+        $manager = new core_userkey_manager($this->config);
+        $value = $manager->create_key($this->user->id);
 
         $actualkey = $DB->get_record('user_private_key', array('userid' => $this->user->id));
 
@@ -268,13 +260,13 @@ class core_userkey_manager_testcase extends advanced_testcase {
     public function test_can_delete_created_key() {
         global $DB;
 
-        $manager = new core_userkey_manager($this->user->id, $this->config);
-        $manager->create_key();
+        $manager = new core_userkey_manager($this->config);
+        $value = $manager->create_key($this->user->id);
 
         $keys = $DB->get_records('user_private_key', array('userid' => $this->user->id));
         $this->assertEquals(1, count($keys));
 
-        $manager->delete_key();
+        $manager->delete_keys($this->user->id);
 
         $keys = $DB->get_records('user_private_key', array('userid' => $this->user->id));
         $this->assertEquals(0, count($keys));
@@ -286,7 +278,7 @@ class core_userkey_manager_testcase extends advanced_testcase {
     public function test_can_delete_all_existing_keys() {
         global $DB;
 
-        $manager = new core_userkey_manager($this->user->id, $this->config);
+        $manager = new core_userkey_manager($this->config);
 
         create_user_key('auth/userkey', $this->user->id);
         create_user_key('auth/userkey', $this->user->id);
@@ -295,7 +287,7 @@ class core_userkey_manager_testcase extends advanced_testcase {
         $keys = $DB->get_records('user_private_key', array('userid' => $this->user->id));
         $this->assertEquals(3, count($keys));
 
-        $manager->delete_key();
+        $manager->delete_keys($this->user->id);
 
         $keys = $DB->get_records('user_private_key', array('userid' => $this->user->id));
         $this->assertEquals(0, count($keys));
@@ -307,7 +299,7 @@ class core_userkey_manager_testcase extends advanced_testcase {
     public function test_create_only_one_key() {
         global $DB;
 
-        $manager = new core_userkey_manager($this->user->id, $this->config);
+        $manager = new core_userkey_manager($this->config);
 
         create_user_key('auth/userkey', $this->user->id);
         create_user_key('auth/userkey', $this->user->id);
@@ -316,7 +308,7 @@ class core_userkey_manager_testcase extends advanced_testcase {
         $keys = $DB->get_records('user_private_key', array('userid' => $this->user->id));
         $this->assertEquals(3, count($keys));
 
-        $manager->create_key();
+        $manager->create_key($this->user->id);
         $keys = $DB->get_records('user_private_key', array('userid' => $this->user->id));
         $this->assertEquals(1, count($keys));
     }
