@@ -66,6 +66,7 @@ class auth_plugin_userkey extends auth_plugin_base {
     public function __construct() {
         $this->authtype = 'userkey';
         $this->config = get_config('auth_userkey');
+        $this->userkeymanager = new core_userkey_manager($this->config);
     }
 
     /**
@@ -88,43 +89,15 @@ class auth_plugin_userkey extends auth_plugin_base {
      * @throws \moodle_exception If something went wrong.
      */
     public function user_login_userkey() {
-        global $DB, $SESSION, $CFG;
+        global $SESSION, $CFG;
 
         $keyvalue = required_param('key', PARAM_ALPHANUM);
         $wantsurl = optional_param('wantsurl', '', PARAM_URL);
 
-        $options = array(
-            'script' => core_userkey_manager::CORE_USER_KEY_MANAGER_SCRIPT,
-            'value' => $keyvalue
-        );
+        $key = $this->userkeymanager->validate_key($keyvalue);
+        $this->userkeymanager->delete_keys($key->userid);
 
-        if (!$key = $DB->get_record('user_private_key', $options)) {
-            print_error('invalidkey');
-        }
-
-        if (!isset($this->userkeymanager)) {
-            $userkeymanager = new core_userkey_manager($key->userid, $this->config);
-            $this->set_userkey_manager($userkeymanager);
-        }
-
-        $this->userkeymanager->delete_key();
-
-        if (!empty($key->validuntil) and $key->validuntil < time()) {
-            print_error('expiredkey');
-        }
-
-        if ($key->iprestriction) {
-            $remoteaddr = getremoteaddr(null);
-            if (empty($remoteaddr) or !address_in_subnet($remoteaddr, $key->iprestriction)) {
-                print_error('ipmismatch');
-            }
-        }
-
-        if (!$user = $DB->get_record('user', array('id' => $key->userid))) {
-            print_error('invaliduserid');
-        }
-
-        $user = get_complete_user_data('id', $user->id);
+        $user = get_complete_user_data('id', $key->userid);
         complete_user_login($user);
 
         // Identify this session as using user key auth method.
@@ -220,6 +193,8 @@ class auth_plugin_userkey extends auth_plugin_base {
     /**
      * Set userkey manager.
      *
+     * This function is the only way to inject dependency, because of the way auth plugins work.
+     *
      * @param \auth_userkey\userkey_manager_interface $keymanager
      */
     public function set_userkey_manager(userkey_manager_interface $keymanager) {
@@ -313,13 +288,8 @@ class auth_plugin_userkey extends auth_plugin_base {
             }
         }
 
-        if (!isset($this->userkeymanager)) {
-            $ips = isset($data['ip']) ? $data['ip'] : null;
-            $userkeymanager = new core_userkey_manager($user->id, $this->config, $ips);
-            $this->set_userkey_manager($userkeymanager);
-        }
-
-        $userkey = $this->userkeymanager->create_key();
+        $allowedips = isset($data['ip']) ? $data['ip'] : null;
+        $userkey = $this->userkeymanager->create_key($user->id, $allowedips);
 
         return $CFG->wwwroot . '/auth/userkey/login.php?key=' . $userkey;
     }
