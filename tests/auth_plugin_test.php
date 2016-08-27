@@ -635,7 +635,7 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
      * Test that a user loggs in correctly.
      */
     public function test_that_user_logged_in() {
-        global $DB, $USER, $SESSION;
+        global $DB, $USER, $SESSION, $CFG;
 
         $key = new stdClass();
         $key->value = 'UserLogin';
@@ -651,8 +651,7 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
 
         // Using @ is the only way to test this. Thanks moodle!
         $redirect = @$this->auth->user_login_userkey();
-
-        $this->assertEquals('/', $redirect);
+        $this->assertEquals($CFG->wwwroot, $redirect);
         $this->assertEquals($this->user->id, $USER->id);
         $this->assertSame(sesskey(), $USER->sesskey);
         $this->assertObjectHasAttribute('userkey', $SESSION);
