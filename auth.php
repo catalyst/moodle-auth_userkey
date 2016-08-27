@@ -83,12 +83,12 @@ class auth_plugin_userkey extends auth_plugin_base {
     /**
      * Login user using userkey and return URL to redirect after.
      *
-     * @return mixed|string URL to redirect.
+     * @return string URL to redirect.
      *
      * @throws \moodle_exception If something went wrong.
      */
     public function user_login_userkey() {
-        global $DB, $SESSION;
+        global $DB, $SESSION, $CFG;
 
         $keyvalue = required_param('key', PARAM_ALPHANUM);
         $wantsurl = optional_param('wantsurl', '', PARAM_URL);
@@ -133,7 +133,7 @@ class auth_plugin_userkey extends auth_plugin_base {
         if (!empty($wantsurl)) {
             return $wantsurl;
         } else {
-            return '/';
+            return $CFG->wwwroot;
         }
     }
 
