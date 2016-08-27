@@ -29,6 +29,9 @@ use auth_userkey\core_userkey_manager;
 /**
  * Tests for core_userkey_manager class.
  *
+ * Key validation is fully covered in auth_plugin_test.php file.
+ * TODO: write tests for validate_key() function.
+ *
  * @copyright  2016 Dmitrii Metelkin (dmitriim@catalyst-au.net)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
