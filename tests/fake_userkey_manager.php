@@ -27,11 +27,15 @@ namespace auth_userkey;
 
 class fake_userkey_manager implements userkey_manager_interface {
 
-    public function create_key() {
+    public function create_key($userid, $allowedips = null) {
         return 'FaKeKeyFoRtEsTiNg';
     }
 
-    public function delete_key() {
+    public function delete_keys($userid) {
+        // TODO: Implement delete_keys() method.
+    }
 
+    public function validate_key($keyvalue) {
+        // TODO: Implement validate_key() method.
     }
 }
