@@ -37,34 +37,6 @@ class core_userkey_manager implements userkey_manager_interface {
     const DEFAULT_KEY_LIFE_TIME_IN_SECONDS = 60;
 
     /**
-     * Generated user key.
-     *
-     * @var string
-     */
-    protected $userkey;
-
-    /**
-     * User id.
-     *
-     * @var int
-     */
-    protected $userid;
-
-    /**
-     * Shows if we need restrict user key by IP.
-     *
-     * @var null | bool
-     */
-    protected $iprestriction = null;
-
-    /**
-     * Time when user key will be expired in unix stamp format.
-     *
-     * @var null | string
-     */
-    protected $validuntil = null;
-
-    /**
      * Config object.
      *
      * @var \stdClass
@@ -78,12 +50,6 @@ class core_userkey_manager implements userkey_manager_interface {
      */
     public function __construct(\stdClass $config) {
         $this->config = $config;
-
-        if (isset($config->keylifetime) && (int)$config->keylifetime > 0) {
-            $this->validuntil = time() + $config->keylifetime;
-        } else {
-            $this->validuntil = time() + self::DEFAULT_KEY_LIFE_TIME_IN_SECONDS;
-        }
     }
 
     /**
@@ -97,23 +63,29 @@ class core_userkey_manager implements userkey_manager_interface {
     public function create_key($userid, $allowedips = null) {
         $this->delete_keys($userid);
 
+        if (isset($this->config->keylifetime) && (int)$this->config->keylifetime > 0) {
+            $validuntil = time() + $this->config->keylifetime;
+        } else {
+            $validuntil = time() + self::DEFAULT_KEY_LIFE_TIME_IN_SECONDS;
+        }
+
+        $iprestriction = null;
+
         if (isset($this->config->iprestriction) && !empty($this->config->iprestriction)) {
             if ($allowedips) {
-                $this->iprestriction = $allowedips;
+                $iprestriction = $allowedips;
             } else {
-                $this->iprestriction = getremoteaddr($this->iprestriction);
+                $iprestriction = getremoteaddr(null);
             }
         }
 
-        $this->userkey = create_user_key(
+        return create_user_key(
             self::CORE_USER_KEY_MANAGER_SCRIPT,
             $userid,
             $userid,
-            $this->iprestriction,
-            $this->validuntil
+            $iprestriction,
+            $validuntil
         );
-
-        return $this->userkey;
     }
 
     /**
