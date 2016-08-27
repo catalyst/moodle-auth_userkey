@@ -33,13 +33,29 @@ interface userkey_manager_interface {
     /**
      * Create a user key.
      *
+     * @param int $userid User ID.
+     * @param null|array $allowedips A list of allowed ips for this key.
+     *
      * @return string Generated key.
      */
-    public function create_key();
+    public function create_key($userid, $allowedips = null);
 
     /**
-     * Delete a user key.
+     * Delete all keys for a specific user.
+     *
+     * @param int $userid User ID.
      */
-    public function delete_key();
+    public function delete_keys($userid);
+
+    /**
+     * Validates key and returns key data object if valid.
+     *
+     * @param string $keyvalue Key value.
+     *
+     * @return object Key object including userid property.
+     *
+     * @throws \moodle_exception If provided key is not valid.
+     */
+    public function validate_key($keyvalue);
 
 }
