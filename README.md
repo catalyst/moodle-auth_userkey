@@ -14,8 +14,9 @@ Using
 3. Enable web service advance feature (Admin > Advanced features), more info http://docs.moodle.org/en/Web_services
 4. Enable one of the supported protocols (Admin > Plugins > Web services > Manage protocols)
 5. Create a token for a specific user and for the service 'User key authentication web service' (Admin > Plugins > Web services > Manage tokens)
-6. Configure your external application to make a web call to get login URL.
-7. Redirect your users to this URL to be logged in to Moodle.
+6. Make sure that the "web service" user has 'auth/userkey:generatekey' capability.
+7. Configure your external application to make a web call to get login URL.
+8. Redirect your users to this URL to be logged in to Moodle.
 
 Configuration
 -------------
