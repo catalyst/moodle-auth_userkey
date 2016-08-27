@@ -150,7 +150,7 @@ class auth_plugin_userkey extends auth_plugin_base {
     public function config_form($config, $err, $userfields) {
         global $CFG, $OUTPUT;
 
-        $config = (object) array_merge($this->defaults, (array) $config );
+        $config = (object) array_merge($this->defaults, (array) $config);
         include("settings.html");
     }
 
@@ -220,8 +220,8 @@ class auth_plugin_userkey extends auth_plugin_base {
      * @return bool
      */
     protected function should_create_user() {
-        if (isset($this->config->createuser)) {
-            return $this->config->createuser;
+        if (isset($this->config->createuser) && $this->config->createuser == true) {
+            return true;
         }
 
         return false;
@@ -232,7 +232,7 @@ class auth_plugin_userkey extends auth_plugin_base {
      *
      * @return bool
      */
-    protected function is_iprestriction_enabled() {
+    protected function is_ip_restriction_enabled() {
         if (isset($this->config->iprestriction) && $this->config->iprestriction == true) {
             return true;
         }
@@ -242,8 +242,12 @@ class auth_plugin_userkey extends auth_plugin_base {
 
     /**
      * Create a new user.
+     *
+     * @param array $data Validated user data from web service.
+     *
+     * @return object User object.
      */
-    protected function create_user() {
+    protected function create_user(array $data) {
         // TODO:
         // 1. Validate user
         // 2. Create user.
@@ -251,27 +255,43 @@ class auth_plugin_userkey extends auth_plugin_base {
     }
 
     /**
-     * Return login URL.
+     * Validate user data from web service.
      *
-     * @param array|stdClass $data User data.
+     * @param mixed $data User data from web service.
      *
-     * @return string Login URL.
+     * @return array
      *
-     * @throws \invalid_parameter_exception
+     * @throws \invalid_parameter_exception If provided data is invalid.
      */
-    public function get_login_url($data) {
-        global $CFG, $DB;
-
+    protected function validate_user_data($data) {
         $data = (array)$data;
+
         $mappingfield = $this->get_mapping_field();
 
         if (!isset($data[$mappingfield]) || empty($data[$mappingfield])) {
             throw new invalid_parameter_exception('Required field "' . $mappingfield . '" is not set or empty.');
         }
 
-        if ($this->is_iprestriction_enabled() && !isset($data['ip'])) {
+        if ($this->is_ip_restriction_enabled() && !isset($data['ip'])) {
             throw new invalid_parameter_exception('Required parameter "ip" is not set.');
         }
+
+        return $data;
+    }
+
+    /**
+     * Return user object.
+     *
+     * @param array $data Validated user data.
+     *
+     * @return object A user object.
+     *
+     * @throws \invalid_parameter_exception If user is not exist and we don't need to create a new.
+     */
+    protected function get_user(array $data) {
+        global $DB, $CFG;
+
+        $mappingfield = $this->get_mapping_field();
 
         $params = array(
             $mappingfield => $data[$mappingfield],
@@ -281,15 +301,60 @@ class auth_plugin_userkey extends auth_plugin_base {
         $user = $DB->get_record('user', $params);
 
         if (empty($user)) {
-            if (!$this->should_create_user()) {
-                throw new invalid_parameter_exception('User is not exist');
+            if ($this->should_create_user()) {
+                $user = $this->create_user($data);
             } else {
-                $user = $this->create_user();
+                throw new invalid_parameter_exception('User is not exist');
             }
         }
 
-        $allowedips = isset($data['ip']) ? $data['ip'] : null;
-        $userkey = $this->userkeymanager->create_key($user->id, $allowedips);
+        return $user;
+    }
+
+    /**
+     * Return allowed IPs from user data.
+     *
+     * @param array $data Validated user data.
+     *
+     * @return null|string Allowed IPs or null.
+     */
+    protected function get_allowed_ips(array $data) {
+        if (isset($data['ip']) && !empty($data['ip'])) {
+            return $data['ip'];
+        }
+
+        return null;
+    }
+
+    /**
+     * Generate login user key.
+     *
+     * @param array $data Validated user data.
+     *
+     * @return string
+     * @throws \invalid_parameter_exception
+     */
+    protected function generate_user_key(array $data) {
+        $user = $this->get_user($data);
+        $ips = $this->get_allowed_ips($data);
+
+        return $this->userkeymanager->create_key($user->id, $ips);
+    }
+
+    /**
+     * Return login URL.
+     *
+     * @param array|stdClass $data User data from web service.
+     *
+     * @return string Login URL.
+     *
+     * @throws \invalid_parameter_exception
+     */
+    public function get_login_url($data) {
+        global $CFG;
+
+        $userdata = $this->validate_user_data($data);
+        $userkey  = $this->generate_user_key($userdata);
 
         return $CFG->wwwroot . '/auth/userkey/login.php?key=' . $userkey;
     }
@@ -359,7 +424,7 @@ class auth_plugin_userkey extends auth_plugin_base {
     protected function get_user_fields_parameters() {
         $parameters = array();
 
-        if ($this->is_iprestriction_enabled()) {
+        if ($this->is_ip_restriction_enabled()) {
             $parameters['ip'] = new external_value(
                 PARAM_HOST,
                 'User IP address'
