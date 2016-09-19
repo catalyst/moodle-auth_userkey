@@ -499,6 +499,7 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
         $formconfig->keylifetime = 100;
         $formconfig->iprestriction = 0;
         $formconfig->redirecturl = 'http://google.com/';
+        $formconfig->ssourl = 'http://google.com/';
 
         $this->auth->process_config($formconfig);
 
@@ -705,6 +706,63 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
         $redirect = @$this->auth->user_login_userkey();
 
         $this->assertEquals('http://test.com/course/index.php?id=12&key=134', $redirect);
+    }
+
+    /**
+     * Test that login page hook redirects correctly.
+     */
+    public function test_loginpage_hook_redirects_correctly() {
+        global $SESSION;
+
+        $SESSION->enrolkey_skipsso = 0;
+        set_config('ssourl', 'http://google.com', 'auth_userkey');
+        $this->auth = new auth_plugin_userkey();
+
+        $userredirect = $this->auth->should_login_redirect();
+        $this->assertEquals($userredirect, true);
+
+    }
+
+    /**
+     * Test that Moodle login page is displayed if url param is set correctly.
+     */
+    public function test_login_page_displays_correctly_url_param_set() {
+        global $SESSION;
+
+        $SESSION->enrolkey_skipsso = 1;
+        set_config('ssourl', 'http://google.com', 'auth_userkey');
+        $this->auth = new auth_plugin_userkey();
+        $userredirect = $this->auth->should_login_redirect();
+        $this->assertEquals($userredirect, false);
+
+    }
+
+    /**
+     * Test that Moodle login page is displayed if no redirect url and no param is set.
+     */
+    public function test_login_page_displays_correctly() {
+        global $SESSION;
+
+        $SESSION->enrolkey_skipsso = 0;
+        set_config('ssourl', '', 'auth_userkey');
+        $this->auth = new auth_plugin_userkey();
+        $userredirect = $this->auth->should_login_redirect();
+        $this->assertEquals($userredirect, false);
+
+    }
+
+    /**
+     * Test that Moodle login page is displayed if no redirect url, but param is set.
+     */
+    public function test_login_page_displays_correctly_param_set() {
+        global $SESSION;
+
+        $SESSION->enrolkey_skipsso = 1;
+        set_config('ssourl', '', 'auth_userkey');
+        $this->auth = new auth_plugin_userkey();
+        $userredirect = $this->auth->should_login_redirect();
+        $this->assertEquals($userredirect, false);
+
     }
 
 }

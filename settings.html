@@ -56,6 +56,13 @@ $fields = get_auth_plugin('userkey')->get_allowed_mapping_fields();
             <?php if (isset($err[$field])) { echo $OUTPUT->notification($err[$field], 'notifyfailure'); } ?>
             <?php print_string($field.'_desc', 'auth_userkey') ?></td>
     </tr>
+    <tr valign="top">
+        <?php $field = 'ssourl' ?>
+        <td align="right"><label for="<?php echo $field ?>"><?php print_string($field, 'auth_userkey') ?></label></td>
+        <td><input type="text" size="60" name="<?php echo $field ?>" value="<?php print $config->$field ?>" placeholder=""><br>
+            <?php if (isset($err[$field])) { echo $OUTPUT->notification($err[$field], 'notifyfailure'); } ?>
+            <?php print_string($field.'_desc', 'auth_userkey') ?></td>
+    </tr>
     <!--UNCOMMENT FOLLOWING WHEN IMPLEMENT USER CREATION.-->
     <!--<tr valign="top">-->
         <!--<?php $field = 'createuser' ?>-->
