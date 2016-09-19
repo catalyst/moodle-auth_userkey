@@ -39,3 +39,5 @@ $string['redirecturl_desc'] = 'Optionally you can redirect users to this URL aft
 $string['incorrectredirecturl'] = 'You should provide valid URL';
 $string['userkey:generatekey'] = 'Generate login user key';
 $string['pluginisdisabled'] = 'The userkey authentication plugin is disabled.';
+$string['ssourl'] = 'URL of SSO host';
+$string['ssourl_desc'] = 'URL of the SSO host to redirect users to. If defined users will be redirected here on login instead of the Moodle Login page';

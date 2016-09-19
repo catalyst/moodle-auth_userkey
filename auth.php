@@ -57,6 +57,7 @@ class auth_plugin_userkey extends auth_plugin_base {
         'keylifetime' => 60,
         'iprestriction' => 0,
         'redirecturl' => '',
+        'ssourl' => '',
         // TODO: use this field when implementing user creation. 'createuser' => 0.
     );
 
@@ -66,6 +67,30 @@ class auth_plugin_userkey extends auth_plugin_base {
     public function __construct() {
         $this->authtype = 'userkey';
         $this->config = get_config('auth_userkey');
+    }
+
+    /**
+     * All the checking happens before the login page in this hook
+     */
+    public function pre_loginpage_hook() {
+        global $SESSION;
+
+        // If we previously tried to skip SSO on, but then navigated
+        // away, and come in from another deep link while SSO only is
+        // on, then reset the previous session memory of forcing SSO.
+        if (isset($SESSION->enrolkey_skipsso)) {
+            unset($SESSION->enrolkey_skipsso);
+        }
+        $this->loginpage_hook();
+    }
+
+    /**
+     * All the checking happens before the login page in this hook
+     */
+    public function loginpage_hook() {
+        if ($this->should_login_redirect()) {
+            redirect($this->config->ssourl);
+        }
     }
 
     /**
@@ -413,11 +438,38 @@ class auth_plugin_userkey extends auth_plugin_base {
     }
 
     /**
+     * Check if we should redirect a user as part of login.
+     *
+     * @return bool
+     */
+    public function should_login_redirect() {
+        global $SESSION;
+        $skipsso = optional_param('enrolkey_skipsso', 0, PARAM_BOOL);
+
+        // Check whether we've skipped SSO already.
+        // This is here because loginpage_hook is called again during form
+        // submission (all of login.php is processed) and ?skipsso=on is not
+        // preserved forcing us to the SSO.
+        if ((isset($SESSION->enrolkey_skipsso) && $SESSION->enrolkey_skipsso == 1)) {
+            return false;
+        }
+
+        $SESSION->enrolkey_skipsso = $skipsso;
+
+        // If SSO only is set and user is not passing the skip param
+        // or has it already set in their session then redirect to the SSO URL.
+        if (isset($this->config->ssourl) && $this->config->ssourl != '' && !$skipsso) {
+            return true;
+        }
+
+    }
+
+    /**
      * Check if we should redirect a user after logout.
      *
      * @return bool
      */
-    protected function should_redirect() {
+    protected function should_logout_redirect() {
         global $SESSION;
 
         if (!isset($SESSION->userkey)) {
@@ -435,6 +487,7 @@ class auth_plugin_userkey extends auth_plugin_base {
         return true;
     }
 
+
     /**
      * Logout page hook.
      *
@@ -445,7 +498,7 @@ class auth_plugin_userkey extends auth_plugin_base {
     public function logoutpage_hook() {
         global $redirect;
 
-        if ($this->should_redirect()) {
+        if ($this->should_logout_redirect()) {
             $redirect = $this->config->redirecturl;
         }
     }
