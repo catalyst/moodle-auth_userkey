@@ -84,6 +84,13 @@ You can set URL to redirect users after they logged out from Moodle. For example
 to logout script of your web application to log users out from it as well. This setting is optional.
 
 
+**URL of SSO host**
+
+You can set URL to redirect users before they see Moodle login page. For example you can redirect them
+to your web application to login page. You can use "enrolkey_skipsso" URL parameter to bypass this option.
+E.g. http://yourmoodle.com/login/index.php?enrolkey_skipsso=1
+
+
 TODO:
 -----
 1. Add users provisioning.
