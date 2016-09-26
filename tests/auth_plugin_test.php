@@ -403,6 +403,7 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
         $form = new stdClass();
 
         $form->redirecturl = '';
+        $form->ssourl = '';
 
         $form->keylifetime = '';
         $err = array();
@@ -436,52 +437,82 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
     }
 
     /**
-     * Test that we can validate redirecturl for config form correctly.
+     * Data provider for testing URL validation functions.
+     *
+     * @return array First element URL, the second URL is error message. Empty error massage means no errors.
      */
-    public function test_validate_redirecturl_for_config_form() {
+    public function url_data_provider() {
+        return array(
+            array('', ''),
+            array('http://google.com/', ''),
+            array('https://google.com', ''),
+            array('http://some.very.long.and.silly.domain/with/a/path/', ''),
+            array('http://0.255.1.1/numericip.php', ''),
+            array('http://0.255.1.1/numericip.php?test=1&id=2', ''),
+            array('/just/a/path', 'You should provide valid URL'),
+            array('random string', 'You should provide valid URL'),
+            array(123456, 'You should provide valid URL'),
+            array('php://google.com', 'You should provide valid URL'),
+        );
+    }
+
+    /**
+     * Test that we can validate redirecturl for config form correctly.
+     *
+     * @dataProvider url_data_provider
+     */
+
+    /**
+     * Test that we can validate redirecturl for config form correctly.
+     *
+     * @dataProvider url_data_provider
+     *
+     * @param string $url URL to test.
+     * @param string $errortext Expected error text.
+     */
+    public function test_validate_redirecturl_for_config_form($url, $errortext) {
         $form = new stdClass();
 
         $form->keylifetime = 10;
+        $form->ssourl = '';
 
+        $form->redirecturl = $url;
+        $err = array();
+        $this->auth->validate_form($form, $err);
+
+        if (empty($errortext)) {
+            $this->assertFalse(array_key_exists('redirecturl', $err));
+        } else {
+            $this->assertArrayHasKey('redirecturl', $err);
+            $this->assertEquals($errortext, $err['redirecturl']);
+        }
+    }
+
+    /**
+     * Test that we can validate ssourl for config form correctly.
+     *
+     * @dataProvider url_data_provider
+     *
+     * @param string $url URL to test.
+     * @param string $errortext Expected error text.
+     */
+    public function test_validate_ssourl_for_config_form($url, $errortext) {
+        $form = new stdClass();
+
+        $form->keylifetime = 10;
         $form->redirecturl = '';
-        $err = array();
-        $this->auth->validate_form($form, $err);
-        $this->assertFalse(array_key_exists('redirecturl', $err));
+        $form->ssourl = '';
 
-        $form->redirecturl = 'http://google.com/';
+        $form->ssourl = $url;
         $err = array();
         $this->auth->validate_form($form, $err);
-        $this->assertFalse(array_key_exists('redirecturl', $err));
 
-        $form->redirecturl = 'https://google.com';
-        $err = array();
-        $this->auth->validate_form($form, $err);
-        $this->assertFalse(array_key_exists('redirecturl', $err));
-
-        $form->redirecturl = 'http://some.very.long.and.silly.domain/with/a/path/';
-        $err = array();
-        $this->auth->validate_form($form, $err);
-        $this->assertFalse(array_key_exists('redirecturl', $err));
-
-        $form->redirecturl = 'http://0.255.1.1/numericip.php';
-        $err = array();
-        $this->auth->validate_form($form, $err);
-        $this->assertFalse(array_key_exists('redirecturl', $err));
-
-        $form->redirecturl = '/just/a/path';
-        $err = array();
-        $this->auth->validate_form($form, $err);
-        $this->assertEquals('You should provide valid URL', $err['redirecturl']);
-
-        $form->redirecturl = 'random string';
-        $err = array();
-        $this->auth->validate_form($form, $err);
-        $this->assertEquals('You should provide valid URL', $err['redirecturl']);
-
-        $form->redirecturl = 123456;
-        $err = array();
-        $this->auth->validate_form($form, $err);
-        $this->assertEquals('You should provide valid URL', $err['redirecturl']);
+        if (empty($errortext)) {
+            $this->assertFalse(array_key_exists('ssourl', $err));
+        } else {
+            $this->assertArrayHasKey('ssourl', $err);
+            $this->assertEquals($errortext, $err['ssourl']);
+        }
     }
 
     /**

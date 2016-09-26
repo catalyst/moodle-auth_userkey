@@ -193,9 +193,37 @@ class auth_plugin_userkey extends auth_plugin_base {
             $err['keylifetime'] = get_string('incorrectkeylifetime', 'auth_userkey');
         }
 
-        if (!empty($form->redirecturl) && filter_var($form->redirecturl, FILTER_VALIDATE_URL) === false) {
+        if (!$this->is_valid_url($form->redirecturl)) {
             $err['redirecturl'] = get_string('incorrectredirecturl', 'auth_userkey');
         }
+
+        if (!$this->is_valid_url($form->ssourl)) {
+            $err['ssourl'] = get_string('incorrectssourl', 'auth_userkey');
+        }
+
+    }
+
+    /**
+     * Check if provided url is correct.
+     *
+     * @param string $url URL to check.
+     *
+     * @return bool
+     */
+    protected function is_valid_url($url) {
+        if (empty($url)) {
+            return true;
+        }
+
+        if (filter_var($url, FILTER_VALIDATE_URL) === false) {
+            return false;
+        }
+
+        if (!preg_match("/^(http|https):/", $url)) {
+            return false;
+        }
+
+        return true;
     }
 
     /**

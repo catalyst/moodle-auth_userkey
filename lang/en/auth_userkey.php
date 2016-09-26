@@ -37,6 +37,7 @@ $string['createuser_desc'] = 'If enabled, a new user will be created if fail to 
 $string['redirecturl'] = 'Logout redirect URL';
 $string['redirecturl_desc'] = 'Optionally you can redirect users to this URL after they logged out from LMS.';
 $string['incorrectredirecturl'] = 'You should provide valid URL';
+$string['incorrectssourl'] = 'You should provide valid URL';
 $string['userkey:generatekey'] = 'Generate login user key';
 $string['pluginisdisabled'] = 'The userkey authentication plugin is disabled.';
 $string['ssourl'] = 'URL of SSO host';
