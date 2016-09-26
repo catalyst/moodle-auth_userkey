@@ -71,7 +71,9 @@ class auth_plugin_userkey extends auth_plugin_base {
     }
 
     /**
-     * All the checking happens before the login page in this hook
+     * All the checking happens before the login page in this hook.
+     *
+     * It redirects a user if required or return true.
      */
     public function pre_loginpage_hook() {
         global $SESSION;
@@ -82,16 +84,36 @@ class auth_plugin_userkey extends auth_plugin_base {
         if (isset($SESSION->enrolkey_skipsso)) {
             unset($SESSION->enrolkey_skipsso);
         }
-        $this->loginpage_hook();
+
+        return $this->loginpage_hook();
     }
 
     /**
-     * All the checking happens before the login page in this hook
+     * All the checking happens before the login page in this hook.
+     *
+     * It redirects a user if required or return true.
      */
     public function loginpage_hook() {
         if ($this->should_login_redirect()) {
-            redirect($this->config->ssourl);
+            $this->redirect($this->config->ssourl);
         }
+
+        return true;
+    }
+
+    /**
+     * Redirects the user to provided URL.
+     *
+     * @param $url URL to redirect to.
+     *
+     * @throws \moodle_exception If gets running via CLI or AJAX call.
+     */
+    protected function redirect($url) {
+        if (CLI_SCRIPT or AJAX_SCRIPT) {
+            throw new moodle_exception('redirecterrordetected', 'auth_userkey', '', $url);
+        }
+
+        redirect($url);
     }
 
     /**
@@ -505,8 +527,9 @@ class auth_plugin_userkey extends auth_plugin_base {
      *
      * @return bool
      */
-    public function should_login_redirect() {
+    protected function should_login_redirect() {
         global $SESSION;
+
         $skipsso = optional_param('enrolkey_skipsso', 0, PARAM_BOOL);
 
         // Check whether we've skipped SSO already.

@@ -42,3 +42,4 @@ $string['userkey:generatekey'] = 'Generate login user key';
 $string['pluginisdisabled'] = 'The userkey authentication plugin is disabled.';
 $string['ssourl'] = 'URL of SSO host';
 $string['ssourl_desc'] = 'URL of the SSO host to redirect users to. If defined users will be redirected here on login instead of the Moodle Login page';
+$string['redirecterrordetected'] = 'Unsupported redirect to {$a} detected, execution terminated.';

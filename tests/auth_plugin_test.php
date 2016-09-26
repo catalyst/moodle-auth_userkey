@@ -740,60 +740,87 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
     }
 
     /**
-     * Test that login page hook redirects correctly.
+     * Test that login hook redirects a user if skipsso not set and ssourl is set.
+     *
+     * @expectedException moodle_exception
+     * @expectedExceptionMessage Unsupported redirect to http://google.com detected, execution terminated.
      */
-    public function test_loginpage_hook_redirects_correctly() {
+    public function test_loginpage_hook_redirects_if_skipsso_not_set_and_ssourl_set() {
         global $SESSION;
 
         $SESSION->enrolkey_skipsso = 0;
         set_config('ssourl', 'http://google.com', 'auth_userkey');
         $this->auth = new auth_plugin_userkey();
 
-        $userredirect = $this->auth->should_login_redirect();
-        $this->assertEquals($userredirect, true);
-
+        $this->auth->loginpage_hook();
     }
 
     /**
-     * Test that Moodle login page is displayed if url param is set correctly.
+     * Test that login hook does not redirect a user if skipsso not set and ssourl is not set.
      */
-    public function test_login_page_displays_correctly_url_param_set() {
-        global $SESSION;
-
-        $SESSION->enrolkey_skipsso = 1;
-        set_config('ssourl', 'http://google.com', 'auth_userkey');
-        $this->auth = new auth_plugin_userkey();
-        $userredirect = $this->auth->should_login_redirect();
-        $this->assertEquals($userredirect, false);
-
-    }
-
-    /**
-     * Test that Moodle login page is displayed if no redirect url and no param is set.
-     */
-    public function test_login_page_displays_correctly() {
+    public function test_loginpage_hook_does_not_redirect_if_skipsso_not_set_and_ssourl_not_set() {
         global $SESSION;
 
         $SESSION->enrolkey_skipsso = 0;
         set_config('ssourl', '', 'auth_userkey');
         $this->auth = new auth_plugin_userkey();
-        $userredirect = $this->auth->should_login_redirect();
-        $this->assertEquals($userredirect, false);
 
+        $this->assertTrue($this->auth->loginpage_hook());
     }
 
     /**
-     * Test that Moodle login page is displayed if no redirect url, but param is set.
+     * Test that login hook does not redirect a user if skipsso is set and ssourl is not set.
      */
-    public function test_login_page_displays_correctly_param_set() {
+    public function test_loginpage_hook_does_not_redirect_if_skipsso_set_and_ssourl_not_set() {
         global $SESSION;
 
         $SESSION->enrolkey_skipsso = 1;
         set_config('ssourl', '', 'auth_userkey');
         $this->auth = new auth_plugin_userkey();
-        $userredirect = $this->auth->should_login_redirect();
-        $this->assertEquals($userredirect, false);
 
+        $this->assertTrue($this->auth->loginpage_hook());
+    }
+
+    /**
+     * Test that pre login hook redirects a user if skipsso not set and ssourl is set.
+     *
+     * @expectedException moodle_exception
+     * @expectedExceptionMessage Unsupported redirect to http://google.com detected, execution terminated.
+     */
+    public function test_pre_loginpage_hook_redirects_if_skipsso_not_set_and_ssourl_set() {
+        global $SESSION;
+
+        $SESSION->enrolkey_skipsso = 0;
+        set_config('ssourl', 'http://google.com', 'auth_userkey');
+        $this->auth = new auth_plugin_userkey();
+
+        $this->auth->pre_loginpage_hook();
+    }
+
+    /**
+     * Test that pre login hook does not redirect a user if skipsso is not set and ssourl is not set.
+     */
+    public function test_pre_loginpage_hook_does_not_redirect_if_skipsso_not_set_and_ssourl_not_set() {
+        global $SESSION;
+
+        $SESSION->enrolkey_skipsso = 0;
+        set_config('ssourl', '', 'auth_userkey');
+        $this->auth = new auth_plugin_userkey();
+
+        $this->assertTrue($this->auth->pre_loginpage_hook());
+    }
+
+    /**
+     * Test that login page hook does not redirect a user if skipsso is set and ssourl is not set.
+     */
+    public function test_pre_loginpage_hook_does_not_redirect_if_skipsso_set_and_ssourl_not_set() {
+        global $SESSION;
+
+        $SESSION->enrolkey_skipsso = 1;
+        set_config('ssourl', '', 'auth_userkey');
+        $this->auth = new auth_plugin_userkey();
+
+        $this->assertTrue($this->auth->pre_loginpage_hook());
     }
 
 }
