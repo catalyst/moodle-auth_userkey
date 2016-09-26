@@ -656,18 +656,43 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
         $_POST['key'] = 'RemoveKey';
         $_SERVER['HTTP_CLIENT_IP'] = '192.168.1.1';
 
-        // Using @ is the only way to test this. Thanks moodle!
-        @$this->auth->user_login_userkey();
-
-        $keyexists = $DB->record_exists('user_private_key', array('value' => 'RemoveKey'));
-        $this->assertFalse($keyexists);
+        try {
+            // Using @ is the only way to test this. Thanks moodle!
+            @$this->auth->user_login_userkey();
+        } catch (moodle_exception $e) {
+            $keyexists = $DB->record_exists('user_private_key', array('value' => 'RemoveKey'));
+            $this->assertFalse($keyexists);
+        }
     }
 
     /**
-     * Test that a user loggs in correctly.
+     * Test that a user logs in and gets redirected correctly.
+     *
+     * @expectedException moodle_exception
+     * @expectedExceptionMessage Unsupported redirect to http://www.example.com/moodle detected, execution terminated.
      */
-    public function test_that_user_logged_in() {
-        global $DB, $USER, $SESSION, $CFG;
+    public function test_that_user_logged_in_and_redirected() {
+        global $DB;
+
+        $key = new stdClass();
+        $key->value = 'UserLogin';
+        $key->script = 'auth/userkey';
+        $key->userid = $this->user->id;
+        $key->instance = $this->user->id;
+        $key->iprestriction = null;
+        $key->validuntil    = time() + 300;
+        $key->timecreated   = time();
+        $DB->insert_record('user_private_key', $key);
+
+        $_POST['key'] = 'UserLogin';
+        @$this->auth->user_login_userkey();
+    }
+
+    /**
+     * Test that a user logs in correctly.
+     */
+    public function test_that_user_logged_in_correctly() {
+        global $DB, $USER, $SESSION;
 
         $key = new stdClass();
         $key->value = 'UserLogin';
@@ -681,18 +706,23 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
 
         $_POST['key'] = 'UserLogin';
 
-        // Using @ is the only way to test this. Thanks moodle!
-        $redirect = @$this->auth->user_login_userkey();
-        $this->assertEquals($CFG->wwwroot, $redirect);
-        $this->assertEquals($this->user->id, $USER->id);
-        $this->assertSame(sesskey(), $USER->sesskey);
-        $this->assertObjectHasAttribute('userkey', $SESSION);
+        try {
+            // Using @ is the only way to test this. Thanks moodle!
+            @$this->auth->user_login_userkey();
+        } catch (moodle_exception $e) {
+            $this->assertEquals($this->user->id, $USER->id);
+            $this->assertSame(sesskey(), $USER->sesskey);
+            $this->assertObjectHasAttribute('userkey', $SESSION);
+        }
     }
 
     /**
-     * Test that wantsurl URL gets returned after user logged in if wantsurl's set.
+     * Test that a user gets redirected to internal wantsurl URL successful log in.
+     *
+     * @expectedException moodle_exception
+     * @expectedExceptionMessage Unsupported redirect to /course/index.php?id=12&key=134 detected, execution terminated.
      */
-    public function test_that_return_wantsurl() {
+    public function test_that_user_gets_redirected_to_internal_wantsurl() {
         global $DB;
 
         $key = new stdClass();
@@ -709,15 +739,17 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
         $_POST['wantsurl'] = '/course/index.php?id=12&key=134';
 
         // Using @ is the only way to test this. Thanks moodle!
-        $redirect = @$this->auth->user_login_userkey();
-
-        $this->assertEquals('/course/index.php?id=12&key=134', $redirect);
+        @$this->auth->user_login_userkey();
     }
 
     /**
-     * Test that wantsurl URL gets returned after user logged in if wantsurl's set to external URL.
+     * Test that a user gets redirected to external wantsurl URL successful log in.
+     *
+     * @expectedException moodle_exception
+     * @expectedExceptionMessage Unsupported redirect to http://test.com/course/index.php?id=12&key=134 detected,
+     * execution terminated.
      */
-    public function test_that_return_wantsurl_if_it_is_external_url() {
+    public function test_that_user_gets_redirected_to_external_wantsurl() {
         global $DB;
 
         $key = new stdClass();
@@ -734,9 +766,7 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
         $_POST['wantsurl'] = 'http://test.com/course/index.php?id=12&key=134';
 
         // Using @ is the only way to test this. Thanks moodle!
-        $redirect = @$this->auth->user_login_userkey();
-
-        $this->assertEquals('http://test.com/course/index.php?id=12&key=134', $redirect);
+        @$this->auth->user_login_userkey();
     }
 
     /**

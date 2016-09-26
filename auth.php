@@ -129,9 +129,7 @@ class auth_plugin_userkey extends auth_plugin_base {
     }
 
     /**
-     * Login user using userkey and return URL to redirect after.
-     *
-     * @return string URL to redirect.
+     * Logs a user in using userkey and redirects after.
      *
      * @throws \moodle_exception If something went wrong.
      */
@@ -151,10 +149,12 @@ class auth_plugin_userkey extends auth_plugin_base {
         $SESSION->userkey = true;
 
         if (!empty($wantsurl)) {
-            return $wantsurl;
+            $redirecturl = $wantsurl;
         } else {
-            return $CFG->wwwroot;
+            $redirecturl = $CFG->wwwroot;
         }
+
+        $this->redirect($redirecturl);
     }
 
     /**
