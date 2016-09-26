@@ -403,6 +403,7 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
         $form = new stdClass();
 
         $form->redirecturl = '';
+        $form->ssourl = '';
 
         $form->keylifetime = '';
         $err = array();
@@ -436,52 +437,82 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
     }
 
     /**
-     * Test that we can validate redirecturl for config form correctly.
+     * Data provider for testing URL validation functions.
+     *
+     * @return array First element URL, the second URL is error message. Empty error massage means no errors.
      */
-    public function test_validate_redirecturl_for_config_form() {
+    public function url_data_provider() {
+        return array(
+            array('', ''),
+            array('http://google.com/', ''),
+            array('https://google.com', ''),
+            array('http://some.very.long.and.silly.domain/with/a/path/', ''),
+            array('http://0.255.1.1/numericip.php', ''),
+            array('http://0.255.1.1/numericip.php?test=1&id=2', ''),
+            array('/just/a/path', 'You should provide valid URL'),
+            array('random string', 'You should provide valid URL'),
+            array(123456, 'You should provide valid URL'),
+            array('php://google.com', 'You should provide valid URL'),
+        );
+    }
+
+    /**
+     * Test that we can validate redirecturl for config form correctly.
+     *
+     * @dataProvider url_data_provider
+     */
+
+    /**
+     * Test that we can validate redirecturl for config form correctly.
+     *
+     * @dataProvider url_data_provider
+     *
+     * @param string $url URL to test.
+     * @param string $errortext Expected error text.
+     */
+    public function test_validate_redirecturl_for_config_form($url, $errortext) {
         $form = new stdClass();
 
         $form->keylifetime = 10;
+        $form->ssourl = '';
 
+        $form->redirecturl = $url;
+        $err = array();
+        $this->auth->validate_form($form, $err);
+
+        if (empty($errortext)) {
+            $this->assertFalse(array_key_exists('redirecturl', $err));
+        } else {
+            $this->assertArrayHasKey('redirecturl', $err);
+            $this->assertEquals($errortext, $err['redirecturl']);
+        }
+    }
+
+    /**
+     * Test that we can validate ssourl for config form correctly.
+     *
+     * @dataProvider url_data_provider
+     *
+     * @param string $url URL to test.
+     * @param string $errortext Expected error text.
+     */
+    public function test_validate_ssourl_for_config_form($url, $errortext) {
+        $form = new stdClass();
+
+        $form->keylifetime = 10;
         $form->redirecturl = '';
-        $err = array();
-        $this->auth->validate_form($form, $err);
-        $this->assertFalse(array_key_exists('redirecturl', $err));
+        $form->ssourl = '';
 
-        $form->redirecturl = 'http://google.com/';
+        $form->ssourl = $url;
         $err = array();
         $this->auth->validate_form($form, $err);
-        $this->assertFalse(array_key_exists('redirecturl', $err));
 
-        $form->redirecturl = 'https://google.com';
-        $err = array();
-        $this->auth->validate_form($form, $err);
-        $this->assertFalse(array_key_exists('redirecturl', $err));
-
-        $form->redirecturl = 'http://some.very.long.and.silly.domain/with/a/path/';
-        $err = array();
-        $this->auth->validate_form($form, $err);
-        $this->assertFalse(array_key_exists('redirecturl', $err));
-
-        $form->redirecturl = 'http://0.255.1.1/numericip.php';
-        $err = array();
-        $this->auth->validate_form($form, $err);
-        $this->assertFalse(array_key_exists('redirecturl', $err));
-
-        $form->redirecturl = '/just/a/path';
-        $err = array();
-        $this->auth->validate_form($form, $err);
-        $this->assertEquals('You should provide valid URL', $err['redirecturl']);
-
-        $form->redirecturl = 'random string';
-        $err = array();
-        $this->auth->validate_form($form, $err);
-        $this->assertEquals('You should provide valid URL', $err['redirecturl']);
-
-        $form->redirecturl = 123456;
-        $err = array();
-        $this->auth->validate_form($form, $err);
-        $this->assertEquals('You should provide valid URL', $err['redirecturl']);
+        if (empty($errortext)) {
+            $this->assertFalse(array_key_exists('ssourl', $err));
+        } else {
+            $this->assertArrayHasKey('ssourl', $err);
+            $this->assertEquals($errortext, $err['ssourl']);
+        }
     }
 
     /**
@@ -499,6 +530,7 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
         $formconfig->keylifetime = 100;
         $formconfig->iprestriction = 0;
         $formconfig->redirecturl = 'http://google.com/';
+        $formconfig->ssourl = 'http://google.com/';
 
         $this->auth->process_config($formconfig);
 
@@ -624,18 +656,43 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
         $_POST['key'] = 'RemoveKey';
         $_SERVER['HTTP_CLIENT_IP'] = '192.168.1.1';
 
-        // Using @ is the only way to test this. Thanks moodle!
-        @$this->auth->user_login_userkey();
-
-        $keyexists = $DB->record_exists('user_private_key', array('value' => 'RemoveKey'));
-        $this->assertFalse($keyexists);
+        try {
+            // Using @ is the only way to test this. Thanks moodle!
+            @$this->auth->user_login_userkey();
+        } catch (moodle_exception $e) {
+            $keyexists = $DB->record_exists('user_private_key', array('value' => 'RemoveKey'));
+            $this->assertFalse($keyexists);
+        }
     }
 
     /**
-     * Test that a user loggs in correctly.
+     * Test that a user logs in and gets redirected correctly.
+     *
+     * @expectedException moodle_exception
+     * @expectedExceptionMessage Unsupported redirect to http://www.example.com/moodle detected, execution terminated.
      */
-    public function test_that_user_logged_in() {
-        global $DB, $USER, $SESSION, $CFG;
+    public function test_that_user_logged_in_and_redirected() {
+        global $DB;
+
+        $key = new stdClass();
+        $key->value = 'UserLogin';
+        $key->script = 'auth/userkey';
+        $key->userid = $this->user->id;
+        $key->instance = $this->user->id;
+        $key->iprestriction = null;
+        $key->validuntil    = time() + 300;
+        $key->timecreated   = time();
+        $DB->insert_record('user_private_key', $key);
+
+        $_POST['key'] = 'UserLogin';
+        @$this->auth->user_login_userkey();
+    }
+
+    /**
+     * Test that a user logs in correctly.
+     */
+    public function test_that_user_logged_in_correctly() {
+        global $DB, $USER, $SESSION;
 
         $key = new stdClass();
         $key->value = 'UserLogin';
@@ -649,18 +706,23 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
 
         $_POST['key'] = 'UserLogin';
 
-        // Using @ is the only way to test this. Thanks moodle!
-        $redirect = @$this->auth->user_login_userkey();
-        $this->assertEquals($CFG->wwwroot, $redirect);
-        $this->assertEquals($this->user->id, $USER->id);
-        $this->assertSame(sesskey(), $USER->sesskey);
-        $this->assertObjectHasAttribute('userkey', $SESSION);
+        try {
+            // Using @ is the only way to test this. Thanks moodle!
+            @$this->auth->user_login_userkey();
+        } catch (moodle_exception $e) {
+            $this->assertEquals($this->user->id, $USER->id);
+            $this->assertSame(sesskey(), $USER->sesskey);
+            $this->assertObjectHasAttribute('userkey', $SESSION);
+        }
     }
 
     /**
-     * Test that wantsurl URL gets returned after user logged in if wantsurl's set.
+     * Test that a user gets redirected to internal wantsurl URL successful log in.
+     *
+     * @expectedException moodle_exception
+     * @expectedExceptionMessage Unsupported redirect to /course/index.php?id=12&key=134 detected, execution terminated.
      */
-    public function test_that_return_wantsurl() {
+    public function test_that_user_gets_redirected_to_internal_wantsurl() {
         global $DB;
 
         $key = new stdClass();
@@ -677,15 +739,17 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
         $_POST['wantsurl'] = '/course/index.php?id=12&key=134';
 
         // Using @ is the only way to test this. Thanks moodle!
-        $redirect = @$this->auth->user_login_userkey();
-
-        $this->assertEquals('/course/index.php?id=12&key=134', $redirect);
+        @$this->auth->user_login_userkey();
     }
 
     /**
-     * Test that wantsurl URL gets returned after user logged in if wantsurl's set to external URL.
+     * Test that a user gets redirected to external wantsurl URL successful log in.
+     *
+     * @expectedException moodle_exception
+     * @expectedExceptionMessage Unsupported redirect to http://test.com/course/index.php?id=12&key=134 detected,
+     * execution terminated.
      */
-    public function test_that_return_wantsurl_if_it_is_external_url() {
+    public function test_that_user_gets_redirected_to_external_wantsurl() {
         global $DB;
 
         $key = new stdClass();
@@ -702,9 +766,91 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
         $_POST['wantsurl'] = 'http://test.com/course/index.php?id=12&key=134';
 
         // Using @ is the only way to test this. Thanks moodle!
-        $redirect = @$this->auth->user_login_userkey();
+        @$this->auth->user_login_userkey();
+    }
 
-        $this->assertEquals('http://test.com/course/index.php?id=12&key=134', $redirect);
+    /**
+     * Test that login hook redirects a user if skipsso not set and ssourl is set.
+     *
+     * @expectedException moodle_exception
+     * @expectedExceptionMessage Unsupported redirect to http://google.com detected, execution terminated.
+     */
+    public function test_loginpage_hook_redirects_if_skipsso_not_set_and_ssourl_set() {
+        global $SESSION;
+
+        $SESSION->enrolkey_skipsso = 0;
+        set_config('ssourl', 'http://google.com', 'auth_userkey');
+        $this->auth = new auth_plugin_userkey();
+
+        $this->auth->loginpage_hook();
+    }
+
+    /**
+     * Test that login hook does not redirect a user if skipsso not set and ssourl is not set.
+     */
+    public function test_loginpage_hook_does_not_redirect_if_skipsso_not_set_and_ssourl_not_set() {
+        global $SESSION;
+
+        $SESSION->enrolkey_skipsso = 0;
+        set_config('ssourl', '', 'auth_userkey');
+        $this->auth = new auth_plugin_userkey();
+
+        $this->assertTrue($this->auth->loginpage_hook());
+    }
+
+    /**
+     * Test that login hook does not redirect a user if skipsso is set and ssourl is not set.
+     */
+    public function test_loginpage_hook_does_not_redirect_if_skipsso_set_and_ssourl_not_set() {
+        global $SESSION;
+
+        $SESSION->enrolkey_skipsso = 1;
+        set_config('ssourl', '', 'auth_userkey');
+        $this->auth = new auth_plugin_userkey();
+
+        $this->assertTrue($this->auth->loginpage_hook());
+    }
+
+    /**
+     * Test that pre login hook redirects a user if skipsso not set and ssourl is set.
+     *
+     * @expectedException moodle_exception
+     * @expectedExceptionMessage Unsupported redirect to http://google.com detected, execution terminated.
+     */
+    public function test_pre_loginpage_hook_redirects_if_skipsso_not_set_and_ssourl_set() {
+        global $SESSION;
+
+        $SESSION->enrolkey_skipsso = 0;
+        set_config('ssourl', 'http://google.com', 'auth_userkey');
+        $this->auth = new auth_plugin_userkey();
+
+        $this->auth->pre_loginpage_hook();
+    }
+
+    /**
+     * Test that pre login hook does not redirect a user if skipsso is not set and ssourl is not set.
+     */
+    public function test_pre_loginpage_hook_does_not_redirect_if_skipsso_not_set_and_ssourl_not_set() {
+        global $SESSION;
+
+        $SESSION->enrolkey_skipsso = 0;
+        set_config('ssourl', '', 'auth_userkey');
+        $this->auth = new auth_plugin_userkey();
+
+        $this->assertTrue($this->auth->pre_loginpage_hook());
+    }
+
+    /**
+     * Test that login page hook does not redirect a user if skipsso is set and ssourl is not set.
+     */
+    public function test_pre_loginpage_hook_does_not_redirect_if_skipsso_set_and_ssourl_not_set() {
+        global $SESSION;
+
+        $SESSION->enrolkey_skipsso = 1;
+        set_config('ssourl', '', 'auth_userkey');
+        $this->auth = new auth_plugin_userkey();
+
+        $this->assertTrue($this->auth->pre_loginpage_hook());
     }
 
 }

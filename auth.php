@@ -57,6 +57,7 @@ class auth_plugin_userkey extends auth_plugin_base {
         'keylifetime' => 60,
         'iprestriction' => 0,
         'redirecturl' => '',
+        'ssourl' => '',
         // TODO: use this field when implementing user creation. 'createuser' => 0.
     );
 
@@ -67,6 +68,52 @@ class auth_plugin_userkey extends auth_plugin_base {
         $this->authtype = 'userkey';
         $this->config = get_config('auth_userkey');
         $this->userkeymanager = new core_userkey_manager($this->config);
+    }
+
+    /**
+     * All the checking happens before the login page in this hook.
+     *
+     * It redirects a user if required or return true.
+     */
+    public function pre_loginpage_hook() {
+        global $SESSION;
+
+        // If we previously tried to skip SSO on, but then navigated
+        // away, and come in from another deep link while SSO only is
+        // on, then reset the previous session memory of forcing SSO.
+        if (isset($SESSION->enrolkey_skipsso)) {
+            unset($SESSION->enrolkey_skipsso);
+        }
+
+        return $this->loginpage_hook();
+    }
+
+    /**
+     * All the checking happens before the login page in this hook.
+     *
+     * It redirects a user if required or return true.
+     */
+    public function loginpage_hook() {
+        if ($this->should_login_redirect()) {
+            $this->redirect($this->config->ssourl);
+        }
+
+        return true;
+    }
+
+    /**
+     * Redirects the user to provided URL.
+     *
+     * @param $url URL to redirect to.
+     *
+     * @throws \moodle_exception If gets running via CLI or AJAX call.
+     */
+    protected function redirect($url) {
+        if (CLI_SCRIPT or AJAX_SCRIPT) {
+            throw new moodle_exception('redirecterrordetected', 'auth_userkey', '', $url);
+        }
+
+        redirect($url);
     }
 
     /**
@@ -82,9 +129,7 @@ class auth_plugin_userkey extends auth_plugin_base {
     }
 
     /**
-     * Login user using userkey and return URL to redirect after.
-     *
-     * @return string URL to redirect.
+     * Logs a user in using userkey and redirects after.
      *
      * @throws \moodle_exception If something went wrong.
      */
@@ -104,10 +149,12 @@ class auth_plugin_userkey extends auth_plugin_base {
         $SESSION->userkey = true;
 
         if (!empty($wantsurl)) {
-            return $wantsurl;
+            $redirecturl = $wantsurl;
         } else {
-            return $CFG->wwwroot;
+            $redirecturl = $CFG->wwwroot;
         }
+
+        $this->redirect($redirecturl);
     }
 
     /**
@@ -168,9 +215,37 @@ class auth_plugin_userkey extends auth_plugin_base {
             $err['keylifetime'] = get_string('incorrectkeylifetime', 'auth_userkey');
         }
 
-        if (!empty($form->redirecturl) && filter_var($form->redirecturl, FILTER_VALIDATE_URL) === false) {
+        if (!$this->is_valid_url($form->redirecturl)) {
             $err['redirecturl'] = get_string('incorrectredirecturl', 'auth_userkey');
         }
+
+        if (!$this->is_valid_url($form->ssourl)) {
+            $err['ssourl'] = get_string('incorrectssourl', 'auth_userkey');
+        }
+
+    }
+
+    /**
+     * Check if provided url is correct.
+     *
+     * @param string $url URL to check.
+     *
+     * @return bool
+     */
+    protected function is_valid_url($url) {
+        if (empty($url)) {
+            return true;
+        }
+
+        if (filter_var($url, FILTER_VALIDATE_URL) === false) {
+            return false;
+        }
+
+        if (!preg_match("/^(http|https):/", $url)) {
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -448,11 +523,39 @@ class auth_plugin_userkey extends auth_plugin_base {
     }
 
     /**
+     * Check if we should redirect a user as part of login.
+     *
+     * @return bool
+     */
+    protected function should_login_redirect() {
+        global $SESSION;
+
+        $skipsso = optional_param('enrolkey_skipsso', 0, PARAM_BOOL);
+
+        // Check whether we've skipped SSO already.
+        // This is here because loginpage_hook is called again during form
+        // submission (all of login.php is processed) and ?skipsso=on is not
+        // preserved forcing us to the SSO.
+        if ((isset($SESSION->enrolkey_skipsso) && $SESSION->enrolkey_skipsso == 1)) {
+            return false;
+        }
+
+        $SESSION->enrolkey_skipsso = $skipsso;
+
+        // If SSO only is set and user is not passing the skip param
+        // or has it already set in their session then redirect to the SSO URL.
+        if (isset($this->config->ssourl) && $this->config->ssourl != '' && !$skipsso) {
+            return true;
+        }
+
+    }
+
+    /**
      * Check if we should redirect a user after logout.
      *
      * @return bool
      */
-    protected function should_redirect() {
+    protected function should_logout_redirect() {
         global $SESSION;
 
         if (!isset($SESSION->userkey)) {
@@ -470,6 +573,7 @@ class auth_plugin_userkey extends auth_plugin_base {
         return true;
     }
 
+
     /**
      * Logout page hook.
      *
@@ -480,7 +584,7 @@ class auth_plugin_userkey extends auth_plugin_base {
     public function logoutpage_hook() {
         global $redirect;
 
-        if ($this->should_redirect()) {
+        if ($this->should_logout_redirect()) {
             $redirect = $this->config->redirecturl;
         }
     }

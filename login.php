@@ -28,5 +28,4 @@ if (!is_enabled_auth('userkey')) {
     print_error(get_string('pluginisdisabled', 'auth_userkey'));
 }
 
-$redirect = get_auth_plugin('userkey')->user_login_userkey();
-redirect($redirect);
+get_auth_plugin('userkey')->user_login_userkey();
