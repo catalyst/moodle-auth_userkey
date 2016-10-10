@@ -1,3 +1,7 @@
+<a href="https://travis-ci.org/catalyst/moodle-auth_userkey">
+<img src="https://travis-ci.org/catalyst/moodle-auth_userkey.svg?branch=master">
+</a>
+
 Log in to Moodle using one time user key.
 =========================================
 
