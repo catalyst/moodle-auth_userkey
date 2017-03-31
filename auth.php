@@ -29,6 +29,7 @@ use auth_userkey\userkey_manager_interface;
 
 require_once($CFG->libdir . "/externallib.php");
 require_once($CFG->libdir.'/authlib.php');
+require_once($CFG->dirroot . '/user/lib.php');
 
 /**
  * User key authentication plugin.
@@ -58,7 +59,8 @@ class auth_plugin_userkey extends auth_plugin_base {
         'iprestriction' => 0,
         'redirecturl' => '',
         'ssourl' => '',
-        // TODO: use this field when implementing user creation. 'createuser' => 0.
+        'createuser' => false,
+        'updateuser' => false,
     );
 
     /**
@@ -303,6 +305,19 @@ class auth_plugin_userkey extends auth_plugin_base {
     }
 
     /**
+     * Check if we need to update users.
+     *
+     * @return bool
+     */
+    protected function should_update_user() {
+        if (isset($this->config->updateuser) && $this->config->updateuser == true) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
      * Check if restriction by IP is enabled.
      *
      * @return bool
@@ -323,10 +338,77 @@ class auth_plugin_userkey extends auth_plugin_base {
      * @return object User object.
      */
     protected function create_user(array $data) {
-        // TODO:
-        // 1. Validate user
-        // 2. Create user.
-        // 3. Throw exception if something went wrong.
+        global $DB, $CFG;
+
+        $user = $data;
+        unset($user['ip']);
+        $user['auth'] = 'userkey';
+        $user['mnethostid'] = $CFG->mnet_localhost_id;
+
+        if ($DB->record_exists('user', array('username' => $user['username'], 'mnethostid' => $CFG->mnet_localhost_id))) {
+            throw new invalid_parameter_exception('Username already exists: '.$user['username']);
+        }
+        if (!validate_email($user['email'])) {
+            throw new invalid_parameter_exception('Email address is invalid: '.$user['email']);
+        } else if (empty($CFG->allowaccountssameemail) &&
+            $DB->record_exists('user', array('email' => $user['email'], 'mnethostid' => $user['mnethostid']))) {
+            throw new invalid_parameter_exception('Email address already exists: '.$user['email']);
+        }
+
+        $userid = user_create_user($user);
+        return $DB->get_record('user', ['id' => $userid]);
+    }
+
+    /**
+     * Update an existing user.
+     *
+     * @param stdClass $user Existing user record.
+     * @param array $data Validated user data from web service.
+     *
+     * @return object User object.
+     */
+    protected function update_user(\stdClass $user, array $data) {
+        global $DB, $CFG;
+
+        $userdata = $data;
+        unset($userdata['ip']);
+        $userdata['auth'] = 'userkey';
+
+        $changed = false;
+        foreach ($userdata as $key => $value) {
+            if ($user->$key != $value) {
+                $changed = true;
+                break;
+            }
+        }
+
+        if (!$changed) {
+            return $user;
+        }
+
+        if (
+            $user->username != $userdata['username']
+            &&
+            $DB->record_exists('user', array('username' => $userdata['username'], 'mnethostid' => $CFG->mnet_localhost_id))
+        ) {
+            throw new invalid_parameter_exception('Username already exists: '.$userdata['username']);
+        }
+        if (!validate_email($userdata['email'])) {
+            throw new invalid_parameter_exception('Email address is invalid: '.$userdata['email']);
+        } else if (
+            empty($CFG->allowaccountssameemail)
+            &&
+            $user->email != $userdata['email']
+            &&
+            $DB->record_exists('user', array('email' => $userdata['email'], 'mnethostid' => $CFG->mnet_localhost_id))
+        ) {
+            throw new invalid_parameter_exception('Email address already exists: '.$userdata['email']);
+        }
+        $userdata['id'] = $user->id;
+
+        $userdata = (object) $userdata;
+        user_update_user($userdata, false);
+        return $DB->get_record('user', ['id' => $user->id]);
     }
 
     /**
@@ -381,6 +463,8 @@ class auth_plugin_userkey extends auth_plugin_base {
             } else {
                 throw new invalid_parameter_exception('User is not exist');
             }
+        } else if ($this->should_update_user()) {
+            $user = $this->update_user($user, $data);
         }
 
         return $user;
@@ -506,7 +590,18 @@ class auth_plugin_userkey extends auth_plugin_base {
             );
         }
 
-        // TODO: add more fields here when we implement user creation.
+        $mappingfield = $this->get_mapping_field();
+        if ($this->should_create_user() || $this->should_update_user()) {
+            $parameters['firstname'] = new external_value(core_user::get_property_type('firstname'), 'The first name(s) of the user');
+            $parameters['lastname']  = new external_value(core_user::get_property_type('lastname'), 'The family name of the user');
+
+            if ($mappingfield != 'email') {
+                $parameters['email'] = new external_value(core_user::get_property_type('email'), 'A valid and unique email address');
+            }
+            if ($mappingfield != 'username') {
+                $parameters['username'] = new external_value(core_user::get_property_type('username'), 'A valid and unique username');
+            }
+        }
 
         return $parameters;
     }

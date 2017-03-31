@@ -97,6 +97,5 @@ E.g. http://yourmoodle.com/login/index.php?enrolkey_skipsso=1
 
 TODO:
 -----
-1. Add users provisioning.
-2. Implement logout webservice to be able to call it from external application.
-3. Add a test client code to README.
+1. Implement logout webservice to be able to call it from external application.
+2. Add a test client code to README.
