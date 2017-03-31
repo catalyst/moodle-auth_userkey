@@ -345,6 +345,17 @@ class auth_plugin_userkey extends auth_plugin_base {
         $user['auth'] = 'userkey';
         $user['mnethostid'] = $CFG->mnet_localhost_id;
 
+        $requiredfieds = ['username', 'email', 'firstname', 'lastname'];
+        $missingfields = [];
+        foreach($requiredfieds as $requiredfied) {
+            if (empty($user[$requiredfied])) {
+                $missingfields[] = $requiredfied;
+            }
+        }
+        if (!empty($missingfields)) {
+            throw new invalid_parameter_exception('Unable to create user, missing value(s): ' . implode(',', $missingfields));
+        }
+
         if ($DB->record_exists('user', array('username' => $user['username'], 'mnethostid' => $CFG->mnet_localhost_id))) {
             throw new invalid_parameter_exception('Username already exists: '.$user['username']);
         }
@@ -592,14 +603,14 @@ class auth_plugin_userkey extends auth_plugin_base {
 
         $mappingfield = $this->get_mapping_field();
         if ($this->should_create_user() || $this->should_update_user()) {
-            $parameters['firstname'] = new external_value(core_user::get_property_type('firstname'), 'The first name(s) of the user');
-            $parameters['lastname']  = new external_value(core_user::get_property_type('lastname'), 'The family name of the user');
+            $parameters['firstname'] = new external_value(core_user::get_property_type('firstname'), 'The first name(s) of the user', VALUE_OPTIONAL);
+            $parameters['lastname']  = new external_value(core_user::get_property_type('lastname'), 'The family name of the user', VALUE_OPTIONAL);
 
             if ($mappingfield != 'email') {
-                $parameters['email'] = new external_value(core_user::get_property_type('email'), 'A valid and unique email address');
+                $parameters['email'] = new external_value(core_user::get_property_type('email'), 'A valid and unique email address', VALUE_OPTIONAL);
             }
             if ($mappingfield != 'username') {
-                $parameters['username'] = new external_value(core_user::get_property_type('username'), 'A valid and unique username');
+                $parameters['username'] = new external_value(core_user::get_property_type('username'), 'A valid and unique username', VALUE_OPTIONAL);
             }
         }
 

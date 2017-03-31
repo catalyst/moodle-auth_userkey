@@ -309,6 +309,26 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
     }
 
     /**
+     * Test that we can request a key for a new user.
+     */
+    public function test_missing_data_to_create_user() {
+        global $CFG, $DB;
+
+        set_config('createuser', true, 'auth_userkey');
+        $this->auth = new auth_plugin_userkey();
+
+        $userkeymanager = new \auth_userkey\fake_userkey_manager();
+        $this->auth->set_userkey_manager($userkeymanager);
+
+        $user = new stdClass();
+        $user->email = 'username@test.com';
+        $user->ip = '192.168.1.1';
+
+        $this->setExpectedException('invalid_parameter_exception', 'Unable to create user, missing value(s): username,firstname,lastname');
+        $this->auth->get_login_url($user);
+    }
+
+    /**
      * Test that when we attempt to create a new user duplicate usernames are caught.
      */
     public function test_create_refuse_duplicate_username() {
@@ -578,10 +598,10 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
         $this->auth = new auth_plugin_userkey();
         $expected = array(
             'ip' => new external_value(PARAM_HOST, 'User IP address'),
-            'firstname' => new external_value(core_user::get_property_type('firstname'), 'The first name(s) of the user'),
-            'lastname'  => new external_value(core_user::get_property_type('lastname'), 'The family name of the user'),
-            'email'     => new external_value(core_user::get_property_type('email'), 'A valid and unique email address'),
-            'username'  => new external_value(core_user::get_property_type('username'), 'A valid and unique username'),
+            'firstname' => new external_value(core_user::get_property_type('firstname'), 'The first name(s) of the user', VALUE_OPTIONAL),
+            'lastname'  => new external_value(core_user::get_property_type('lastname'), 'The family name of the user', VALUE_OPTIONAL),
+            'email'     => new external_value(core_user::get_property_type('email'), 'A valid and unique email address', VALUE_OPTIONAL),
+            'username'  => new external_value(core_user::get_property_type('username'), 'A valid and unique username', VALUE_OPTIONAL),
         );
         $actual = $this->auth->get_request_login_url_user_parameters();
         $this->assertEquals($expected, $actual);
@@ -592,10 +612,10 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
         $this->auth = new auth_plugin_userkey();
         $expected = array(
             'ip' => new external_value(PARAM_HOST, 'User IP address'),
-            'firstname' => new external_value(core_user::get_property_type('firstname'), 'The first name(s) of the user'),
-            'lastname'  => new external_value(core_user::get_property_type('lastname'), 'The family name of the user'),
-            'email'     => new external_value(core_user::get_property_type('email'), 'A valid and unique email address'),
-            'username'  => new external_value(core_user::get_property_type('username'), 'A valid and unique username'),
+            'firstname' => new external_value(core_user::get_property_type('firstname'), 'The first name(s) of the user', VALUE_OPTIONAL),
+            'lastname'  => new external_value(core_user::get_property_type('lastname'), 'The family name of the user', VALUE_OPTIONAL),
+            'email'     => new external_value(core_user::get_property_type('email'), 'A valid and unique email address', VALUE_OPTIONAL),
+            'username'  => new external_value(core_user::get_property_type('username'), 'A valid and unique username', VALUE_OPTIONAL),
         );
         $actual = $this->auth->get_request_login_url_user_parameters();
         $this->assertEquals($expected, $actual);
