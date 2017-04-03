@@ -52,6 +52,7 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
         require_once($CFG->libdir . "/externallib.php");
         require_once($CFG->dirroot . '/auth/userkey/tests/fake_userkey_manager.php');
         require_once($CFG->dirroot . '/auth/userkey/auth.php');
+        require_once($CFG->dirroot . '/user/lib.php');
 
         $this->auth = new auth_plugin_userkey();
         $this->user = self::getDataGenerator()->create_user();

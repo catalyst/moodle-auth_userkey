@@ -24,6 +24,8 @@
 
 namespace auth_userkey;
 
+defined('MOODLE_INTERNAL') || die();
+
 /**
  * Interface userkey_manager_interface describes key manager behaviour.
  *

@@ -347,7 +347,7 @@ class auth_plugin_userkey extends auth_plugin_base {
 
         $requiredfieds = ['username', 'email', 'firstname', 'lastname'];
         $missingfields = [];
-        foreach($requiredfieds as $requiredfied) {
+        foreach ($requiredfieds as $requiredfied) {
             if (empty($user[$requiredfied])) {
                 $missingfields[] = $requiredfied;
             }
