@@ -52,6 +52,7 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
         require_once($CFG->libdir . "/externallib.php");
         require_once($CFG->dirroot . '/auth/userkey/tests/fake_userkey_manager.php');
         require_once($CFG->dirroot . '/auth/userkey/auth.php');
+        require_once($CFG->dirroot . '/user/lib.php');
 
         $this->auth = new auth_plugin_userkey();
         $this->user = self::getDataGenerator()->create_user();
@@ -278,6 +279,205 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
     }
 
     /**
+     * Test that we can request a key for a new user.
+     */
+    public function test_return_correct_login_url_and_create_new_user() {
+        global $CFG, $DB;
+
+        set_config('createuser', true, 'auth_userkey');
+        $this->auth = new auth_plugin_userkey();
+
+        $userkeymanager = new \auth_userkey\fake_userkey_manager();
+        $this->auth->set_userkey_manager($userkeymanager);
+
+        $user = new stdClass();
+        $user->username = 'username';
+        $user->email = 'username@test.com';
+        $user->firstname = 'user';
+        $user->lastname = 'name';
+        $user->ip = '192.168.1.1';
+
+        $expected = $CFG->wwwroot . '/auth/userkey/login.php?key=FaKeKeyFoRtEsTiNg';
+        $actual = $this->auth->get_login_url($user);
+
+        $this->assertEquals($expected, $actual);
+
+        $userrecord = $DB->get_record('user', ['username' => 'username']);
+        $this->assertEquals($user->email, $userrecord->email);
+        $this->assertEquals($user->firstname, $userrecord->firstname);
+        $this->assertEquals($user->lastname, $userrecord->lastname);
+        $this->assertEquals('userkey', $userrecord->auth);
+    }
+
+    /**
+     * Test that we can request a key for a new user.
+     */
+    public function test_missing_data_to_create_user() {
+        global $CFG, $DB;
+
+        set_config('createuser', true, 'auth_userkey');
+        $this->auth = new auth_plugin_userkey();
+
+        $userkeymanager = new \auth_userkey\fake_userkey_manager();
+        $this->auth->set_userkey_manager($userkeymanager);
+
+        $user = new stdClass();
+        $user->email = 'username@test.com';
+        $user->ip = '192.168.1.1';
+
+        $this->setExpectedException('invalid_parameter_exception', 'Unable to create user, missing value(s): username,firstname,lastname');
+        $this->auth->get_login_url($user);
+    }
+
+    /**
+     * Test that when we attempt to create a new user duplicate usernames are caught.
+     */
+    public function test_create_refuse_duplicate_username() {
+        set_config('createuser', true, 'auth_userkey');
+        $this->auth = new auth_plugin_userkey();
+
+        $userkeymanager = new \auth_userkey\fake_userkey_manager();
+        $this->auth->set_userkey_manager($userkeymanager);
+
+        $originaluser = new stdClass();
+        $originaluser->username = 'username';
+        $originaluser->email = 'username@test.com';
+        $originaluser->firstname = 'user';
+        $originaluser->lastname = 'name';
+        $originaluser->city = 'brighton';
+        $originaluser->ip = '192.168.1.1';
+
+        self::getDataGenerator()->create_user($originaluser);
+
+        $duplicateuser = clone($originaluser);
+        $duplicateuser->email = 'duplicateuser@test.com';
+
+        $this->setExpectedException('invalid_parameter_exception', 'Username already exists: username');
+        $this->auth->get_login_url($duplicateuser);
+    }
+
+    /**
+     * Test that when we attempt to create a new user duplicate emails are caught.
+     */
+    public function test_create_refuse_duplicate_email() {
+        set_config('createuser', true, 'auth_userkey');
+        set_config('mappingfield', 'username', 'auth_userkey');
+        $this->auth = new auth_plugin_userkey();
+
+        $userkeymanager = new \auth_userkey\fake_userkey_manager();
+        $this->auth->set_userkey_manager($userkeymanager);
+
+        $originaluser = new stdClass();
+        $originaluser->username = 'username';
+        $originaluser->email = 'username@test.com';
+        $originaluser->firstname = 'user';
+        $originaluser->lastname = 'name';
+        $originaluser->city = 'brighton';
+        $originaluser->ip = '192.168.1.1';
+
+        self::getDataGenerator()->create_user($originaluser);
+
+        $duplicateuser = clone($originaluser);
+        $duplicateuser->username = 'duplicateuser';
+
+        $this->setExpectedException('invalid_parameter_exception', 'Email address already exists: username@test.com');
+        $this->auth->get_login_url($duplicateuser);
+    }
+
+    /**
+     * Test that we can request a key for an existing user and update their details.
+     */
+    public function test_return_correct_login_url_and_update_user() {
+        global $CFG, $DB;
+
+        set_config('updateuser', true, 'auth_userkey');
+        $this->auth = new auth_plugin_userkey();
+
+        $userkeymanager = new \auth_userkey\fake_userkey_manager();
+        $this->auth->set_userkey_manager($userkeymanager);
+
+        $originaluser = new stdClass();
+        $originaluser->username = 'username';
+        $originaluser->email = 'username@test.com';
+        $originaluser->firstname = 'user';
+        $originaluser->lastname = 'name';
+        $originaluser->city = 'brighton';
+        $originaluser->ip = '192.168.1.1';
+
+        self::getDataGenerator()->create_user($originaluser);
+
+        $user = new stdClass();
+        $user->username = 'usernamechanged';
+        $user->email = 'username@test.com';
+        $user->firstname = 'userchanged';
+        $user->lastname = 'namechanged';
+        $user->ip = '192.168.1.1';
+
+        $expected = $CFG->wwwroot . '/auth/userkey/login.php?key=FaKeKeyFoRtEsTiNg';
+        $actual = $this->auth->get_login_url($user);
+
+        $this->assertEquals($expected, $actual);
+
+        $userrecord = $DB->get_record('user', ['email' => $user->email]);
+        $this->assertEquals($user->username, $userrecord->username);
+        $this->assertEquals($user->firstname, $userrecord->firstname);
+        $this->assertEquals($user->lastname, $userrecord->lastname);
+        $this->assertEquals($originaluser->city, $userrecord->city);
+        $this->assertEquals('userkey', $userrecord->auth);
+    }
+
+    /**
+     * Test that when we attempt to update a user duplicate emails are caught.
+     */
+    public function test_update_refuse_duplicate_email() {
+        set_config('updateuser', true, 'auth_userkey');
+        set_config('mappingfield', 'username', 'auth_userkey');
+        $this->auth = new auth_plugin_userkey();
+
+        $userkeymanager = new \auth_userkey\fake_userkey_manager();
+        $this->auth->set_userkey_manager($userkeymanager);
+
+        self::getDataGenerator()->create_user(['email' => 'trytoduplicate@test.com']);
+        self::getDataGenerator()->create_user(['username' => 'username']);
+
+        $originaluser = new stdClass();
+        $originaluser->username = 'username';
+        $originaluser->email = 'trytoduplicate@test.com';
+        $originaluser->firstname = 'user';
+        $originaluser->lastname = 'name';
+        $originaluser->city = 'brighton';
+        $originaluser->ip = '192.168.1.1';
+
+        $this->setExpectedException('invalid_parameter_exception', 'Email address already exists: trytoduplicate@test.com');
+        $this->auth->get_login_url($originaluser);
+    }
+
+    /**
+     * Test that when we attempt to update a user duplicate usernames are caught.
+     */
+    public function test_update_refuse_duplicate_username() {
+        set_config('updateuser', true, 'auth_userkey');
+        $this->auth = new auth_plugin_userkey();
+
+        $userkeymanager = new \auth_userkey\fake_userkey_manager();
+        $this->auth->set_userkey_manager($userkeymanager);
+
+        self::getDataGenerator()->create_user(['username' => 'trytoduplicate']);
+        self::getDataGenerator()->create_user(['email' => 'username@test.com']);
+
+        $originaluser = new stdClass();
+        $originaluser->username = 'trytoduplicate';
+        $originaluser->email = 'username@test.com';
+        $originaluser->firstname = 'user';
+        $originaluser->lastname = 'name';
+        $originaluser->city = 'brighton';
+        $originaluser->ip = '192.168.1.1';
+
+        $this->setExpectedException('invalid_parameter_exception', 'Username already exists: trytoduplicate');
+        $this->auth->get_login_url($originaluser);
+    }
+
+    /**
      * Test that we can get login url if we do not use fake keymanager.
      */
     public function test_return_correct_login_url_if_user_is_object_using_default_keymanager() {
@@ -394,6 +594,33 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
         $actual = $this->auth->get_request_login_url_user_parameters();
         $this->assertEquals($expected, $actual);
 
+        // Check IP if createuser enabled.
+        set_config('createuser', true, 'auth_userkey');
+        $this->auth = new auth_plugin_userkey();
+        $expected = array(
+            'ip' => new external_value(PARAM_HOST, 'User IP address'),
+            'firstname' => new external_value(PARAM_NOTAGS, 'The first name(s) of the user', VALUE_OPTIONAL),
+            'lastname'  => new external_value(PARAM_NOTAGS, 'The family name of the user', VALUE_OPTIONAL),
+            'email'     => new external_value(PARAM_RAW_TRIMMED, 'A valid and unique email address', VALUE_OPTIONAL),
+            'username'  => new external_value(PARAM_USERNAME, 'A valid and unique username', VALUE_OPTIONAL),
+        );
+        $actual = $this->auth->get_request_login_url_user_parameters();
+        $this->assertEquals($expected, $actual);
+        set_config('createuser', false, 'auth_userkey');
+
+        // Check IP if updateuser enabled.
+        set_config('updateuser', true, 'auth_userkey');
+        $this->auth = new auth_plugin_userkey();
+        $expected = array(
+            'ip' => new external_value(PARAM_HOST, 'User IP address'),
+            'firstname' => new external_value(PARAM_NOTAGS, 'The first name(s) of the user', VALUE_OPTIONAL),
+            'lastname'  => new external_value(PARAM_NOTAGS, 'The family name of the user', VALUE_OPTIONAL),
+            'email'     => new external_value(PARAM_RAW_TRIMMED, 'A valid and unique email address', VALUE_OPTIONAL),
+            'username'  => new external_value(PARAM_USERNAME, 'A valid and unique username', VALUE_OPTIONAL),
+        );
+        $actual = $this->auth->get_request_login_url_user_parameters();
+        $this->assertEquals($expected, $actual);
+        set_config('updateuser', false, 'auth_userkey');
     }
 
     /**
@@ -531,6 +758,8 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
         $formconfig->iprestriction = 0;
         $formconfig->redirecturl = 'http://google.com/';
         $formconfig->ssourl = 'http://google.com/';
+        $formconfig->createuser = false;
+        $formconfig->updateuser = false;
 
         $this->auth->process_config($formconfig);
 

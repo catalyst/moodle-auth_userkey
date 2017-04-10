@@ -94,9 +94,70 @@ You can set URL to redirect users before they see Moodle login page. For example
 to your web application to login page. You can use "enrolkey_skipsso" URL parameter to bypass this option.
 E.g. http://yourmoodle.com/login/index.php?enrolkey_skipsso=1
 
+**Example client**
+
+The code below defines a function that can be used to obtain a login url. 
+You will need to add/remove parameters depending on whether you have iprestriction or update/create user enabled and which mapping field you are using.
+
+The required library curl.php can be obtained from https://github.com/dongsheng/cURL
+```   
+/**
+ * @param   string $useremail Email address of user to create token for.
+ * @param   string $firstname First name of user (used to update/create user).
+ * @param   string $lastname Last name of user (used to update/create user).
+ * @param   string $username Username of user (used to update/create user).
+ * @param   string $ipaddress IP address of end user that login request will come from (probably $_SERVER['REMOTE_ADDR']).
+ * @param int      $courseid Course id to send logged in users to, defaults to site home.
+ * @param int      $modname Name of course module to send users to, defaults to none.
+ * @param int      $activityid cmid to send logged in users to, defaults to site home.
+ * @return bool|string
+ */
+function getloginurl($useremail, $firstname, $lastname, $username, $ipaddress, $courseid = null, $modname = null, $activityid = null) {
+    require_once('./curl.php');
+        
+    $token        = 'YOUR_TOKEN';
+    $domainname   = 'http://MOODLE_WWW_ROOT';
+    $functionname = 'auth_userkey_request_login_url';
+
+    $param = [
+        'user' => [
+            'firstname' => $firstname,
+            'lastname'  => $lastname,
+            'username'  => $username,
+            'email'     => $useremail,
+            'ip'        => $ipaddress
+        ]
+    ];
+
+    $serverurl = $domainname . '/webservice/rest/server.php' . '?wstoken=' . $token . '&wsfunction=' . $functionname . '&moodlewsrestformat=json';
+    $curl = new curl;
+
+    try {
+        $resp     = $curl->post($serverurl, $param);
+        $resp     = json_decode($resp);
+        $loginurl = $resp->loginurl;
+    } catch (Exception $ex) {
+        return false;
+    }
+
+    if (!isset($loginurl)) {
+        return false;
+    }
+
+    $path = '';
+    if (isset($courseid)) {
+        $path = '&wantsurl=' . urlencode("$domainname/course/view.php?id=$courseid");
+    }
+    if (isset($modname) && isset($activityid)) {
+        $path = '&wantsurl=' . urlencode("$domainname/mod/$modname/view.php?id=$activityid");
+    }
+
+    return $loginurl . $path;
+}
+
+echo getloginurl('barrywhite@googlemail.com', 'barry', 'white', 'barrywhite', '127.0.0.1', 2, 'certificate', 8);
+```
 
 TODO:
 -----
-1. Add users provisioning.
-2. Implement logout webservice to be able to call it from external application.
-3. Add a test client code to README.
+1. Implement logout webservice to be able to call it from external application.
