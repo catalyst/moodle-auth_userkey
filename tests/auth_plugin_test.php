@@ -901,7 +901,7 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
      * @expectedExceptionMessage Unsupported redirect to http://www.example.com/moodle detected, execution terminated.
      */
     public function test_that_user_logged_in_and_redirected() {
-        global $DB;
+        global $DB, $CFG;
 
         $key = new stdClass();
         $key->value = 'UserLogin';
@@ -913,6 +913,7 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
         $key->timecreated   = time();
         $DB->insert_record('user_private_key', $key);
 
+        $CFG->wwwroot = 'http://www.example.com/moodle';
         $_POST['key'] = 'UserLogin';
         @$this->auth->user_login_userkey();
     }
