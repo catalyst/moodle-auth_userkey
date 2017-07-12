@@ -100,7 +100,7 @@ The code below defines a function that can be used to obtain a login url.
 You will need to add/remove parameters depending on whether you have iprestriction or update/create user enabled and which mapping field you are using.
 
 The required library curl.php can be obtained from https://github.com/dongsheng/cURL
-```   
+```php
 /**
  * @param   string $useremail Email address of user to create token for.
  * @param   string $firstname First name of user (used to update/create user).
