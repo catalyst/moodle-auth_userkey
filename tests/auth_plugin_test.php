@@ -756,6 +756,7 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
         $formconfig->mappingfield = 'email';
         $formconfig->keylifetime = 100;
         $formconfig->iprestriction = 0;
+        $formconfig->ipwhitelist = '';
         $formconfig->redirecturl = 'http://google.com/';
         $formconfig->ssourl = 'http://google.com/';
         $formconfig->createuser = false;
@@ -839,6 +840,84 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
 
         $_POST['key'] = 'IpmismatchKey';
         $_SERVER['HTTP_CLIENT_IP'] = '192.168.1.2';
+        $this->auth->user_login_userkey();
+    }
+
+    /**
+     * Test that IP address mismatch exception gets thrown if incorrect IP.
+     *
+     * @expectedException moodle_exception
+     * @expectedExceptionMessage Unsupported redirect to http://www.example.com/moodle detected, execution terminated.
+     */
+    public function test_ipmismatch_exception_notthrown_if_ip_is_whitelisted() {
+        global $DB;
+
+        set_config('ipwhitelist', '10.0.0.0/8;172.16.0.0/12;192.168.0.0/16', 'auth_userkey');
+
+        $key = new stdClass();
+        $key->value = 'IpmismatchKey';
+        $key->script = 'auth/userkey';
+        $key->userid = $this->user->id;
+        $key->instance = $this->user->id;
+        $key->iprestriction = '192.168.1.1';
+        $key->validuntil    = time() + 300;
+        $key->timecreated   = time();
+        $DB->insert_record('user_private_key', $key);
+
+        $_POST['key'] = 'IpmismatchKey';
+        $_SERVER['HTTP_CLIENT_IP'] = '192.168.1.2';
+        @$this->auth->user_login_userkey();
+    }
+
+    /**
+     * Test that IP address mismatch exception gets thrown if incorrect IP.
+     *
+     * @expectedException moodle_exception
+     * @expectedExceptionMessage Unsupported redirect to http://www.example.com/moodle detected, execution terminated.
+     */
+    public function test_ipmismatch_exception_notthrown_if_ip_is_whitelisted_temp() {
+        global $DB;
+
+        set_config('ipwhitelist', '192.168.1.2', 'auth_userkey');
+
+        $key = new stdClass();
+        $key->value = 'IpmismatchKey';
+        $key->script = 'auth/userkey';
+        $key->userid = $this->user->id;
+        $key->instance = $this->user->id;
+        $key->iprestriction = '192.168.1.1';
+        $key->validuntil    = time() + 300;
+        $key->timecreated   = time();
+        $DB->insert_record('user_private_key', $key);
+
+        $_POST['key'] = 'IpmismatchKey';
+        $_SERVER['HTTP_CLIENT_IP'] = '192.168.1.2';
+        @$this->auth->user_login_userkey();
+    }
+
+    /**
+     * Test that IP address mismatch exception gets thrown if incorrect IP.
+     *
+     * @expectedException moodle_exception
+     * @expectedExceptionMessage Client IP address mismatch
+     */
+    public function test_ipmismatch_exception_thrown_if_ip_is_outside_whitelist() {
+        global $DB;
+
+        set_config('ipwhitelist', '10.0.0.0/8;172.16.0.0/12;192.168.0.0/16', 'auth_userkey');
+
+        $key = new stdClass();
+        $key->value = 'IpmismatchKey';
+        $key->script = 'auth/userkey';
+        $key->userid = $this->user->id;
+        $key->instance = $this->user->id;
+        $key->iprestriction = '192.161.1.1';
+        $key->validuntil    = time() + 300;
+        $key->timecreated   = time();
+        $DB->insert_record('user_private_key', $key);
+
+        $_POST['key'] = 'IpmismatchKey';
+        $_SERVER['HTTP_CLIENT_IP'] = '192.161.1.2';
         $this->auth->user_login_userkey();
     }
 

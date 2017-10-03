@@ -57,6 +57,7 @@ class auth_plugin_userkey extends auth_plugin_base {
         'mappingfield' => self::DEFAULT_MAPPING_FIELD,
         'keylifetime' => 60,
         'iprestriction' => 0,
+        'ipwhitelist' => '',
         'redirecturl' => '',
         'ssourl' => '',
         'createuser' => false,
@@ -347,7 +348,7 @@ class auth_plugin_userkey extends auth_plugin_base {
 
         $requiredfieds = ['username', 'email', 'firstname', 'lastname'];
         $missingfields = [];
-        foreach ($requiredfieds as $requiredfied) {
+        foreach($requiredfieds as $requiredfied) {
             if (empty($user[$requiredfied])) {
                 $missingfields[] = $requiredfied;
             }
@@ -603,14 +604,14 @@ class auth_plugin_userkey extends auth_plugin_base {
 
         $mappingfield = $this->get_mapping_field();
         if ($this->should_create_user() || $this->should_update_user()) {
-            $parameters['firstname'] = new external_value(PARAM_NOTAGS, 'The first name(s) of the user', VALUE_OPTIONAL);
-            $parameters['lastname']  = new external_value(PARAM_NOTAGS, 'The family name of the user', VALUE_OPTIONAL);
+            $parameters['firstname'] = new external_value(core_user::get_property_type('firstname'), 'The first name(s) of the user', VALUE_OPTIONAL);
+            $parameters['lastname']  = new external_value(core_user::get_property_type('lastname'), 'The family name of the user', VALUE_OPTIONAL);
 
             if ($mappingfield != 'email') {
-                $parameters['email'] = new external_value(PARAM_RAW_TRIMMED, 'A valid and unique email address', VALUE_OPTIONAL);
+                $parameters['email'] = new external_value(core_user::get_property_type('email'), 'A valid and unique email address', VALUE_OPTIONAL);
             }
             if ($mappingfield != 'username') {
-                $parameters['username'] = new external_value(PARAM_USERNAME, 'A valid and unique username', VALUE_OPTIONAL);
+                $parameters['username'] = new external_value(core_user::get_property_type('username'), 'A valid and unique username', VALUE_OPTIONAL);
             }
         }
 
