@@ -30,6 +30,7 @@ use auth_userkey\userkey_manager_interface;
 require_once($CFG->libdir . "/externallib.php");
 require_once($CFG->libdir.'/authlib.php');
 require_once($CFG->dirroot . '/user/lib.php');
+require_once($CFG->dirroot . '/lib/classes/user.php');
 
 /**
  * User key authentication plugin.
@@ -348,7 +349,7 @@ class auth_plugin_userkey extends auth_plugin_base {
 
         $requiredfieds = ['username', 'email', 'firstname', 'lastname'];
         $missingfields = [];
-        foreach($requiredfieds as $requiredfied) {
+        foreach ($requiredfieds as $requiredfied) {
             if (empty($user[$requiredfied])) {
                 $missingfields[] = $requiredfied;
             }
