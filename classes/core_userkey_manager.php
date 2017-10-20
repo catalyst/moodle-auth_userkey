@@ -124,7 +124,13 @@ class core_userkey_manager implements userkey_manager_interface {
 
         if ($key->iprestriction) {
             $remoteaddr = getremoteaddr(null);
-            $whitelist = get_config('auth_userkey', 'ipwhitelist');
+
+            if (isset($this->config->ipwhitelist)) {
+                $whitelist = $this->config->ipwhitelist;
+            } else {
+                $whitelist = false;
+            }
+
             if (empty($remoteaddr) ) {
                 print_error('noip', 'auth_userkey');
             } else if (!empty($whitelist)) {
