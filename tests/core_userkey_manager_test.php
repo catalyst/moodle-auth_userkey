@@ -150,6 +150,45 @@ class core_userkey_manager_testcase extends advanced_testcase {
     }
 
     /**
+     * Test that IP address mismatch exception gets thrown if incorrect IP and outside whitelist.
+     *
+     * @expectedException moodle_exception
+     * @expectedExceptionMessage Client IP address mismatch
+     */
+    public function test_exception_if_ip_is_outside_whitelist() {
+        global $DB;
+
+        $this->config->iprestriction = true;
+        $this->config->ipwhitelist = '10.0.0.0/8;172.16.0.0/12;192.168.0.0/16';
+
+        $manager = new core_userkey_manager($this->config);
+        $value = $manager->create_key($this->user->id, '193.168.1.1');
+
+        $_SERVER['HTTP_CLIENT_IP'] = '193.168.1.2';
+
+        $manager->validate_key($value);
+    }
+
+    /**
+     * Test that key is accepted if incorrect IP and within whitelist.
+     */
+    public function test_create_correct_key_if_ip_is_whitelisted() {
+        global $DB;
+
+        $this->config->iprestriction = true;
+
+        $this->config->ipwhitelist = '10.0.0.0/8;172.16.0.0/12;192.168.0.0/16';
+
+        $manager = new core_userkey_manager($this->config);
+        $value = $manager->create_key($this->user->id, '192.168.1.1');
+
+        $_SERVER['HTTP_CLIENT_IP'] = '192.168.1.2';
+
+        $key = $manager->validate_key($value);
+        $this->assertEquals($this->user->id, $key->userid);
+    }
+
+    /**
      * Test that key gets created correctly if config option iprestriction is set to false and we set allowedips.
      */
     public function test_create_correct_key_if_iprestriction_is_falseand_we_set_allowedips() {

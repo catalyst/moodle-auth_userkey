@@ -57,6 +57,7 @@ class auth_plugin_userkey extends auth_plugin_base {
         'mappingfield' => self::DEFAULT_MAPPING_FIELD,
         'keylifetime' => 60,
         'iprestriction' => 0,
+        'ipwhitelist' => '',
         'redirecturl' => '',
         'ssourl' => '',
         'createuser' => false,

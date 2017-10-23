@@ -124,8 +124,28 @@ class core_userkey_manager implements userkey_manager_interface {
 
         if ($key->iprestriction) {
             $remoteaddr = getremoteaddr(null);
-            if (empty($remoteaddr) or !address_in_subnet($remoteaddr, $key->iprestriction)) {
-                print_error('ipmismatch');
+
+            if (isset($this->config->ipwhitelist)) {
+                $whitelist = $this->config->ipwhitelist;
+            } else {
+                $whitelist = false;
+            }
+
+            if (empty($remoteaddr) ) {
+                print_error('noip', 'auth_userkey');
+            } else if (!empty($whitelist)) {
+                $ips = explode(';', $whitelist);
+                $whitelisted = false;
+                foreach ($ips as $ip) {
+                    if (address_in_subnet($remoteaddr, $ip)) {
+                        $whitelisted = true;
+                    }
+                }
+                if (!$whitelisted) {
+                    print_error('ipmismatch', 'error', '', null, "Remote address: $remoteaddr\nKey IP: $key->iprestriction");
+                }
+            } else if (!address_in_subnet($remoteaddr, $key->iprestriction)) {
+                print_error('ipmismatch', 'error', '', null, "Remote address: $remoteaddr\nKey IP: $key->iprestriction");
             }
         }
 
