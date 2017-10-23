@@ -32,6 +32,9 @@ matrix:
     # Test PHP 7.1
     - php: 7.1
       env: MOODLE_BRANCH=master
+  exclude:
+    - php: 5.6
+      env: MOODLE_BRANCH=master
 
 before_install:
   - cd ../..
