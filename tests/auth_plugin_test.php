@@ -311,7 +311,11 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
 
     /**
      * Test that we can request a key for a new user.
+     *
+     * @expectedException \invalid_parameter_exception
+     * @expectedExceptionMessage Unable to create user, missing value(s): username,firstname,lastname
      */
+
     public function test_missing_data_to_create_user() {
         global $CFG, $DB;
 
@@ -325,12 +329,13 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
         $user->email = 'username@test.com';
         $user->ip = '192.168.1.1';
 
-        $this->setExpectedException('invalid_parameter_exception', 'Unable to create user, missing value(s): username,firstname,lastname');
         $this->auth->get_login_url($user);
     }
 
     /**
      * Test that when we attempt to create a new user duplicate usernames are caught.
+     * @expectedException \invalid_parameter_exception
+     * @expectedExceptionMessage Username already exists: username
      */
     public function test_create_refuse_duplicate_username() {
         set_config('createuser', true, 'auth_userkey');
@@ -352,12 +357,14 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
         $duplicateuser = clone($originaluser);
         $duplicateuser->email = 'duplicateuser@test.com';
 
-        $this->setExpectedException('invalid_parameter_exception', 'Username already exists: username');
         $this->auth->get_login_url($duplicateuser);
     }
 
     /**
      * Test that when we attempt to create a new user duplicate emails are caught.
+     *
+     * @expectedException \invalid_parameter_exception
+     * @expectedExceptionMessage Email address already exists: username@test.com
      */
     public function test_create_refuse_duplicate_email() {
         set_config('createuser', true, 'auth_userkey');
@@ -380,7 +387,6 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
         $duplicateuser = clone($originaluser);
         $duplicateuser->username = 'duplicateuser';
 
-        $this->setExpectedException('invalid_parameter_exception', 'Email address already exists: username@test.com');
         $this->auth->get_login_url($duplicateuser);
     }
 
@@ -428,6 +434,9 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
 
     /**
      * Test that when we attempt to update a user duplicate emails are caught.
+     *
+     * @expectedException \invalid_parameter_exception
+     * @expectedExceptionMessage Email address already exists: trytoduplicate@test.com
      */
     public function test_update_refuse_duplicate_email() {
         set_config('updateuser', true, 'auth_userkey');
@@ -448,12 +457,14 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
         $originaluser->city = 'brighton';
         $originaluser->ip = '192.168.1.1';
 
-        $this->setExpectedException('invalid_parameter_exception', 'Email address already exists: trytoduplicate@test.com');
         $this->auth->get_login_url($originaluser);
     }
 
     /**
      * Test that when we attempt to update a user duplicate usernames are caught.
+     *
+     * @expectedException \invalid_parameter_exception
+     * @expectedExceptionMessage Username already exists: trytoduplicate
      */
     public function test_update_refuse_duplicate_username() {
         set_config('updateuser', true, 'auth_userkey');
@@ -473,7 +484,6 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
         $originaluser->city = 'brighton';
         $originaluser->ip = '192.168.1.1';
 
-        $this->setExpectedException('invalid_parameter_exception', 'Username already exists: trytoduplicate');
         $this->auth->get_login_url($originaluser);
     }
 
