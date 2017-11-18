@@ -122,38 +122,45 @@ class core_userkey_manager implements userkey_manager_interface {
             print_error('expiredkey');
         }
 
-        if ($key->iprestriction) {
-            $remoteaddr = getremoteaddr(null);
-
-            if (isset($this->config->ipwhitelist)) {
-                $whitelist = $this->config->ipwhitelist;
-            } else {
-                $whitelist = false;
-            }
-
-            if (empty($remoteaddr) ) {
-                print_error('noip', 'auth_userkey');
-            } else if (!empty($whitelist)) {
-                $ips = explode(';', $whitelist);
-                $whitelisted = false;
-                foreach ($ips as $ip) {
-                    if (address_in_subnet($remoteaddr, $ip)) {
-                        $whitelisted = true;
-                    }
-                }
-                if (!$whitelisted) {
-                    print_error('ipmismatch', 'error', '', null, "Remote address: $remoteaddr\nKey IP: $key->iprestriction");
-                }
-            } else if (!address_in_subnet($remoteaddr, $key->iprestriction)) {
-                print_error('ipmismatch', 'error', '', null, "Remote address: $remoteaddr\nKey IP: $key->iprestriction");
-            }
-        }
-
         if (!$user = $DB->get_record('user', array('id' => $key->userid))) {
             print_error('invaliduserid');
         }
 
+        $this->validate_ip_address($key);
         return $key;
     }
 
+    /**
+     * Validates key IP address and returns true if valid.
+     *
+     * @param object $key Key object including userid property.
+     *
+     * @throws \moodle_exception If provided key is not valid.
+     */
+    protected function validate_ip_address($key) {
+        if (!$key->iprestriction) {
+            return true;
+        }
+
+        $remoteaddr = getremoteaddr(null);
+
+        if (empty($remoteaddr)) {
+            print_error('noip', 'auth_userkey');
+        }
+
+        if (address_in_subnet($remoteaddr, $key->iprestriction)) {
+            return true;
+        }
+
+        if (isset($this->config->ipwhitelist)) {
+            $ips = explode(';', $this->config->ipwhitelist);
+            foreach ($ips as $ip) {
+                if (address_in_subnet($remoteaddr, $ip)) {
+                    return true;
+                }
+            }
+        }
+
+        print_error('ipmismatch', 'error', '', null, "Remote address: $remoteaddr\nKey IP: $key->iprestriction");
+    }
 }
