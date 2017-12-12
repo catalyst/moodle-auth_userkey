@@ -122,11 +122,11 @@ class core_userkey_manager implements userkey_manager_interface {
             print_error('expiredkey');
         }
 
+        $this->validate_ip_address($key);
+
         if (!$user = $DB->get_record('user', array('id' => $key->userid))) {
             print_error('invaliduserid');
         }
-
-        $this->validate_ip_address($key);
         return $key;
     }
 
