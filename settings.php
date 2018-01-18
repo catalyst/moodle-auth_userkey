@@ -66,7 +66,7 @@ if ($ADMIN->fulltree) {
     $settings->add(new admin_setting_configtext(
         'auth_userkey/ssourl',
         get_string('ssourl', 'auth_userkey'),
-        get_string('ssourll_desc', 'auth_userkey'),
+        get_string('ssourl_desc', 'auth_userkey'),
         ''));
 
     $options = array(
