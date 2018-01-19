@@ -25,62 +25,14 @@ defined('MOODLE_INTERNAL') || die;
 $yesno = array(get_string('no'), get_string('yes'));
 $fields = get_auth_plugin('userkey')->get_allowed_mapping_fields();
 if ($ADMIN->fulltree) {
-
-    //MAPPING FIELD
-    $settings->add(new admin_setting_configselect(
-        'auth_userkey/mappingfield',
-        get_string('mappingfield', 'auth_userkey'),
-        get_string('mappingfield_desc', 'auth_userkey'),
-        0, $fields));
-
-    //KEY LIFETIME
-    $settings->add(new admin_setting_configtext(
-        'auth_userkey/keylifetime',
-        get_string('keylifetime', 'auth_userkey'),
-        get_string('keylifetime_desc', 'auth_userkey'),
-        ''));
-
-
-    //IP RESTRICTIONS
-    $settings->add(new admin_setting_configtext(
-        'auth_userkey/iprestriction',
-        get_string('iprestriction', 'auth_userkey'),
-        get_string('iprestriction_desc', 'auth_userkey'),
-        ''));
-
-    //KIP WHITELIST
-    $settings->add(new admin_setting_configtext(
-        'auth_userkey/ipwhitelist',
-        get_string('ipwhitelist', 'auth_userkey'),
-        get_string('ipwhitelist_desc', 'auth_userkey'),
-        ''));
-
-    //URL REDIRECT
-    $settings->add(new admin_setting_configtext(
-        'auth_userkey/redirecturl',
-        get_string('redirecturl', 'auth_userkey'),
-        get_string('redirecturl_desc', 'auth_userkey'),
-        ''));
-
-    //URL SSO
-    $settings->add(new admin_setting_configtext(
-        'auth_userkey/ssourl',
-        get_string('ssourl', 'auth_userkey'),
-        get_string('ssourl_desc', 'auth_userkey'),
-        ''));
-
-    $options = array(
-        'NO',
-        'YES'
-    );
-
-    //CREATE USER?
-    $settings->add(new admin_setting_configselect('auth_userkey/createuser',
-        new lang_string('createuser', 'auth_userkey'),
-        new lang_string('createuser_desc', 'auth_userkey'), 0, $options));
-
-    //UPDATE USER?
-    $settings->add(new admin_setting_configselect('auth_userkey/updateuser',
-        new lang_string('updateuser', 'auth_userkey'),
-        new lang_string('updateuser_desc', 'auth_userkey'), 0, $options));
+    $settings->add(new admin_setting_configselect('auth_userkey/mappingfield',get_string('mappingfield','auth_userkey'),get_string('mappingfield_desc', 'auth_userkey'),0, $fields));
+    $settings->add(new admin_setting_configtext('auth_userkey/keylifetime',get_string('keylifetime', 'auth_userkey'),get_string('keylifetime_desc', 'auth_userkey'),''));
+    $settings->add(new admin_setting_configtext('auth_userkey/iprestriction',get_string('iprestriction', 'auth_userkey'),get_string('iprestriction_desc', 'auth_userkey'),''));
+    $settings->add(new admin_setting_configtext('auth_userkey/ipwhitelist',get_string('ipwhitelist', 'auth_userkey'),get_string('ipwhitelist_desc', 'auth_userkey'),''));
+    $settings->add(new admin_setting_configtext('auth_userkey/redirecturl',get_string('redirecturl', 'auth_userkey'),get_string('redirecturl_desc', 'auth_userkey'),''));
+    $settings->add(new admin_setting_configtext('auth_userkey/ssourl',get_string('ssourl', 'auth_userkey'),get_string('ssourl_desc', 'auth_userkey'),''));
+    $options = array('NO','YES');
+    $settings->add(new admin_setting_configselect('auth_userkey/createuser',new lang_string('createuser', 'auth_userkey'),new lang_string('createuser_desc', 'auth_userkey'), 0, $options));
+    $settings->add(new admin_setting_configselect('auth_userkey/updateuser',new lang_string('updateuser', 'auth_userkey'),new lang_string('updateuser_desc', 'auth_userkey'), 0, $options));
 }
+?>
