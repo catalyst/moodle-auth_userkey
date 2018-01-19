@@ -23,16 +23,15 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 defined('MOODLE_INTERNAL') || die;
-$yesno = array(get_string('no'),  get_string('yes'));
+$yesno = array(get_string('no'), get_string('yes'));
 $fields = get_auth_plugin('userkey')->get_allowed_mapping_fields();
 if ($ADMIN->fulltree) {
     $settings->add(new admin_setting_configselect('auth_userkey/mappingfield',
         get_string('mappingfield', 'auth_userkey'),
         get_string('mappingfield_desc', 'auth_userkey'), 0, $fields));
     $settings->add(new admin_setting_configtext('auth_userkey/keylifetime',
-        get_string('keylifetime',  'auth_userkey'),
-        get_string('keylifetime_desc',
-            'auth_userkey'), ''));
+        get_string('keylifetime', 'auth_userkey'),
+        get_string('keylifetime_desc','auth_userkey'), ''));
     $settings->add(new admin_setting_configtext('auth_userkey/iprestriction',
         get_string('iprestriction', 'auth_userkey'),
         get_string('iprestriction_desc', 'auth_userkey'), ''));
