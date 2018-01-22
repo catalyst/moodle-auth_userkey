@@ -142,6 +142,16 @@ class auth_plugin_userkey extends auth_plugin_base {
         $keyvalue = required_param('key', PARAM_ALPHANUM);
         $wantsurl = optional_param('wantsurl', '', PARAM_URL);
 
+        if (!empty($wantsurl)) {
+            $redirecturl = $wantsurl;
+        } else {
+            $redirecturl = $CFG->wwwroot;
+        }
+
+        if (isloggedin()) {
+            $this->redirect($redirecturl);
+        }
+
         $key = $this->userkeymanager->validate_key($keyvalue);
         $this->userkeymanager->delete_keys($key->userid);
 
@@ -150,12 +160,6 @@ class auth_plugin_userkey extends auth_plugin_base {
 
         // Identify this session as using user key auth method.
         $SESSION->userkey = true;
-
-        if (!empty($wantsurl)) {
-            $redirecturl = $wantsurl;
-        } else {
-            $redirecturl = $CFG->wwwroot;
-        }
 
         $this->redirect($redirecturl);
     }
