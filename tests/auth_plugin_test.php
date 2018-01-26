@@ -758,8 +758,8 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
     public function test_process_config_form() {
         $config = get_config('auth_userkey');
 
-        $this->assertObjectNotHasAttribute('mappingfield', $config);
-        $this->assertObjectNotHasAttribute('iprestriction', $config);
+        $this->assertObjectHasAttribute('mappingfield', $config);
+        $this->assertObjectHasAttribute('iprestriction', $config);
         $this->assertObjectHasAttribute('keylifetime', $config);
         $this->assertEquals('60', $config->keylifetime);
 
