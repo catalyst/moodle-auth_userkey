@@ -1,40 +1,45 @@
 language: php
 
+notifications:
+  email:
+    recipients:
+    - dmitriim@catalyst-au.net
+
 cache:
   directories:
     - $HOME/.composer/cache
 
 php:
   - 5.6
-  - 7.0
 
 addons:
   postgresql: "9.3"
 
 env:
-  global:
-    - DB=pgsql # There is not enough database usage to justify full check with mysqli too.
-  matrix:
-    - MOODLE_BRANCH=MOODLE_30_STABLE
-    - MOODLE_BRANCH=MOODLE_31_STABLE
-    - MOODLE_BRANCH=MOODLE_32_STABLE
-    - MOODLE_BRANCH=MOODLE_33_STABLE
-    - MOODLE_BRANCH=master
+ matrix:
+  - DB=pgsql MOODLE_BRANCH=MOODLE_29_STABLE
+  - DB=pgsql MOODLE_BRANCH=MOODLE_30_STABLE
+  - DB=pgsql MOODLE_BRANCH=MOODLE_31_STABLE
+  - DB=pgsql MOODLE_BRANCH=MOODLE_32_STABLE
+  - DB=mysqli MOODLE_BRANCH=MOODLE_29_STABLE
+  - DB=mysqli MOODLE_BRANCH=MOODLE_30_STABLE
+  - DB=mysqli MOODLE_BRANCH=MOODLE_31_STABLE
+  - DB=mysqli MOODLE_BRANCH=MOODLE_32_STABLE
 
 matrix:
   include:
-    # Test old Moodle in PHP 5.6 only
-    - php: 5.6
-      env: MOODLE_BRANCH=MOODLE_29_STABLE
-    # Test MySQL
     - php: 7.0
-      env: DB=mysqli MOODLE_BRANCH=master
-    # Test PHP 7.1
-    - php: 7.1
-      env: MOODLE_BRANCH=master
-  exclude:
-    - php: 5.6
-      env: MOODLE_BRANCH=master
+      env: DB=pgsql MOODLE_BRANCH=MOODLE_30_STABLE
+    - php: 7.0
+      env: DB=pgsql MOODLE_BRANCH=MOODLE_31_STABLE
+    - php: 7.0
+      env: DB=pgsql MOODLE_BRANCH=MOODLE_32_STABLE
+    - php: 7.0
+      env: DB=mysqli MOODLE_BRANCH=MOODLE_30_STABLE
+    - php: 7.0
+      env: DB=mysqli MOODLE_BRANCH=MOODLE_31_STABLE
+    - php: 7.0
+      env: DB=mysqli MOODLE_BRANCH=MOODLE_32_STABLE
 
 before_install:
   - cd ../..
