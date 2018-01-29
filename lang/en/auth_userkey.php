@@ -22,6 +22,8 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+defined('MOODLE_INTERNAL') || die;
+
 $string['pluginname'] = 'User key authentication';
 $string['auth_userkeydescription'] = 'Log in to Moodle using one time user key.';
 $string['mappingfield'] = 'Mapping field';

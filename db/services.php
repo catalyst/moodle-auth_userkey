@@ -22,6 +22,8 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+defined('MOODLE_INTERNAL') || die;
+
 $functions = array(
     'auth_userkey_request_login_url' => array(
         'classname'   => 'auth_userkey_external',
