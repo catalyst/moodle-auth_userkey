@@ -35,7 +35,7 @@ if ($ADMIN->fulltree) {
     $settings->add(new admin_setting_configtext('auth_userkey/keylifetime', get_string('keylifetime', 'auth_userkey'),
             get_string('keylifetime_desc', 'auth_userkey', 'auth'),
             '60', PARAM_INT));
-    
+
     $settings->add(new admin_setting_configselect('auth_userkey/iprestriction',
             new lang_string('iprestriction', 'auth_userkey'),
             new lang_string('iprestriction_desc', 'auth_userkey'), 0, $yesno));
