@@ -29,12 +29,9 @@ $string['auth_userkeydescription'] = 'Log in to Moodle using one time user key.'
 $string['mappingfield'] = 'Mapping field';
 $string['mappingfield_desc'] = 'This user field will be used to find relevant user in the LMS.';
 $string['iprestriction'] = 'IP restriction';
-$string['iprestriction_desc'] = 'If enabled, a web call has to contain "ip" parameter when requesting login URL.
-A user has to have provided IP to be able to use a key to login to LMS.';
+$string['iprestriction_desc'] = 'If enabled, a web call has to contain "ip" parameter when requesting login URL. A user has to have provided IP to be able to use a key to login to LMS.';
 $string['ipwhitelist'] = 'Whitelist IP ranges';
-$string['ipwhitelist_desc'] = "Ignore IP restrictions if the IP address the token was issued for or the login attempt comes from falls within any of these ranges.
-\nThis can happen when some users reach Moodle or the system issuing login tokens via a private network or DMZ.
-\nIf the route to either the system issuing tokens or this Moodle is via a private address range then set this value to 10.0.0.0/8;172.16.0.0/12;192.168.0.0/16";
+$string['ipwhitelist_desc'] = 'Ignore IP restrictions if the IP address the token was issued for or the login attempt comes from falls within any of these ranges. This can happen when some users reach Moodle or the system issuing login tokens via a private network or DMZ. If the route to either the system issuing tokens or this Moodle is via a private address range then set this value to 10.0.0.0/8;172.16.0.0/12;192.168.0.0/16';
 $string['keylifetime'] = 'User key life time';
 $string['keylifetime_desc'] = 'Life time in seconds of the each user login key.';
 $string['incorrectkeylifetime'] = 'User key life time should be a number';

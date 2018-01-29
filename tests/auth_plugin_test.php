@@ -759,8 +759,9 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
         $config = get_config('auth_userkey');
 
         $this->assertObjectNotHasAttribute('mappingfield', $config);
-        $this->assertObjectNotHasAttribute('keylifetime', $config);
-        $this->assertObjectNotHasAttribute('iprestriction', $config);
+        $this->assertObjectHasAttribute('iprestriction', $config);
+        $this->assertObjectHasAttribute('keylifetime', $config);
+        $this->assertEquals('60', $config->keylifetime);
 
         $formconfig = new stdClass();
         $formconfig->mappingfield = 'email';
