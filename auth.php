@@ -62,6 +62,7 @@ class auth_plugin_userkey extends auth_plugin_base {
         'ssourl' => '',
         'createuser' => false,
         'updateuser' => false,
+        'authtyperestriction' => true,
     );
 
     /**
@@ -135,6 +136,7 @@ class auth_plugin_userkey extends auth_plugin_base {
      * Logs a user in using userkey and redirects after.
      *
      * @throws \moodle_exception If something went wrong.
+     * @throws \invalid_parameter_exception If Auth type not allowed.
      */
     public function user_login_userkey() {
         global $SESSION, $CFG;
@@ -156,6 +158,10 @@ class auth_plugin_userkey extends auth_plugin_base {
         $this->userkeymanager->delete_keys($key->userid);
 
         $user = get_complete_user_data('id', $key->userid);
+        // TODO: only allow a "valid user".
+        if ( $this->is_authtype_restriction_enabled() && $user->auth <> $this->authtype ) {
+            throw new invalid_parameter_exception('Auth type not allowed');
+        }
         complete_user_login($user);
 
         // Identify this session as using user key auth method.
@@ -252,6 +258,19 @@ class auth_plugin_userkey extends auth_plugin_base {
         }
 
         return false;
+    }
+
+    /**
+     * Check if restriction by authtype is enabled. Restrict if not set.
+     *
+     * @return bool
+     */
+    protected function is_authtype_restriction_enabled() {
+        if (isset($this->config->authtyperestriction) && $this->config->authtyperestriction == false) {
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -429,7 +448,12 @@ class auth_plugin_userkey extends auth_plugin_base {
      * @throws \invalid_parameter_exception
      */
     protected function generate_user_key(array $data) {
+        // TODO: only generate for "valid users".
+
         $user = $this->get_user($data);
+        if ( $this->is_authtype_restriction_enabled() && $user->auth <> $this->authtype ) {
+            throw new invalid_parameter_exception('Auth type not allowed');
+        }
         $ips = $this->get_allowed_ips($data);
 
         return $this->userkeymanager->create_key($user->id, $ips);
