@@ -59,4 +59,8 @@ if ($ADMIN->fulltree) {
     $settings->add(new admin_setting_configselect('auth_userkey/updateuser',
             new lang_string('updateuser', 'auth_userkey'),
             new lang_string('updateuser_desc', 'auth_userkey'), 0, $yesno));
+
+    $settings->add(new admin_setting_configselect('auth_userkey/authtyperestriction',
+        new lang_string('authtyperestriction', 'auth_userkey'),
+        new lang_string('authtyperestriction_desc', 'auth_userkey'), 1, $yesno));
 }
