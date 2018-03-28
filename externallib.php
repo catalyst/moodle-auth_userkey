@@ -80,7 +80,7 @@ class auth_userkey_external extends external_api {
     public static function request_login_url_returns() {
         return new external_single_structure(
             array(
-                'loginurl' => new external_value(PARAM_URL, 'Login URL for a user to log in'),
+                'loginurl' => new external_value(PARAM_RAW, 'Login URL for a user to log in'),
             )
         );
     }
