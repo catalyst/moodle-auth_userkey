@@ -24,8 +24,8 @@
 
 defined('MOODLE_INTERNAL') || die;
 
-$plugin->version   = 2018012900;        // The current plugin version (Date: YYYYMMDDXX)
-$plugin->release   = 2018012900;        // Match release exactly to version.
+$plugin->version   = 2018012901;        // The current plugin version (Date: YYYYMMDDXX)
+$plugin->release   = 2018012901;        // Match release exactly to version.
 $plugin->requires  = 2017051500;        // Requires Moodle 3.3 version.
 $plugin->component = 'auth_userkey';    // Full name of the plugin (used for diagnostics).
 $plugin->maturity  = MATURITY_STABLE;
