@@ -96,10 +96,12 @@ E.g. http://yourmoodle.com/login/index.php?enrolkey_skipsso=1
 
 **Example client**
 
-The code below defines a function that can be used to obtain a login url. 
-You will need to add/remove parameters depending on whether you have iprestriction or update/create user enabled and which mapping field you are using.
+**Note:** the code below is not for production use. It's just a quick and dirty way to test the functionality.
 
-The required library curl.php can be obtained from https://github.com/dongsheng/cURL
+The code below defines a function that can be used to obtain a login url. 
+You will need to add/remove parameters depending on whether you have update/create user enabled and which mapping field you are using.
+
+The required library curl can be obtained from https://github.com/moodlehq/sample-ws-clients
 ```php
 /**
  * @param   string $useremail Email address of user to create token for.
@@ -112,8 +114,8 @@ The required library curl.php can be obtained from https://github.com/dongsheng/
  * @param int      $activityid cmid to send logged in users to, defaults to site home.
  * @return bool|string
  */
-function getloginurl($useremail, $firstname, $lastname, $username, $ipaddress, $courseid = null, $modname = null, $activityid = null) {
-    require_once('./curl.php');
+function getloginurl($useremail, $firstname, $lastname, $username, $courseid = null, $modname = null, $activityid = null) {
+    require_once('curl.php');
         
     $token        = 'YOUR_TOKEN';
     $domainname   = 'http://MOODLE_WWW_ROOT';
@@ -121,21 +123,22 @@ function getloginurl($useremail, $firstname, $lastname, $username, $ipaddress, $
 
     $param = [
         'user' => [
-            'firstname' => $firstname,
-            'lastname'  => $lastname,
-            'username'  => $username,
+            'firstname' => $firstname, // You will not need this parameter, if you are not creating/updating users
+            'lastname'  => $lastname, // You will not need this parameter, if you are not creating/updating users
+            'username'  => $username, 
             'email'     => $useremail,
-            'ip'        => $ipaddress
         ]
     ];
 
     $serverurl = $domainname . '/webservice/rest/server.php' . '?wstoken=' . $token . '&wsfunction=' . $functionname . '&moodlewsrestformat=json';
-    $curl = new curl;
+    $curl = new curl; // The required library curl can be obtained from https://github.com/moodlehq/sample-ws-clients 
 
     try {
         $resp     = $curl->post($serverurl, $param);
         $resp     = json_decode($resp);
-        $loginurl = $resp->loginurl;
+        if ($resp && !empty($resp->loginurl)) {
+            $loginurl = $resp->loginurl;        
+        }
     } catch (Exception $ex) {
         return false;
     }
@@ -155,7 +158,7 @@ function getloginurl($useremail, $firstname, $lastname, $username, $ipaddress, $
     return $loginurl . $path;
 }
 
-echo getloginurl('barrywhite@googlemail.com', 'barry', 'white', 'barrywhite', '127.0.0.1', 2, 'certificate', 8);
+echo getloginurl('barrywhite@googlemail.com', 'barry', 'white', 'barrywhite', 2, 'certificate', 8);
 ```
 
 TODO:
