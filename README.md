@@ -13,7 +13,7 @@ URL to be log in to Moodle without typing username and password.
 
 Using
 -----
-1. Install the plugin as usual.
+1. Install the plugin using admin interface (Admin > Plugins > Install plugins) or command line.
 2. Enable and configure just installed plugin. Set required Mapping field, User key life time, IP restriction and Logout redirect URL.
 3. Enable web service advance feature (Admin > Advanced features), more info http://docs.moodle.org/en/Web_services
 4. Enable one of the supported protocols (Admin > Plugins > Web services > Manage protocols)
