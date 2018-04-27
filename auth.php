@@ -348,6 +348,7 @@ class auth_plugin_userkey extends auth_plugin_base {
         $user = $data;
         unset($user['ip']);
         $user['auth'] = 'userkey';
+        $user['confirmed'] = 1;
         $user['mnethostid'] = $CFG->mnet_localhost_id;
 
         $requiredfieds = ['username', 'email', 'firstname', 'lastname'];
