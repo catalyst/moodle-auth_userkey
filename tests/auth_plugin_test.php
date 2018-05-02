@@ -295,7 +295,6 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
         $user->email = 'username@test.com';
         $user->firstname = 'user';
         $user->lastname = 'name';
-        $user->confirmed = 1;
         $user->ip = '192.168.1.1';
 
         $expected = $CFG->wwwroot . '/auth/userkey/login.php?key=FaKeKeyFoRtEsTiNg';
@@ -307,7 +306,7 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
         $this->assertEquals($user->email, $userrecord->email);
         $this->assertEquals($user->firstname, $userrecord->firstname);
         $this->assertEquals($user->lastname, $userrecord->lastname);
-        $this->assertEquals($user->confirmed, $userrecord->confirmed);
+        $this->assertEquals(1, $userrecord->confirmed);
         $this->assertEquals('userkey', $userrecord->auth);
     }
 
