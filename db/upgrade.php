@@ -30,7 +30,7 @@ function xmldb_auth_userkey_upgrade($oldversion) {
     if ($oldversion < 2018050200) {
         // Confirm all previously created users.
         $DB->execute("UPDATE {user} SET confirmed=? WHERE auth=?", array(1, 'userkey'));
-        upgrade_plugin_savepoint(true, 2018050200, 'auth', 'saml2');
+        upgrade_plugin_savepoint(true, 2018050200, 'auth', 'userkey');
     }
 
     return true;
