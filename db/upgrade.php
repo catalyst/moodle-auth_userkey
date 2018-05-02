@@ -15,17 +15,23 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Version details.
+ * Upgrade script.
  *
  * @package    auth_userkey
- * @copyright  2016 Dmitrii Metelkin (dmitriim@catalyst-au.net)
+ * @copyright  2018 Dmitrii Metelkin (dmitriim@catalyst-au.net)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die;
 
-$plugin->version   = 2017051503;        // The current plugin version (Date: YYYYMMDDXX)
-$plugin->release   = 2017051503;        // Match release exactly to version.
-$plugin->requires  = 2015051100;        // Requires this Moodle version.
-$plugin->component = 'auth_userkey';    // Full name of the plugin (used for diagnostics).
-$plugin->maturity  = MATURITY_STABLE;
+function xmldb_auth_userkey_upgrade($oldversion) {
+    global $DB;
+
+    if ($oldversion < 2017051503) {
+        // Confirm all previously created users.
+        $DB->execute('UPDATE {user} SET confirmed=1 WHERE auth="userkey"');
+        upgrade_plugin_savepoint(true, 2017051503, 'auth', 'userkey');
+    }
+
+    return true;
+}
