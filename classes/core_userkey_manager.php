@@ -144,25 +144,41 @@ class core_userkey_manager implements userkey_manager_interface {
             return true;
         }
 
-        $remoteaddr = getremoteaddr(null);
+        $remoteaddresses = [];
 
-        if (empty($remoteaddr)) {
+        if (isset($_SERVER['HTTP_CLIENT_IP'])) {
+            $remoteaddresses['HTTP_CLIENT_IP'] = $_SERVER['HTTP_CLIENT_IP'];
+        }
+        if (isset($_SERVER['REMOTE_ADDR'])) {
+            $remoteaddresses['REMOTE_ADDR'] = $_SERVER['REMOTE_ADDR'];
+        }
+        if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+            $remoteaddresses['HTTP_X_FORWARDED_FOR'] = $_SERVER['HTTP_X_FORWARDED_FOR'];
+        }
+
+        if (empty($remoteaddresses)) {
             print_error('noip', 'auth_userkey');
         }
 
-        if (address_in_subnet($remoteaddr, $key->iprestriction)) {
-            return true;
+        foreach ($remoteaddresses as $remoteaddr) {
+            if (address_in_subnet($remoteaddr, $key->iprestriction)) {
+                return true;
+            }
         }
 
         if (isset($this->config->ipwhitelist)) {
             $ips = explode(';', $this->config->ipwhitelist);
             foreach ($ips as $ip) {
-                if (address_in_subnet($remoteaddr, $ip)) {
-                    return true;
+                foreach ($remoteaddresses as $remoteaddr) {
+                    if (address_in_subnet($remoteaddr, $ip)) {
+                        return true;
+                    }
                 }
             }
         }
 
-        print_error('ipmismatch', 'error', '', null, "Remote address: $remoteaddr\nKey IP: $key->iprestriction");
+        $remoteaddrdebuginfo = print_r($remoteaddresses, true);
+
+        print_error('ipmismatch', 'error', '', null, "Remote addresses: $remoteaddrdebuginfo\nKey IP: $key->iprestriction");
     }
 }
