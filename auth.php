@@ -137,7 +137,7 @@ class auth_plugin_userkey extends auth_plugin_base {
      * @throws \moodle_exception If something went wrong.
      */
     public function user_login_userkey() {
-        global $SESSION, $CFG;
+        global $SESSION, $CFG, $USER;
 
         $keyvalue = required_param('key', PARAM_ALPHANUM);
         $wantsurl = optional_param('wantsurl', '', PARAM_URL);
@@ -148,14 +148,22 @@ class auth_plugin_userkey extends auth_plugin_base {
             $redirecturl = $CFG->wwwroot;
         }
 
-        if (isloggedin()) {
-            $this->redirect($redirecturl);
-        }
-
         $key = $this->userkeymanager->validate_key($keyvalue);
-        $this->userkeymanager->delete_keys($key->userid);
+        $user_id = $key->userid;
+        
+        if (isloggedin()) {
+            if($user_id == $USER->id){
+                $this->redirect($redirecturl);
+            }else{
+                require_logout();
+            }
+        }
+                
+        die;
+        
+        $this->userkeymanager->delete_keys($user_id);
 
-        $user = get_complete_user_data('id', $key->userid);
+        $user = get_complete_user_data('id', $user_id);
         complete_user_login($user);
 
         // Identify this session as using user key auth method.
