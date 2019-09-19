@@ -14,7 +14,6 @@ cache:
 php:
   - 7.0
   - 7.1
-  - 7.3
   
 services:
   - mysql
@@ -23,13 +22,11 @@ services:
 env:
   - DB=pgsql MOODLE_BRANCH=MOODLE_33_STABLE
   - DB=pgsql MOODLE_BRANCH=MOODLE_34_STABLE
-  - DB=pgsql MOODLE_BRANCH=MOODLE_372
-  - DB=pgsql MOODLE_BRANCH=MOODLE_37_STABLE
   - DB=pgsql MOODLE_BRANCH=master
+  - DB=pgsql MOODLE_BRANCH=MOODLE_37_STABLE
   - DB=mysqli MOODLE_BRANCH=MOODLE_33_STABLE
   - DB=mysqli MOODLE_BRANCH=MOODLE_34_STABLE
   - DB=mysqli MOODLE_BRANCH=master
-  - DB=mysqli MOODLE_BRANCH=MOODLE_372
   - DB=mysqli MOODLE_BRANCH=MOODLE_37_STABLE
 
 before_install:
