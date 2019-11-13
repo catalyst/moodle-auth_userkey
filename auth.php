@@ -149,27 +149,28 @@ class auth_plugin_userkey extends auth_plugin_base {
         }
 
         $key = $this->userkeymanager->validate_key($keyvalue);
-        $user_id = $key->userid;
-        
+
         if (isloggedin()) {
-            if($user_id == $USER->id){
+            if($key->userid <> $USER->id){ 
+                require_logout(); 
+                $wantsurl = ( !empty($wantsurl) ? '&wantsurl='.$wantsurl : '' );
+                $redirecturl = $CFG->wwwroot.'/auth/userkey/login.php?key=' . $keyvalue . $wantsurl;
                 $this->redirect($redirecturl);
             }else{
-                require_logout();
+                $this->redirect($redirecturl);
             }
+        }else{
+            //$key = $this->userkeymanager->validate_key($keyvalue);
+            $this->userkeymanager->delete_keys($key->userid);
+
+            $user = get_complete_user_data('id', $key->userid);
+            complete_user_login($user);
+
+            // Identify this session as using user key auth method.
+            $SESSION->userkey = true;
+
+            $this->redirect($redirecturl);
         }
-                
-        die;
-        
-        $this->userkeymanager->delete_keys($user_id);
-
-        $user = get_complete_user_data('id', $user_id);
-        complete_user_login($user);
-
-        // Identify this session as using user key auth method.
-        $SESSION->userkey = true;
-
-        $this->redirect($redirecturl);
     }
 
     /**
