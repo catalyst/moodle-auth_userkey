@@ -141,7 +141,6 @@ class auth_plugin_userkey extends auth_plugin_base {
     public function user_login_userkey() {
         global $SESSION, $CFG, $USER;
 
-
         $keyvalue = required_param('key', PARAM_ALPHANUM);
         $wantsurl = optional_param('wantsurl', '', PARAM_URL);
 
