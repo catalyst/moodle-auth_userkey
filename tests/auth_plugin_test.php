@@ -989,4 +989,36 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
         $this->assertTrue($this->auth->pre_loginpage_hook());
     }
 
+    /**
+     * Test that if one user logged, he will be logged out before a new one is authorised.
+     */
+    public function test_that_different_authorised_user_is_logged_out_and_new_one_logged_in() {
+        global $DB, $USER, $SESSION;
+
+        $user = $this->getDataGenerator()->create_user();
+        $this->setUser($user);
+        $this->assertEquals($USER->id, $user->id);
+
+        $key = new stdClass();
+        $key->value = 'UserLogin';
+        $key->script = 'auth/userkey';
+        $key->userid = $this->user->id;
+        $key->instance = $this->user->id;
+        $key->iprestriction = null;
+        $key->validuntil    = time() + 300;
+        $key->timecreated   = time();
+        $DB->insert_record('user_private_key', $key);
+
+        $_POST['key'] = 'UserLogin';
+
+        try {
+            // Using @ is the only way to test this. Thanks moodle!
+            @$this->auth->user_login_userkey();
+        } catch (moodle_exception $e) {
+            $this->assertEquals($this->user->id, $USER->id);
+            $this->assertSame(sesskey(), $USER->sesskey);
+            $this->assertObjectHasAttribute('userkey', $SESSION);
+        }
+    }
+
 }
