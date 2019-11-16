@@ -157,11 +157,8 @@ class auth_plugin_userkey extends auth_plugin_base {
             print_error($exception->errorcode);
         }
 
-        if (isloggedin()) {
-            if ($SESSION->userid != $key->userid) {
-                require_logout();
-                $this->user_login_userkey();
-            }
+        if (isloggedin() && $SESSION->userid != $key->userid) {
+            require_logout();
         }
 
         $this->userkeymanager->delete_keys($key->userid);
