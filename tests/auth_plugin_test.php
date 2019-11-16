@@ -752,7 +752,7 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
      * Test that IP address mismatch exception gets thrown if user id is incorrect.
      *
      * @expectedException moodle_exception
-     * @expectedExceptionMessage Invalid user id
+     * @expectedExceptionMessageRegExp /Invalid user id/i
      */
     public function test_invalid_user_exception_thrown_if_user_is_invalid() {
         global $DB;
