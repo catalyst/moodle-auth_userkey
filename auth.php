@@ -134,10 +134,13 @@ class auth_plugin_userkey extends auth_plugin_base {
     /**
      * Logs a user in using userkey and redirects after.
      *
+     * @TODO: refactor this method to make it easy to read.
+     *
      * @throws \moodle_exception If something went wrong.
      */
     public function user_login_userkey() {
         global $SESSION, $CFG, $USER;
+
 
         $keyvalue = required_param('key', PARAM_ALPHANUM);
         $wantsurl = optional_param('wantsurl', '', PARAM_URL);
@@ -151,6 +154,7 @@ class auth_plugin_userkey extends auth_plugin_base {
         try {
             $key = $this->userkeymanager->validate_key($keyvalue);
         } catch (moodle_exception $exception) {
+            // If user is logged in and key is not valid, we'd like to logout a user.
             if (isloggedin()) {
                 require_logout();
             }
@@ -159,8 +163,10 @@ class auth_plugin_userkey extends auth_plugin_base {
 
         if (isloggedin()) {
             if ($USER->id != $key->userid) {
+                // Logout the current user if it's different to one that associated to the valid key.
                 require_logout();
             } else {
+                // Don't process further if the user is already logged in.
                 $this->userkeymanager->delete_keys($key->userid);
                 $this->redirect($redirecturl);
             }
