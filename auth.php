@@ -137,7 +137,7 @@ class auth_plugin_userkey extends auth_plugin_base {
      * @throws \moodle_exception If something went wrong.
      */
     public function user_login_userkey() {
-        global $SESSION, $CFG;
+        global $SESSION, $CFG, $USER;
 
         $keyvalue = required_param('key', PARAM_ALPHANUM);
         $wantsurl = optional_param('wantsurl', '', PARAM_URL);
@@ -157,8 +157,13 @@ class auth_plugin_userkey extends auth_plugin_base {
             print_error($exception->errorcode);
         }
 
-        if (isloggedin() && $SESSION->userid != $key->userid) {
-            require_logout();
+        if (isloggedin()) {
+            if ($USER->id != $key->userid) {
+                require_logout();
+            } else {
+                $this->userkeymanager->delete_keys($key->userid);
+                $this->redirect($redirecturl);
+            }
         }
 
         $this->userkeymanager->delete_keys($key->userid);

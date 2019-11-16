@@ -1080,7 +1080,9 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
         } catch (moodle_exception $e) {
             $this->assertEquals($this->user->id, $USER->id);
             $this->assertSame(sesskey(), $USER->sesskey);
-            $this->assertObjectHasAttribute('userkey', $SESSION);
+            $this->assertObjectNotHasAttribute('userkey', $SESSION);
+            $keyexists = $DB->record_exists('user_private_key', array('value' => 'UserLogin'));
+            $this->assertFalse($keyexists);
         }
     }
 
