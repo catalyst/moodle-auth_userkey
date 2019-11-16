@@ -1021,4 +1021,36 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
         }
     }
 
+    /**
+     * Test that authorised user gets logged out when trying to logged in with invalid key.
+     */
+    public function test_if_invalid_key_authorised_user_gets_logged_out() {
+        global $DB, $USER, $SESSION;
+
+        $user = $this->getDataGenerator()->create_user();
+        $this->setUser($user);
+        $this->assertEquals($USER->id, $user->id);
+
+        $key = new stdClass();
+        $key->value = 'UserLogin';
+        $key->script = 'auth/userkey';
+        $key->userid = $this->user->id;
+        $key->instance = $this->user->id;
+        $key->iprestriction = null;
+        $key->validuntil    = time() + 300;
+        $key->timecreated   = time();
+        $DB->insert_record('user_private_key', $key);
+
+        $_POST['key'] = 'Incorrect Key';
+
+        try {
+            // Using @ is the only way to test this. Thanks moodle!
+            @$this->auth->user_login_userkey();
+        } catch (moodle_exception $e) {
+            $this->assertEquals('Incorrect key', $e->getMessage());
+            $this->assertEmpty($USER->id);
+            $this->assertEquals(new stdClass(), $SESSION);
+        }
+    }
+
 }

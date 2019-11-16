@@ -148,7 +148,14 @@ class auth_plugin_userkey extends auth_plugin_base {
             $redirecturl = $CFG->wwwroot;
         }
 
-        $key = $this->userkeymanager->validate_key($keyvalue);
+        try {
+            $key = $this->userkeymanager->validate_key($keyvalue);
+        } catch (moodle_exception $exception) {
+            if (isloggedin()) {
+                require_logout();
+            }
+            print_error($exception->errorcode);
+        }
 
         if (isloggedin()) {
             if ($SESSION->userid != $key->userid) {
