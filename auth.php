@@ -118,9 +118,9 @@ class auth_plugin_userkey extends auth_plugin_base {
 
         redirect($url);
     }
-
+    
     /**
-     * Regenerate session ID and redirects the user to provided URL with key parameter.
+     * Redirects the user to provided URL.
      *
      * @param $url URL to redirect to.
      *
@@ -133,6 +133,7 @@ class auth_plugin_userkey extends auth_plugin_base {
         session_regenerate_id($delete_old_session = true);
         redirect($url);
     }
+
     /**
      * Don't allow login using login form.
      *
@@ -155,12 +156,17 @@ class auth_plugin_userkey extends auth_plugin_base {
 
         $keyvalue = required_param('key', PARAM_ALPHANUM);
         $wantsurl = optional_param('wantsurl', '', PARAM_URL);
-        
-        //Check if a user is already logged in with another session on the same browser.
-       if (isloggedin()) {
+
+        if (!empty($wantsurl)) {
+            $redirecturl = $wantsurl;
+        } else {
+            $redirecturl = $CFG->wwwroot;
+        }
+
+        if (isloggedin()) {
             $this->redirectloggedin($redirecturl.'/auth/userkey/login.php?key='.$keyvalue);
         }
-        
+
         $key = $this->userkeymanager->validate_key($keyvalue);
         $this->userkeymanager->delete_keys($key->userid);
 
@@ -169,12 +175,6 @@ class auth_plugin_userkey extends auth_plugin_base {
 
         // Identify this session as using user key auth method.
         $SESSION->userkey = true;
-
-        if (!empty($wantsurl)) {
-            $redirecturl = $wantsurl;
-        } else {
-            $redirecturl = $CFG->wwwroot;
-        }
 
         $this->redirect($redirecturl);
     }
@@ -204,87 +204,6 @@ class auth_plugin_userkey extends auth_plugin_base {
      */
     public function can_change_password() {
         return false;
-    }
-
-    /**
-     * Prints a form for configuring this authentication plugin.
-     *
-     * This function is called from admin/auth.php, and outputs a full page with
-     * a form for configuring this plugin.
-     *
-     * @param object $config
-     * @param object $err
-     * @param array $userfields
-     */
-    public function config_form($config, $err, $userfields) {
-        global $CFG, $OUTPUT;
-
-        $config = (object) array_merge($this->defaults, (array) $config);
-        include("settings.html");
-    }
-
-    /**
-     * A chance to validate form data, and last chance to
-     * do stuff before it is inserted in config_plugin
-     *
-     * @param object $form with submitted configuration settings (without system magic quotes)
-     * @param array $err array of error messages
-     *
-     * @return array of any errors
-     */
-    public function validate_form($form, &$err) {
-        if ((int)$form->keylifetime == 0) {
-            $err['keylifetime'] = get_string('incorrectkeylifetime', 'auth_userkey');
-        }
-
-        if (!$this->is_valid_url($form->redirecturl)) {
-            $err['redirecturl'] = get_string('incorrectredirecturl', 'auth_userkey');
-        }
-
-        if (!$this->is_valid_url($form->ssourl)) {
-            $err['ssourl'] = get_string('incorrectssourl', 'auth_userkey');
-        }
-
-    }
-
-    /**
-     * Check if provided url is correct.
-     *
-     * @param string $url URL to check.
-     *
-     * @return bool
-     */
-    protected function is_valid_url($url) {
-        if (empty($url)) {
-            return true;
-        }
-
-        if (filter_var($url, FILTER_VALIDATE_URL) === false) {
-            return false;
-        }
-
-        if (!preg_match("/^(http|https):/", $url)) {
-            return false;
-        }
-
-        return true;
-    }
-
-    /**
-     * Process and stores configuration data for this authentication plugin.
-     *
-     * @param object $config Config object from the form.
-     *
-     * @return bool
-     */
-    public function process_config($config) {
-        foreach ($this->defaults as $key => $value) {
-            if (!isset($this->config->$key) || $config->$key != $this->config->$key) {
-                set_config($key, $config->$key, 'auth_userkey');
-            }
-        }
-
-        return true;
     }
 
     /**
@@ -363,6 +282,7 @@ class auth_plugin_userkey extends auth_plugin_base {
         $user = $data;
         unset($user['ip']);
         $user['auth'] = 'userkey';
+        $user['confirmed'] = 1;
         $user['mnethostid'] = $CFG->mnet_localhost_id;
 
         $requiredfieds = ['username', 'email', 'firstname', 'lastname'];
