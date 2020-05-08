@@ -50,14 +50,53 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
         global $CFG;
 
         require_once($CFG->libdir . "/externallib.php");
-        require_once($CFG->dirroot . '/auth/userkey/tests/fake_userkey_manager.php');
+        require_once($CFG->dirroot . '/auth/userkey/tests/phpunit/fake_userkey_manager.php');
         require_once($CFG->dirroot . '/auth/userkey/auth.php');
         require_once($CFG->dirroot . '/user/lib.php');
 
-        $this->auth = new auth_plugin_userkey();
-        $this->user = self::getDataGenerator()->create_user();
+        parent::setUp();
 
         $this->resetAfterTest();
+        $CFG->getremoteaddrconf = GETREMOTEADDR_SKIP_HTTP_X_FORWARDED_FOR;
+        $this->auth = new auth_plugin_userkey();
+        $this->user = self::getDataGenerator()->create_user();
+    }
+
+    /**
+     * A helper function to create TestKey.
+     *
+     * @param array $record Key record.
+     */
+    protected function create_user_private_key(array $record = []) {
+        global $DB;
+
+        $record = (object)$record;
+
+        if (!isset($record->value)) {
+            $record->value = 'TestKey';
+        }
+
+        if (!isset($record->userid)) {
+            $record->userid = $this->user->id;
+        }
+
+        if (!isset($record->userid)) {
+            $record->instance = $this->user->id;
+        }
+
+        if (!isset($record->iprestriction)) {
+            $record->iprestriction = null;
+        }
+        if (!isset($record->validuntil)) {
+            $record->validuntil = time() + 300;
+        }
+        if (!isset($record->timecreated)) {
+            $record->timecreated = time();
+        }
+
+        $record->script = 'auth/userkey';
+
+        $DB->insert_record('user_private_key', $record);
     }
 
     /**
@@ -682,19 +721,9 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
      * @expectedExceptionMessage Expired key
      */
     public function test_expired_key_exception_thrown_if_expired_key() {
-        global $DB;
+        $this->create_user_private_key(['validuntil' => time() - 3000]);
 
-        $key = new stdClass();
-        $key->value = 'ExpiredKey';
-        $key->script = 'auth/userkey';
-        $key->userid = $this->user->id;
-        $key->instance = $this->user->id;
-        $key->iprestriction = null;
-        $key->validuntil    = time() - 3000;
-        $key->timecreated   = time();
-        $DB->insert_record('user_private_key', $key);
-
-        $_POST['key'] = 'ExpiredKey';
+        $_POST['key'] = 'TestKey';
         $this->auth->user_login_userkey();
     }
 
@@ -705,19 +734,9 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
      * @expectedExceptionMessage Client IP address mismatch
      */
     public function test_ipmismatch_exception_thrown_if_ip_is_incorrect() {
-        global $DB;
+        $this->create_user_private_key(['iprestriction' => '192.168.1.1']);
 
-        $key = new stdClass();
-        $key->value = 'IpmismatchKey';
-        $key->script = 'auth/userkey';
-        $key->userid = $this->user->id;
-        $key->instance = $this->user->id;
-        $key->iprestriction = '192.168.1.1';
-        $key->validuntil    = time() + 300;
-        $key->timecreated   = time();
-        $DB->insert_record('user_private_key', $key);
-
-        $_POST['key'] = 'IpmismatchKey';
+        $_POST['key'] = 'TestKey';
         $_SERVER['HTTP_CLIENT_IP'] = '192.168.1.2';
         $this->auth->user_login_userkey();
     }
@@ -729,21 +748,10 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
      * @expectedExceptionMessage Client IP address mismatch
      */
     public function test_ipmismatch_exception_thrown_if_ip_is_outside_whitelist() {
-        global $DB;
-
         set_config('ipwhitelist', '10.0.0.0/8;172.16.0.0/12;192.168.0.0/16', 'auth_userkey');
+        $this->create_user_private_key(['iprestriction' => '192.161.1.1']);
 
-        $key = new stdClass();
-        $key->value = 'IpmismatchKey';
-        $key->script = 'auth/userkey';
-        $key->userid = $this->user->id;
-        $key->instance = $this->user->id;
-        $key->iprestriction = '192.161.1.1';
-        $key->validuntil    = time() + 300;
-        $key->timecreated   = time();
-        $DB->insert_record('user_private_key', $key);
-
-        $_POST['key'] = 'IpmismatchKey';
+        $_POST['key'] = 'TestKey';
         $_SERVER['HTTP_CLIENT_IP'] = '192.161.1.2';
         $this->auth->user_login_userkey();
     }
@@ -755,19 +763,13 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
      * @expectedExceptionMessageRegExp /Invalid user id/i
      */
     public function test_invalid_user_exception_thrown_if_user_is_invalid() {
-        global $DB;
+        $this->create_user_private_key([
+            'userid' => 777,
+            'instance' => 777,
+            'iprestriction' => '192.168.1.1',
+        ]);
 
-        $key = new stdClass();
-        $key->value = 'InvalidUser';
-        $key->script = 'auth/userkey';
-        $key->userid = 777;
-        $key->instance = 777;
-        $key->iprestriction = '192.168.1.1';
-        $key->validuntil    = time() + 300;
-        $key->timecreated   = time();
-        $DB->insert_record('user_private_key', $key);
-
-        $_POST['key'] = 'InvalidUser';
+        $_POST['key'] = 'TestKey';
         $_SERVER['HTTP_CLIENT_IP'] = '192.168.1.1';
         $this->auth->user_login_userkey();
     }
@@ -778,15 +780,10 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
     public function test_that_key_gets_removed_after_user_logged_in() {
         global $DB;
 
-        $key = new stdClass();
-        $key->value = 'RemoveKey';
-        $key->script = 'auth/userkey';
-        $key->userid = $this->user->id;
-        $key->instance = $this->user->id;
-        $key->iprestriction = '192.168.1.1';
-        $key->validuntil    = time() + 300;
-        $key->timecreated   = time();
-        $DB->insert_record('user_private_key', $key);
+        $this->create_user_private_key([
+            'value' => 'RemoveKey',
+            'iprestriction' => '192.168.1.1',
+        ]);
 
         $_POST['key'] = 'RemoveKey';
         $_SERVER['HTTP_CLIENT_IP'] = '192.168.1.1';
@@ -807,20 +804,11 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
      * @expectedExceptionMessage Unsupported redirect to http://www.example.com/moodle detected, execution terminated.
      */
     public function test_that_user_logged_in_and_redirected() {
-        global $DB, $CFG;
+        global $CFG;
 
-        $key = new stdClass();
-        $key->value = 'UserLogin';
-        $key->script = 'auth/userkey';
-        $key->userid = $this->user->id;
-        $key->instance = $this->user->id;
-        $key->iprestriction = null;
-        $key->validuntil    = time() + 300;
-        $key->timecreated   = time();
-        $DB->insert_record('user_private_key', $key);
-
+        $this->create_user_private_key();
         $CFG->wwwroot = 'http://www.example.com/moodle';
-        $_POST['key'] = 'UserLogin';
+        $_POST['key'] = 'TestKey';
         @$this->auth->user_login_userkey();
     }
 
@@ -828,19 +816,11 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
      * Test that a user logs in correctly.
      */
     public function test_that_user_logged_in_correctly() {
-        global $DB, $USER, $SESSION;
+        global $USER, $SESSION;
 
-        $key = new stdClass();
-        $key->value = 'UserLogin';
-        $key->script = 'auth/userkey';
-        $key->userid = $this->user->id;
-        $key->instance = $this->user->id;
-        $key->iprestriction = null;
-        $key->validuntil    = time() + 300;
-        $key->timecreated   = time();
-        $DB->insert_record('user_private_key', $key);
+        $this->create_user_private_key();
 
-        $_POST['key'] = 'UserLogin';
+        $_POST['key'] = 'TestKey';
 
         try {
             // Using @ is the only way to test this. Thanks moodle!
@@ -859,19 +839,8 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
      * @expectedExceptionMessage Unsupported redirect to /course/index.php?id=12&key=134 detected, execution terminated.
      */
     public function test_that_user_gets_redirected_to_internal_wantsurl() {
-        global $DB;
-
-        $key = new stdClass();
-        $key->value = 'WantsUrl';
-        $key->script = 'auth/userkey';
-        $key->userid = $this->user->id;
-        $key->instance = $this->user->id;
-        $key->iprestriction = null;
-        $key->validuntil    = time() + 300;
-        $key->timecreated   = time();
-        $DB->insert_record('user_private_key', $key);
-
-        $_POST['key'] = 'WantsUrl';
+        $this->create_user_private_key();
+        $_POST['key'] = 'TestKey';
         $_POST['wantsurl'] = '/course/index.php?id=12&key=134';
 
         // Using @ is the only way to test this. Thanks moodle!
@@ -886,19 +855,9 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
      * execution terminated.
      */
     public function test_that_user_gets_redirected_to_external_wantsurl() {
-        global $DB;
+        $this->create_user_private_key();
 
-        $key = new stdClass();
-        $key->value = 'WantsUrlExternal';
-        $key->script = 'auth/userkey';
-        $key->userid = $this->user->id;
-        $key->instance = $this->user->id;
-        $key->iprestriction = null;
-        $key->validuntil    = time() + 300;
-        $key->timecreated   = time();
-        $DB->insert_record('user_private_key', $key);
-
-        $_POST['key'] = 'WantsUrlExternal';
+        $_POST['key'] = 'TestKey';
         $_POST['wantsurl'] = 'http://test.com/course/index.php?id=12&key=134';
 
         // Using @ is the only way to test this. Thanks moodle!
@@ -993,23 +952,15 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
      * Test that if one user logged, he will be logged out before a new one is authorised.
      */
     public function test_that_different_authorised_user_is_logged_out_and_new_one_logged_in() {
-        global $DB, $USER, $SESSION;
+        global $USER, $SESSION;
 
         $user = $this->getDataGenerator()->create_user();
         $this->setUser($user);
         $this->assertEquals($USER->id, $user->id);
 
-        $key = new stdClass();
-        $key->value = 'UserLogin';
-        $key->script = 'auth/userkey';
-        $key->userid = $this->user->id;
-        $key->instance = $this->user->id;
-        $key->iprestriction = null;
-        $key->validuntil    = time() + 300;
-        $key->timecreated   = time();
-        $DB->insert_record('user_private_key', $key);
+        $this->create_user_private_key();
 
-        $_POST['key'] = 'UserLogin';
+        $_POST['key'] = 'TestKey';
 
         try {
             // Using @ is the only way to test this. Thanks moodle!
@@ -1025,21 +976,13 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
      * Test that authorised user gets logged out when trying to logged in with invalid key.
      */
     public function test_if_invalid_key_authorised_user_gets_logged_out() {
-        global $DB, $USER, $SESSION;
+        global $USER, $SESSION;
 
         $user = $this->getDataGenerator()->create_user();
         $this->setUser($user);
         $this->assertEquals($USER->id, $user->id);
 
-        $key = new stdClass();
-        $key->value = 'UserLogin';
-        $key->script = 'auth/userkey';
-        $key->userid = $this->user->id;
-        $key->instance = $this->user->id;
-        $key->iprestriction = null;
-        $key->validuntil    = time() + 300;
-        $key->timecreated   = time();
-        $DB->insert_record('user_private_key', $key);
+        $this->create_user_private_key();
 
         $_POST['key'] = 'Incorrect Key';
 
@@ -1062,17 +1005,9 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
         $this->setUser($this->user);
         $this->assertEquals($USER->id, $this->user->id);
 
-        $key = new stdClass();
-        $key->value = 'UserLogin';
-        $key->script = 'auth/userkey';
-        $key->userid = $this->user->id;
-        $key->instance = $this->user->id;
-        $key->iprestriction = null;
-        $key->validuntil    = time() + 300;
-        $key->timecreated   = time();
-        $DB->insert_record('user_private_key', $key);
+        $this->create_user_private_key();
 
-        $_POST['key'] = 'UserLogin';
+        $_POST['key'] = 'TestKey';
 
         try {
             // Using @ is the only way to test this. Thanks moodle!
@@ -1081,7 +1016,7 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
             $this->assertEquals($this->user->id, $USER->id);
             $this->assertSame(sesskey(), $USER->sesskey);
             $this->assertObjectNotHasAttribute('userkey', $SESSION);
-            $keyexists = $DB->record_exists('user_private_key', array('value' => 'UserLogin'));
+            $keyexists = $DB->record_exists('user_private_key', array('value' => 'TestKey'));
             $this->assertFalse($keyexists);
         }
     }

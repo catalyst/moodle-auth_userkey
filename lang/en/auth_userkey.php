@@ -52,3 +52,4 @@ $string['ssourl'] = 'URL of SSO host';
 $string['ssourl_desc'] = 'URL of the SSO host to redirect users to. If defined users will be redirected here on login instead of the Moodle Login page';
 $string['redirecterrordetected'] = 'Unsupported redirect to {$a} detected, execution terminated.';
 $string['noip'] = 'Unable to fetch IP address of client.';
+$string['privacy:metadata'] = 'User key authentication plugin does not store any personal data.';

@@ -153,7 +153,7 @@ class auth_userkey_externallib_testcase extends advanced_testcase {
      * @expectedException invalid_parameter_exception
      * @expectedExceptionMessage Invalid parameter value detected (Required field "email" is not set or empty.)
      */
-    public function test_exception_thrown_if_required_parameter_email_is_not_seе() {
+    public function test_exception_thrown_if_required_parameter_email_is_not_set() {
         global $CFG;
 
         $this->setAdminUser();
@@ -172,7 +172,7 @@ class auth_userkey_externallib_testcase extends advanced_testcase {
      * @expectedException invalid_parameter_exception
      * @expectedExceptionMessage Invalid parameter value detected (Required parameter "ip" is not set.)
      */
-    public function test_exception_thrown_if_required_parameter_ip_is_not_seе() {
+    public function test_exception_thrown_if_required_parameter_op_is_not_set() {
         global $CFG;
 
         $this->setAdminUser();

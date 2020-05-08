@@ -52,7 +52,12 @@ class core_userkey_manager_testcase extends advanced_testcase {
      * Initial set up.
      */
     public function setUp() {
+        global $CFG;
+
+        parent::setUp();
+
         $this->resetAfterTest();
+        $CFG->getremoteaddrconf = GETREMOTEADDR_SKIP_HTTP_X_FORWARDED_FOR;
         $this->user = self::getDataGenerator()->create_user();
         $this->config = new stdClass();
     }
