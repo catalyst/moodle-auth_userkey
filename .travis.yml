@@ -33,6 +33,10 @@ env:
 
 matrix:
   exclude:
+    - php: 7.1
+      env: MOODLE_BRANCH=master
+    - php: 7.2
+      env: MOODLE_BRANCH=MOODLE_33_STABLE
     - php: 7.3
       env: MOODLE_BRANCH=MOODLE_33_STABLE
     - php: 7.3
