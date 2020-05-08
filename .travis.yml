@@ -1,68 +1,61 @@
 language: php
 
-addons:
-  firefox: "47.0.1"
-  postgresql: "9.4"
+notifications:
+  email:
+    recipients:
+      - dmitriim@catalyst-au.net
+
+sudo: false
 
 cache:
   directories:
     - $HOME/.composer/cache
-    - $HOME/.npm
 
-dist: trusty
+addons:
+  postgresql: "9.6"
+
+php:
+  - 7.1
+  - 7.2
+  - 7.3
+
+env:
+  global:
+    - DB=pgsql
+  matrix:
+    - MOODLE_BRANCH=MOODLE_33_STABLE
+    - MOODLE_BRANCH=MOODLE_34_STABLE
+    - MOODLE_BRANCH=MOODLE_35_STABLE
+    - MOODLE_BRANCH=MOODLE_36_STABLE
+    - MOODLE_BRANCH=MOODLE_37_STABLE
+    - MOODLE_BRANCH=MOODLE_38_STABLE
+    - MOODLE_BRANCH=master
 
 matrix:
-  include:
-    - php: 7.0
-      env: DB=mysqli MOODLE_BRANCH=MOODLE_33_STABLE
-    - php: 7.0
-      env: DB=pgsql  MOODLE_BRANCH=MOODLE_33_STABLE
-    - php: 7.0
-      env: DB=mysqli MOODLE_BRANCH=MOODLE_34_STABLE
-    - php: 7.0
-      env: DB=pgsql  MOODLE_BRANCH=MOODLE_34_STABLE
-    - php: 7.1
-      env: DB=mysqli MOODLE_BRANCH=MOODLE_33_STABLE
-    - php: 7.1
-      env: DB=pgsql  MOODLE_BRANCH=MOODLE_33_STABLE
-    - php: 7.1
-      env: DB=mysqli MOODLE_BRANCH=MOODLE_34_STABLE
-    - php: 7.1
-      env: DB=pgsql  MOODLE_BRANCH=MOODLE_34_STABLE
-    - php: 7.1
-      env: DB=mysqli MOODLE_BRANCH=MOODLE_35_STABLE
-    - php: 7.1
-      env: DB=pgsql  MOODLE_BRANCH=MOODLE_35_STABLE
-    - php: 7.1
-      env: DB=mysqli MOODLE_BRANCH=MOODLE_36_STABLE
-    - php: 7.1
-      env: DB=pgsql  MOODLE_BRANCH=MOODLE_36_STABLE
-    - php: 7.2
-      env: DB=mysqli MOODLE_BRANCH=MOODLE_37_STABLE
-    - php: 7.2
-      env: DB=pgsql  MOODLE_BRANCH=MOODLE_37_STABLE
-    - php: 7.2
-      env: DB=mysqli MOODLE_BRANCH=master
-    - php: 7.2
-      env: DB=pgsql  MOODLE_BRANCH=master
+  exclude:
+    - php: 7.3
+      env: MOODLE_BRANCH=MOODLE_33_STABLE
+    - php: 7.3
+      env: MOODLE_BRANCH=MOODLE_34_STABLE
+    - php: 7.3
+      env: MOODLE_BRANCH=MOODLE_35_STABLE
 
 before_install:
-  - phpenv config-rm xdebug.ini
-  - nvm install 8.9
-  - nvm use 8.9
   - cd ../..
-  - composer create-project -n --no-dev --prefer-dist moodlerooms/moodle-plugin-ci ci ^2
+  - composer selfupdate
+  - composer create-project -n --no-dev moodlerooms/moodle-plugin-ci ci ^1
   - export PATH="$(cd ci/bin; pwd):$(cd ci/vendor/bin; pwd):$PATH"
 
 install:
-  - moodle-plugin-ci install
+  - moodle-plugin-ci install -vvv
 
 script:
   - moodle-plugin-ci phplint
+  - moodle-plugin-ci phpcpd
+  - moodle-plugin-ci phpmd
   - moodle-plugin-ci codechecker
-  - moodle-plugin-ci validate
-  - moodle-plugin-ci savepoints
-  - moodle-plugin-ci mustache
-  - moodle-plugin-ci grunt
+  - moodle-plugin-ci csslint
+  - moodle-plugin-ci shifter
+  - moodle-plugin-ci jshint
   - moodle-plugin-ci phpunit
   - moodle-plugin-ci behat
