@@ -178,7 +178,7 @@ https://www.catalyst-au.net/
 
 Issues, and pull requests using github are welcome and encouraged! 
 
-https://github.com/catalyst/moodle-tool_webanalytics/issues
+https://github.com/catalyst/moodle-auth_userkey/issues
 
 If you would like commercial support or would like to sponsor additional improvements
 to this plugin please contact us:
