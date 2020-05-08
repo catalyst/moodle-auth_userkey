@@ -984,7 +984,6 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
 
         $this->create_user_private_key();
 
-
         $_POST['key'] = 'Incorrect Key';
 
         try {
