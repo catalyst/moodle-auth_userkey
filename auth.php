@@ -637,4 +637,23 @@ class auth_plugin_userkey extends auth_plugin_base {
             $redirect = $this->config->redirecturl;
         }
     }
+
+    /**
+     * Log out user and redirect.
+     */
+    public function user_logout_userkey() {
+        global $CFG, $USER;
+
+        $redirect = required_param('return', PARAM_URL);
+
+        // We redirect when user's session in Moodle already has expired
+        // or the user is still logged in using "userkey" auth type.
+        if (!isloggedin() || $USER->auth == 'userkey') {
+            require_logout();
+            $this->redirect($redirect);
+        } else {
+            // If logged in with different auth type, then display an error.
+            print_error('incorrectlogout', 'auth_userkey', $CFG->wwwroot);
+        }
+    }
 }

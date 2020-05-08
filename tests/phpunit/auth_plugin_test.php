@@ -1021,4 +1021,76 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
         }
     }
 
+    /**
+     * Test when try to logout, but required return is not set.
+     *
+     * @expectedException moodle_exception
+     * @expectedExceptionMessage A required parameter (return) was missing
+     */
+    public function test_user_logout_userkey_when_required_return_not_set() {
+        $this->auth->user_logout_userkey();
+    }
+
+    /**
+     * Test when try to logout, but user is not logged in.
+     *
+     * @expectedException moodle_exception
+     * @expectedExceptionMessage Unsupported redirect to http://google.com detected, execution terminated.
+     */
+    public function test_user_logout_userkey_when_user_is_not_logged_in() {
+        $_POST['return'] = 'http://google.com';
+
+        $this->auth->user_logout_userkey();
+    }
+
+    /**
+     * Test when try to logout, but user logged in with different auth type.
+     */
+    public function test_user_logout_userkey_when_user_logged_in_with_different_auth() {
+        global $USER;
+
+        $_POST['return'] = 'http://google.com';
+
+        $this->setUser($this->user);
+        try {
+            $this->auth->user_logout_userkey();
+        } catch (moodle_exception $e) {
+            $this->assertTrue(isloggedin());
+            $this->assertEquals($USER->id, $this->user->id);
+            $this->assertEquals(
+                'Incorrect logout request',
+                $e->getMessage()
+            );
+        }
+    }
+
+    /**
+     * Test when try to logout, but user logged in with different auth type.
+     *
+     * @expectedException moodle_exception
+     * @expectedExceptionMessage A required parameter (return) was missing
+     */
+    public function test_user_logout_userkey_when_user_logged_in_but_return_not_set() {
+        $this->setUser($this->user);
+        $this->auth->user_logout_userkey();
+    }
+
+    /**
+     * Test successful logout.
+     */
+    public function test_user_logout_userkey_logging_out() {
+        global $USER;
+
+        $this->setUser($this->user);
+        $USER->auth = 'userkey';
+        $_POST['return'] = 'http://google.com';
+
+        try {
+            $this->auth->user_logout_userkey();
+        } catch (moodle_exception $e) {
+            $this->assertFalse(isloggedin());
+            $this->assertEquals('Unsupported redirect to http://google.com detected, execution terminated.', $e->getMessage());
+        }
+    }
+
 }

@@ -15,17 +15,17 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Version details.
+ * Logout page for auth_userkey.
  *
  * @package    auth_userkey
  * @copyright  2016 Dmitrii Metelkin (dmitriim@catalyst-au.net)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die;
+require_once(dirname(__FILE__) . '/../../config.php');
 
-$plugin->version   = 2020050801;        // The current plugin version (Date: YYYYMMDDXX)
-$plugin->release   = 2020050801;        // Match release exactly to version.
-$plugin->requires  = 2017051500;        // Requires Moodle 3.3 version.
-$plugin->component = 'auth_userkey';    // Full name of the plugin (used for diagnostics).
-$plugin->maturity  = MATURITY_STABLE;
+if (!is_enabled_auth('userkey')) {
+    print_error(get_string('pluginisdisabled', 'auth_userkey'));
+}
+
+get_auth_plugin('userkey')->user_logout_userkey();
