@@ -82,17 +82,28 @@ get an error.
 If this setting is set to yes, then your web application has to provie user's ip address to generate a user key. Then
 the user should have provided ip when using this key. If ip address is different a user will get an error.
 
-**Logout redirect URL**
+**Redirect after logout from Moodle**
 
 You can set URL to redirect users after they logged out from Moodle. For example you can redirect them
 to logout script of your web application to log users out from it as well. This setting is optional.
-
 
 **URL of SSO host**
 
 You can set URL to redirect users before they see Moodle login page. For example you can redirect them
 to your web application to login page. You can use "enrolkey_skipsso" URL parameter to bypass this option.
 E.g. http://yourmoodle.com/login/index.php?enrolkey_skipsso=1
+
+**Logout URL**
+
+If you need to logout users after they logged out from the external application, you can redirect them 
+to logout script with required parameter "return". 
+
+E.g. http://yourmoodle.com/auth/userkey/logout.php?return=www.google.com 
+
+
+Users will be logged out from Moodle and then redirected to the provided URL. 
+In case when a user session is already expired, the user will be still redirected.  
+  
 
 **Example client**
 
@@ -160,10 +171,6 @@ function getloginurl($useremail, $firstname, $lastname, $username, $courseid = n
 
 echo getloginurl('barrywhite@googlemail.com', 'barry', 'white', 'barrywhite', 2, 'certificate', 8);
 ```
-
-TODO:
------
-1. Implement logout webservice to be able to call it from external application.
 
 
 # Crafted by Catalyst IT
