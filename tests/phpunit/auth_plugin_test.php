@@ -50,7 +50,7 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
         global $CFG;
 
         require_once($CFG->libdir . "/externallib.php");
-        require_once($CFG->dirroot . '/auth/userkey/tests/fake_userkey_manager.php');
+        require_once($CFG->dirroot . '/auth/userkey/tests/phpunit/fake_userkey_manager.php');
         require_once($CFG->dirroot . '/auth/userkey/auth.php');
         require_once($CFG->dirroot . '/user/lib.php');
 
