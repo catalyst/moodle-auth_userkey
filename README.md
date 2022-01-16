@@ -1,6 +1,4 @@
-<a href="https://travis-ci.org/catalyst/moodle-auth_userkey">
-<img src="https://travis-ci.org/catalyst/moodle-auth_userkey.svg?branch=master">
-</a>
+[![Build Status](https://github.com/catalyst/moodle-auth_userkey/workflows/Run%20all%20tests%20for%20Moodle%2033+/badge.svg)](https://github.com/catalyst/moodle-auth_userkey/actions)
 
 Log in to Moodle using one time user key.
 =========================================
