@@ -24,9 +24,6 @@
 
 namespace auth_userkey;
 
-defined('MOODLE_INTERNAL') || die();
-
-
 class fake_userkey_manager implements userkey_manager_interface {
 
     public function create_key($userid, $allowedips = null) {
