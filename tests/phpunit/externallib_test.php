@@ -33,7 +33,7 @@ class auth_userkey_externallib_testcase extends advanced_testcase {
     /**
      * Initial set up.
      */
-    public function setUp() {
+    public function setUp(): void {
         global $CFG;
 
         require_once($CFG->libdir . "/externallib.php");

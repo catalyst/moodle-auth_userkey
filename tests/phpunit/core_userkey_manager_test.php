@@ -49,7 +49,7 @@ class core_userkey_manager_testcase extends advanced_testcase {
     /**
      * Initial set up.
      */
-    public function setUp() {
+    public function setUp(): void {
         global $CFG;
 
         parent::setUp();
