@@ -22,8 +22,6 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Tests for auth_plugin_userkey class.
  *
@@ -46,7 +44,7 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
     /**
      * Initial set up.
      */
-    public function setUp() {
+    public function setUp(): void {
         global $CFG;
 
         require_once($CFG->libdir . "/externallib.php");

@@ -22,8 +22,6 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
-
 use auth_userkey\core_userkey_manager;
 
 /**
@@ -51,7 +49,7 @@ class core_userkey_manager_testcase extends advanced_testcase {
     /**
      * Initial set up.
      */
-    public function setUp() {
+    public function setUp(): void {
         global $CFG;
 
         parent::setUp();

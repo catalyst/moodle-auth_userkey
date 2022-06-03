@@ -24,8 +24,6 @@
 
 namespace auth_userkey;
 
-defined('MOODLE_INTERNAL') || die;
-
 class core_userkey_manager implements userkey_manager_interface {
 
     /**
