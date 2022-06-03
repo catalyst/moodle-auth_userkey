@@ -1,6 +1,5 @@
-<a href="https://travis-ci.org/catalyst/moodle-auth_userkey">
-<img src="https://travis-ci.org/catalyst/moodle-auth_userkey.svg?branch=master">
-</a>
+![GitHub Workflow Status (branch)](https://img.shields.io/github/workflow/status/catalyst/moodle-auth_userkey/ci/MOODLE_33PLUS)
+
 
 Log in to Moodle using one time user key.
 =========================================

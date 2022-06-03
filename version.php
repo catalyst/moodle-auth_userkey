@@ -29,3 +29,5 @@ $plugin->release   = 2020050801;        // Match release exactly to version.
 $plugin->requires  = 2017051500;        // Requires Moodle 3.3 version.
 $plugin->component = 'auth_userkey';    // Full name of the plugin (used for diagnostics).
 $plugin->maturity  = MATURITY_STABLE;
+$plugin->supported = [33, 401];  // Available as of Moodle 3.9.0 or later.
+
