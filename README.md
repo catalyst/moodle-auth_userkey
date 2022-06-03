@@ -1,4 +1,5 @@
-[![Build Status](https://github.com/catalyst/moodle-auth_userkey/workflows/Run%20all%20tests%20for%20Moodle%2033+/badge.svg)](https://github.com/catalyst/moodle-auth_userkey/actions)
+![GitHub Workflow Status (branch)](https://img.shields.io/github/workflow/status/catalyst/moodle-auth_userkey/ci/MOODLE_33PLUS)
+
 
 Log in to Moodle using one time user key.
 =========================================
