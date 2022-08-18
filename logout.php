@@ -25,7 +25,7 @@
 require_once(dirname(__FILE__) . '/../../config.php');
 
 if (!is_enabled_auth('userkey')) {
-    print_error(get_string('pluginisdisabled', 'auth_userkey'));
+    throw new moodle_exception(get_string('pluginisdisabled', 'auth_userkey'));
 }
 
 get_auth_plugin('userkey')->user_logout_userkey();

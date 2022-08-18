@@ -157,7 +157,7 @@ class auth_plugin_userkey extends auth_plugin_base {
             if (isloggedin()) {
                 require_logout();
             }
-            print_error($exception->errorcode);
+            throw $exception;
         }
 
         if (isloggedin()) {
@@ -653,7 +653,7 @@ class auth_plugin_userkey extends auth_plugin_base {
             $this->redirect($redirect);
         } else {
             // If logged in with different auth type, then display an error.
-            print_error('incorrectlogout', 'auth_userkey', $CFG->wwwroot);
+            throw new moodle_exception('incorrectlogout', 'auth_userkey', $CFG->wwwroot);
         }
     }
 }
