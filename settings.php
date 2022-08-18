@@ -59,4 +59,9 @@ if ($ADMIN->fulltree) {
     $settings->add(new admin_setting_configselect('auth_userkey/updateuser',
             new lang_string('updateuser', 'auth_userkey'),
             new lang_string('updateuser_desc', 'auth_userkey'), 0, $yesno));
+    
+    // Display locking / mapping of profile fields.
+    $authplugin = get_auth_plugin('userkey');
+    display_auth_lock_options($settings, $authplugin->authtype,
+        $authplugin->userfields, get_string('auth_fieldlocks_help', 'auth'), false, false);
 }
