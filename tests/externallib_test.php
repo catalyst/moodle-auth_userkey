@@ -14,6 +14,16 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+namespace auth_userkey;
+
+use advanced_testcase;
+use webservice_access_exception;
+use auth_userkey_external;
+use external_api;
+use invalid_parameter_exception;
+use required_capability_exception;
+use context_system;
+
 /**
  * Tests for externallib.php.
  *
@@ -21,7 +31,7 @@
  * @copyright  2016 Dmitrii Metelkin (dmitriim@catalyst-au.net)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class auth_userkey_externallib_testcase extends advanced_testcase {
+class externallib_test extends advanced_testcase {
     /**
      * User object.
      *

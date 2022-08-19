@@ -14,15 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
- * Tests for core_userkey_manager class.
- *
- * @package    auth_userkey
- * @copyright  2016 Dmitrii Metelkin (dmitriim@catalyst-au.net)
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
-use auth_userkey\core_userkey_manager;
+namespace auth_userkey;
 
 /**
  * Tests for core_userkey_manager class.
@@ -30,10 +22,11 @@ use auth_userkey\core_userkey_manager;
  * Key validation is fully covered in auth_plugin_test.php file.
  * TODO: write tests for validate_key() function.
  *
+ * @package    auth_userkey
  * @copyright  2016 Dmitrii Metelkin (dmitriim@catalyst-au.net)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class core_userkey_manager_testcase extends advanced_testcase {
+class core_userkey_manager_test extends \advanced_testcase {
     /**
      * Test user object.
      * @var
@@ -57,7 +50,7 @@ class core_userkey_manager_testcase extends advanced_testcase {
         $this->resetAfterTest();
         $CFG->getremoteaddrconf = GETREMOTEADDR_SKIP_HTTP_X_FORWARDED_FOR;
         $this->user = self::getDataGenerator()->create_user();
-        $this->config = new stdClass();
+        $this->config = new \stdClass();
     }
 
     /**
@@ -166,7 +159,7 @@ class core_userkey_manager_testcase extends advanced_testcase {
 
         $_SERVER['HTTP_CLIENT_IP'] = '193.168.1.2';
 
-        $this->expectException(moodle_exception::class);
+        $this->expectException(\moodle_exception::class);
         $this->expectExceptionMessage('Client IP address mismatch');
 
         $manager->validate_key($value);
