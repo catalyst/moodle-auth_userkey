@@ -112,7 +112,7 @@ class auth_plugin_userkey extends auth_plugin_base {
      * @throws \moodle_exception If gets running via CLI or AJAX call.
      */
     protected function redirect($url) {
-        if (CLI_SCRIPT or AJAX_SCRIPT) {
+        if (CLI_SCRIPT || AJAX_SCRIPT) {
             throw new moodle_exception('redirecterrordetected', 'auth_userkey', '', $url);
         }
 

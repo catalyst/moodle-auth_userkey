@@ -117,7 +117,7 @@ class core_userkey_manager implements userkey_manager_interface {
             throw new \moodle_exception('invalidkey');
         }
 
-        if (!empty($key->validuntil) and $key->validuntil < time()) {
+        if (!empty($key->validuntil) && $key->validuntil < time()) {
             throw new \moodle_exception('expiredkey');
         }
 
