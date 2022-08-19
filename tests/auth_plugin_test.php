@@ -14,6 +14,15 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+namespace auth_userkey;
+
+use advanced_testcase;
+use auth_plugin_userkey;
+use stdClass;
+use invalid_parameter_exception;
+use moodle_exception;
+use external_value;
+
 /**
  * Tests for auth_plugin_userkey class.
  *
@@ -21,14 +30,7 @@
  * @copyright  2016 Dmitrii Metelkin (dmitriim@catalyst-au.net)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
-/**
- * Tests for auth_plugin_userkey class.
- *
- * @copyright  2016 Dmitrii Metelkin (dmitriim@catalyst-au.net)
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-class auth_plugin_userkey_testcase extends advanced_testcase {
+class auth_plugin_test extends advanced_testcase {
     /**
      * An instance of auth_plugin_userkey class.
      * @var auth_plugin_userkey
@@ -48,7 +50,7 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
         global $CFG;
 
         require_once($CFG->libdir . "/externallib.php");
-        require_once($CFG->dirroot . '/auth/userkey/tests/phpunit/fake_userkey_manager.php');
+        require_once($CFG->dirroot . '/auth/userkey/tests/fake_userkey_manager.php');
         require_once($CFG->dirroot . '/auth/userkey/auth.php');
         require_once($CFG->dirroot . '/user/lib.php');
 
@@ -262,7 +264,7 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
 
         self::getDataGenerator()->create_user($user);
 
-        $userkeymanager = new \auth_userkey\fake_userkey_manager();
+        $userkeymanager = new fake_userkey_manager();
         $this->auth->set_userkey_manager($userkeymanager);
 
         $expected = $CFG->wwwroot . '/auth/userkey/login.php?key=FaKeKeyFoRtEsTiNg';
@@ -283,7 +285,7 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
 
         self::getDataGenerator()->create_user($user);
 
-        $userkeymanager = new \auth_userkey\fake_userkey_manager();
+        $userkeymanager = new fake_userkey_manager();
         $this->auth->set_userkey_manager($userkeymanager);
 
         $expected = $CFG->wwwroot . '/auth/userkey/login.php?key=FaKeKeyFoRtEsTiNg';
@@ -305,7 +307,7 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
 
         self::getDataGenerator()->create_user($user);
 
-        $userkeymanager = new \auth_userkey\fake_userkey_manager();
+        $userkeymanager = new fake_userkey_manager();
         $this->auth->set_userkey_manager($userkeymanager);
 
         $expected = $CFG->wwwroot . '/auth/userkey/login.php?key=FaKeKeyFoRtEsTiNg';
@@ -323,7 +325,7 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
         set_config('createuser', true, 'auth_userkey');
         $this->auth = new auth_plugin_userkey();
 
-        $userkeymanager = new \auth_userkey\fake_userkey_manager();
+        $userkeymanager = new fake_userkey_manager();
         $this->auth->set_userkey_manager($userkeymanager);
 
         $user = new stdClass();
@@ -355,7 +357,7 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
         set_config('createuser', true, 'auth_userkey');
         $this->auth = new auth_plugin_userkey();
 
-        $userkeymanager = new \auth_userkey\fake_userkey_manager();
+        $userkeymanager = new fake_userkey_manager();
         $this->auth->set_userkey_manager($userkeymanager);
 
         $user = new stdClass();
@@ -375,7 +377,7 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
         set_config('createuser', true, 'auth_userkey');
         $this->auth = new auth_plugin_userkey();
 
-        $userkeymanager = new \auth_userkey\fake_userkey_manager();
+        $userkeymanager = new fake_userkey_manager();
         $this->auth->set_userkey_manager($userkeymanager);
 
         $originaluser = new stdClass();
@@ -405,7 +407,7 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
         set_config('mappingfield', 'username', 'auth_userkey');
         $this->auth = new auth_plugin_userkey();
 
-        $userkeymanager = new \auth_userkey\fake_userkey_manager();
+        $userkeymanager = new fake_userkey_manager();
         $this->auth->set_userkey_manager($userkeymanager);
 
         $originaluser = new stdClass();
@@ -436,7 +438,7 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
         set_config('updateuser', true, 'auth_userkey');
         $this->auth = new auth_plugin_userkey();
 
-        $userkeymanager = new \auth_userkey\fake_userkey_manager();
+        $userkeymanager = new fake_userkey_manager();
         $this->auth->set_userkey_manager($userkeymanager);
 
         $originaluser = new stdClass();
@@ -477,7 +479,7 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
         set_config('mappingfield', 'username', 'auth_userkey');
         $this->auth = new auth_plugin_userkey();
 
-        $userkeymanager = new \auth_userkey\fake_userkey_manager();
+        $userkeymanager = new fake_userkey_manager();
         $this->auth->set_userkey_manager($userkeymanager);
 
         self::getDataGenerator()->create_user(['email' => 'trytoduplicate@test.com']);
@@ -504,7 +506,7 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
         set_config('updateuser', true, 'auth_userkey');
         $this->auth = new auth_plugin_userkey();
 
-        $userkeymanager = new \auth_userkey\fake_userkey_manager();
+        $userkeymanager = new fake_userkey_manager();
         $this->auth->set_userkey_manager($userkeymanager);
 
         self::getDataGenerator()->create_user(['username' => 'trytoduplicate']);
