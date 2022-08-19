@@ -190,7 +190,7 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
         $user = array();
         $this->expectException(invalid_parameter_exception::class);
         $this->expectExceptionMessage('Invalid parameter value detected (Required field "email" is not set or empty.)');
-        
+
         $actual = $this->auth->get_login_url($user);
     }
 
