@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+namespace auth_userkey;
+
 /**
  * Key manager class.
  *
@@ -21,9 +23,6 @@
  * @copyright  2016 Dmitrii Metelkin (dmitriim@catalyst-au.net)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
-namespace auth_userkey;
-
 class core_userkey_manager implements userkey_manager_interface {
 
     /**
@@ -115,17 +114,17 @@ class core_userkey_manager implements userkey_manager_interface {
         );
 
         if (!$key = $DB->get_record('user_private_key', $options)) {
-            print_error('invalidkey');
+            throw new \moodle_exception('invalidkey');
         }
 
         if (!empty($key->validuntil) and $key->validuntil < time()) {
-            print_error('expiredkey');
+            throw new \moodle_exception('expiredkey');
         }
 
         $this->validate_ip_address($key);
 
         if (!$user = $DB->get_record('user', array('id' => $key->userid))) {
-            print_error('invaliduserid');
+            throw new \moodle_exception('invaliduserid');
         }
         return $key;
     }
@@ -145,7 +144,7 @@ class core_userkey_manager implements userkey_manager_interface {
         $remoteaddr = getremoteaddr(null);
 
         if (empty($remoteaddr)) {
-            print_error('noip', 'auth_userkey');
+            throw new \moodle_exception('noip', 'auth_userkey');
         }
 
         if (address_in_subnet($remoteaddr, $key->iprestriction)) {
@@ -161,6 +160,6 @@ class core_userkey_manager implements userkey_manager_interface {
             }
         }
 
-        print_error('ipmismatch', 'error', '', null, "Remote address: $remoteaddr\nKey IP: $key->iprestriction");
+        throw new \moodle_exception('ipmismatch', 'error', '', null, "Remote address: $remoteaddr\nKey IP: $key->iprestriction");
     }
 }

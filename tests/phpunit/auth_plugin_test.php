@@ -185,68 +185,67 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
 
     /**
      * Test that auth plugin throws correct exception if default mapping field is not provided.
-     *
-     * @expectedException \invalid_parameter_exception
-     * @expectedExceptionMessage Invalid parameter value detected (Required field "email" is not set or empty.)
      */
     public function test_throwing_exception_if_default_mapping_field_is_not_provided() {
         $user = array();
+        $this->expectException(invalid_parameter_exception::class);
+        $this->expectExceptionMessage('Invalid parameter value detected (Required field "email" is not set or empty.)');
+
         $actual = $this->auth->get_login_url($user);
     }
 
     /**
      * Test that auth plugin throws correct exception if username mapping field is not provided, but set in configs.
-     *
-     * @expectedException \invalid_parameter_exception
-     * @expectedExceptionMessage Invalid parameter value detected (Required field "username" is not set or empty.)
      */
     public function test_throwing_exception_if_mapping_field_username_is_not_provided() {
         $user = array();
         set_config('mappingfield', 'username', 'auth_userkey');
         $this->auth = new auth_plugin_userkey();
 
+        $this->expectException(invalid_parameter_exception::class);
+        $this->expectExceptionMessage('Invalid parameter value detected (Required field "username" is not set or empty.)');
+
         $actual = $this->auth->get_login_url($user);
     }
 
     /**
      * Test that auth plugin throws correct exception if idnumber mapping field is not provided, but set in configs.
-     *
-     * @expectedException \invalid_parameter_exception
-     * @expectedExceptionMessage Invalid parameter value detected (Required field "idnumber" is not set or empty.)
      */
     public function test_throwing_exception_if_mapping_field_idnumber_is_not_provided() {
         $user = array();
         set_config('mappingfield', 'idnumber', 'auth_userkey');
         $this->auth = new auth_plugin_userkey();
 
+        $this->expectException(invalid_parameter_exception::class);
+        $this->expectExceptionMessage('Invalid parameter value detected (Required field "idnumber" is not set or empty.)');
+
         $actual = $this->auth->get_login_url($user);
     }
 
     /**
      * Test that auth plugin throws correct exception if we trying to request not existing user.
-     *
-     * @expectedException \invalid_parameter_exception
-     * @expectedExceptionMessage Invalid parameter value detected (User is not exist)
      */
     public function test_throwing_exception_if_user_is_not_exist() {
         $user = array();
         $user['email'] = 'notexists@test.com';
 
+        $this->expectException(invalid_parameter_exception::class);
+        $this->expectExceptionMessage('Invalid parameter value detected (User is not exist)');
         $actual = $this->auth->get_login_url($user);
     }
 
     /**
      * Test that auth plugin throws correct exception if we trying to request user,
      * but ip field is not set and iprestriction is enabled.
-     *
-     * @expectedException \invalid_parameter_exception
-     * @expectedExceptionMessage Invalid parameter value detected (Required parameter "ip" is not set.)
      */
     public function test_throwing_exception_if_iprestriction_is_enabled_but_ip_is_missing_in_data() {
         $user = array();
         $user['email'] = 'exists@test.com';
         set_config('iprestriction', true, 'auth_userkey');
         $this->auth = new auth_plugin_userkey();
+
+        $this->expectException(invalid_parameter_exception::class);
+        $this->expectExceptionMessage('Invalid parameter value detected (Required parameter "ip" is not set.)');
 
         $actual = $this->auth->get_login_url($user);
     }
@@ -349,11 +348,7 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
 
     /**
      * Test that we can request a key for a new user.
-     *
-     * @expectedException \invalid_parameter_exception
-     * @expectedExceptionMessage Unable to create user, missing value(s): username,firstname,lastname
      */
-
     public function test_missing_data_to_create_user() {
         global $CFG, $DB;
 
@@ -367,13 +362,14 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
         $user->email = 'username@test.com';
         $user->ip = '192.168.1.1';
 
+        $this->expectException(invalid_parameter_exception::class);
+        $this->expectExceptionMessage('Unable to create user, missing value(s): username,firstname,lastname');
+
         $this->auth->get_login_url($user);
     }
 
     /**
      * Test that when we attempt to create a new user duplicate usernames are caught.
-     * @expectedException \invalid_parameter_exception
-     * @expectedExceptionMessage Username already exists: username
      */
     public function test_create_refuse_duplicate_username() {
         set_config('createuser', true, 'auth_userkey');
@@ -395,14 +391,14 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
         $duplicateuser = clone($originaluser);
         $duplicateuser->email = 'duplicateuser@test.com';
 
+        $this->expectException(invalid_parameter_exception::class);
+        $this->expectExceptionMessage('Username already exists: username');
+
         $this->auth->get_login_url($duplicateuser);
     }
 
     /**
      * Test that when we attempt to create a new user duplicate emails are caught.
-     *
-     * @expectedException \invalid_parameter_exception
-     * @expectedExceptionMessage Email address already exists: username@test.com
      */
     public function test_create_refuse_duplicate_email() {
         set_config('createuser', true, 'auth_userkey');
@@ -424,6 +420,9 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
 
         $duplicateuser = clone($originaluser);
         $duplicateuser->username = 'duplicateuser';
+
+        $this->expectException(invalid_parameter_exception::class);
+        $this->expectExceptionMessage('Email address already exists: username@test.com');
 
         $this->auth->get_login_url($duplicateuser);
     }
@@ -472,9 +471,6 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
 
     /**
      * Test that when we attempt to update a user duplicate emails are caught.
-     *
-     * @expectedException \invalid_parameter_exception
-     * @expectedExceptionMessage Email address already exists: trytoduplicate@test.com
      */
     public function test_update_refuse_duplicate_email() {
         set_config('updateuser', true, 'auth_userkey');
@@ -495,14 +491,14 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
         $originaluser->city = 'brighton';
         $originaluser->ip = '192.168.1.1';
 
+        $this->expectException(invalid_parameter_exception::class);
+        $this->expectExceptionMessage('Email address already exists: trytoduplicate@test.com');
+
         $this->auth->get_login_url($originaluser);
     }
 
     /**
      * Test that when we attempt to update a user duplicate usernames are caught.
-     *
-     * @expectedException \invalid_parameter_exception
-     * @expectedExceptionMessage Username already exists: trytoduplicate
      */
     public function test_update_refuse_duplicate_username() {
         set_config('updateuser', true, 'auth_userkey');
@@ -521,6 +517,9 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
         $originaluser->lastname = 'name';
         $originaluser->city = 'brighton';
         $originaluser->ip = '192.168.1.1';
+
+        $this->expectException(invalid_parameter_exception::class);
+        $this->expectExceptionMessage('Username already exists: trytoduplicate');
 
         $this->auth->get_login_url($originaluser);
     }
@@ -693,33 +692,33 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
 
     /**
      * Test required parameter exception gets thrown id try to login, but key is not set.
-     *
-     * @expectedException moodle_exception
-     * @expectedExceptionMessage A required parameter (key) was missing
      */
     public function test_required_parameter_exception_thrown_if_key_not_set() {
+        $this->expectException(moodle_exception::class);
+        $this->expectExceptionMessage('A required parameter (key) was missing');
+
         $this->auth->user_login_userkey();
     }
 
     /**
      * Test that incorrect key exception gets thrown if a key is incorrect.
-     *
-     * @expectedException moodle_exception
-     * @expectedExceptionMessage Incorrect key
      */
     public function test_invalid_key_exception_thrown_if_invalid_key() {
+        $this->expectException(moodle_exception::class);
+        $this->expectExceptionMessage('Incorrect key');
+
         $_POST['key'] = 'InvalidKey';
         $this->auth->user_login_userkey();
     }
 
     /**
      * Test that expired key exception gets thrown if a key is expired.
-     *
-     * @expectedException moodle_exception
-     * @expectedExceptionMessage Expired key
      */
     public function test_expired_key_exception_thrown_if_expired_key() {
         $this->create_user_private_key(['validuntil' => time() - 3000]);
+
+        $this->expectException(moodle_exception::class);
+        $this->expectExceptionMessage('Expired key');
 
         $_POST['key'] = 'TestKey';
         $this->auth->user_login_userkey();
@@ -727,23 +726,21 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
 
     /**
      * Test that IP address mismatch exception gets thrown if incorrect IP.
-     *
-     * @expectedException moodle_exception
-     * @expectedExceptionMessage Client IP address mismatch
      */
     public function test_ipmismatch_exception_thrown_if_ip_is_incorrect() {
         $this->create_user_private_key(['iprestriction' => '192.168.1.1']);
 
         $_POST['key'] = 'TestKey';
         $_SERVER['HTTP_CLIENT_IP'] = '192.168.1.2';
+
+        $this->expectException(moodle_exception::class);
+        $this->expectExceptionMessage('Client IP address mismatch');
+
         $this->auth->user_login_userkey();
     }
 
     /**
      * Test that IP address mismatch exception gets thrown if incorrect IP and outside whitelist.
-     *
-     * @expectedException moodle_exception
-     * @expectedExceptionMessage Client IP address mismatch
      */
     public function test_ipmismatch_exception_thrown_if_ip_is_outside_whitelist() {
         set_config('ipwhitelist', '10.0.0.0/8;172.16.0.0/12;192.168.0.0/16', 'auth_userkey');
@@ -751,14 +748,15 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
 
         $_POST['key'] = 'TestKey';
         $_SERVER['HTTP_CLIENT_IP'] = '192.161.1.2';
+
+        $this->expectException(moodle_exception::class);
+        $this->expectExceptionMessage('Client IP address mismatch');
+
         $this->auth->user_login_userkey();
     }
 
     /**
      * Test that IP address mismatch exception gets thrown if user id is incorrect.
-     *
-     * @expectedException moodle_exception
-     * @expectedExceptionMessageRegExp /Invalid user id/i
      */
     public function test_invalid_user_exception_thrown_if_user_is_invalid() {
         $this->create_user_private_key([
@@ -769,6 +767,10 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
 
         $_POST['key'] = 'TestKey';
         $_SERVER['HTTP_CLIENT_IP'] = '192.168.1.1';
+
+        $this->expectException(moodle_exception::class);
+        $this->expectExceptionMessage('Invalid user');
+
         $this->auth->user_login_userkey();
     }
 
@@ -797,9 +799,6 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
 
     /**
      * Test that a user logs in and gets redirected correctly.
-     *
-     * @expectedException moodle_exception
-     * @expectedExceptionMessage Unsupported redirect to http://www.example.com/moodle detected, execution terminated.
      */
     public function test_that_user_logged_in_and_redirected() {
         global $CFG;
@@ -807,6 +806,10 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
         $this->create_user_private_key();
         $CFG->wwwroot = 'http://www.example.com/moodle';
         $_POST['key'] = 'TestKey';
+
+        $this->expectException(moodle_exception::class);
+        $this->expectExceptionMessage('Unsupported redirect to http://www.example.com/moodle detected, execution terminated');
+
         @$this->auth->user_login_userkey();
     }
 
@@ -832,14 +835,14 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
 
     /**
      * Test that a user gets redirected to internal wantsurl URL successful log in.
-     *
-     * @expectedException moodle_exception
-     * @expectedExceptionMessage Unsupported redirect to /course/index.php?id=12&key=134 detected, execution terminated.
      */
     public function test_that_user_gets_redirected_to_internal_wantsurl() {
         $this->create_user_private_key();
         $_POST['key'] = 'TestKey';
         $_POST['wantsurl'] = '/course/index.php?id=12&key=134';
+
+        $this->expectException(moodle_exception::class);
+        $this->expectExceptionMessage('Unsupported redirect to /course/index.php?id=12&key=134 detected, execution terminated');
 
         // Using @ is the only way to test this. Thanks moodle!
         @$this->auth->user_login_userkey();
@@ -847,10 +850,6 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
 
     /**
      * Test that a user gets redirected to external wantsurl URL successful log in.
-     *
-     * @expectedException moodle_exception
-     * @expectedExceptionMessage Unsupported redirect to http://test.com/course/index.php?id=12&key=134 detected,
-     * execution terminated.
      */
     public function test_that_user_gets_redirected_to_external_wantsurl() {
         $this->create_user_private_key();
@@ -858,15 +857,15 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
         $_POST['key'] = 'TestKey';
         $_POST['wantsurl'] = 'http://test.com/course/index.php?id=12&key=134';
 
+        $this->expectException(moodle_exception::class);
+        $this->expectExceptionMessage('Unsupported redirect to http://test.com/course/index.php?id=12&key=134 detected, execution terminated');
+
         // Using @ is the only way to test this. Thanks moodle!
         @$this->auth->user_login_userkey();
     }
 
     /**
      * Test that login hook redirects a user if skipsso not set and ssourl is set.
-     *
-     * @expectedException moodle_exception
-     * @expectedExceptionMessage Unsupported redirect to http://google.com detected, execution terminated.
      */
     public function test_loginpage_hook_redirects_if_skipsso_not_set_and_ssourl_set() {
         global $SESSION;
@@ -874,6 +873,9 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
         $SESSION->enrolkey_skipsso = 0;
         set_config('ssourl', 'http://google.com', 'auth_userkey');
         $this->auth = new auth_plugin_userkey();
+
+        $this->expectException(moodle_exception::class);
+        $this->expectExceptionMessage('Unsupported redirect to http://google.com detected, execution terminated.');
 
         $this->auth->loginpage_hook();
     }
@@ -906,9 +908,6 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
 
     /**
      * Test that pre login hook redirects a user if skipsso not set and ssourl is set.
-     *
-     * @expectedException moodle_exception
-     * @expectedExceptionMessage Unsupported redirect to http://google.com detected, execution terminated.
      */
     public function test_pre_loginpage_hook_redirects_if_skipsso_not_set_and_ssourl_set() {
         global $SESSION;
@@ -916,6 +915,9 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
         $SESSION->enrolkey_skipsso = 0;
         set_config('ssourl', 'http://google.com', 'auth_userkey');
         $this->auth = new auth_plugin_userkey();
+
+        $this->expectException(moodle_exception::class);
+        $this->expectExceptionMessage('Unsupported redirect to http://google.com detected, execution terminated.');
 
         $this->auth->pre_loginpage_hook();
     }
@@ -1021,22 +1023,22 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
 
     /**
      * Test when try to logout, but required return is not set.
-     *
-     * @expectedException moodle_exception
-     * @expectedExceptionMessage A required parameter (return) was missing
      */
     public function test_user_logout_userkey_when_required_return_not_set() {
+        $this->expectException(moodle_exception::class);
+        $this->expectExceptionMessage('A required parameter (return) was missing');
+
         $this->auth->user_logout_userkey();
     }
 
     /**
      * Test when try to logout, but user is not logged in.
-     *
-     * @expectedException moodle_exception
-     * @expectedExceptionMessage Unsupported redirect to http://google.com detected, execution terminated.
      */
     public function test_user_logout_userkey_when_user_is_not_logged_in() {
         $_POST['return'] = 'http://google.com';
+
+        $this->expectException(moodle_exception::class);
+        $this->expectExceptionMessage('Unsupported redirect to http://google.com detected, execution terminated.');
 
         $this->auth->user_logout_userkey();
     }
@@ -1064,12 +1066,13 @@ class auth_plugin_userkey_testcase extends advanced_testcase {
 
     /**
      * Test when try to logout, but user logged in with different auth type.
-     *
-     * @expectedException moodle_exception
-     * @expectedExceptionMessage A required parameter (return) was missing
      */
     public function test_user_logout_userkey_when_user_logged_in_but_return_not_set() {
         $this->setUser($this->user);
+
+        $this->expectException(moodle_exception::class);
+        $this->expectExceptionMessage('A required parameter (return) was missing');
+
         $this->auth->user_logout_userkey();
     }
 

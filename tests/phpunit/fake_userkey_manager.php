@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+namespace auth_userkey;
+
 /**
  * Fake userkey manager for testing.
  *
@@ -21,20 +23,35 @@
  * @copyright  2016 Dmitrii Metelkin (dmitriim@catalyst-au.net)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
-namespace auth_userkey;
-
 class fake_userkey_manager implements userkey_manager_interface {
 
+    /**
+     * Create key.
+     *
+     * @param int $userid user ID.
+     * @param null $allowedips Allowed IPs.
+     *
+     * @return string
+     */
     public function create_key($userid, $allowedips = null) {
         return 'FaKeKeyFoRtEsTiNg';
     }
 
+    /**
+     * Delete keys for a user.
+     *
+     * @param int $userid User ID to delete keys for.
+     */
     public function delete_keys($userid) {
-        // TODO: Implement delete_keys() method.
     }
 
+    /**
+     * Validate provided key.
+     *
+     * @param string $keyvalue Key to validate.
+     *
+     * @return object|void
+     */
     public function validate_key($keyvalue) {
-        // TODO: Implement validate_key() method.
     }
 }
