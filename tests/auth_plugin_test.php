@@ -26,7 +26,7 @@ use external_value;
 /**
  * Tests for auth_plugin_userkey class.
  *
- * @covers auth_plugin_userkey
+ * @covers \auth_plugin_userkey
  *
  * @package    auth_userkey
  * @copyright  2016 Dmitrii Metelkin (dmitriim@catalyst-au.net)

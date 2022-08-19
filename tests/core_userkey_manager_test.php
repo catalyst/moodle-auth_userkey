@@ -22,7 +22,7 @@ namespace auth_userkey;
  * Key validation is fully covered in auth_plugin_test.php file.
  * TODO: write tests for validate_key() function.
  *
- * @covers core_userkey_manager
+ * @covers \auth_userkey\core_userkey_manager
  *
  * @package    auth_userkey
  * @copyright  2016 Dmitrii Metelkin (dmitriim@catalyst-au.net)
