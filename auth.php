@@ -107,7 +107,7 @@ class auth_plugin_userkey extends auth_plugin_base {
     /**
      * Redirects the user to provided URL.
      *
-     * @param $url URL to redirect to.
+     * @param string $url URL to redirect to.
      *
      * @throws \moodle_exception If gets running via CLI or AJAX call.
      */
@@ -133,8 +133,6 @@ class auth_plugin_userkey extends auth_plugin_base {
 
     /**
      * Logs a user in using userkey and redirects after.
-     *
-     * @TODO: refactor this method to make it easy to read.
      *
      * @throws \moodle_exception If something went wrong.
      */

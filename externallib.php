@@ -28,6 +28,13 @@ require_once($CFG->libdir . "/externallib.php");
 require_once($CFG->dirroot . "/webservice/lib.php");
 require_once($CFG->dirroot . "/auth/userkey/auth.php");
 
+/**
+ * Webservices for auth_userkey.
+ *
+ * @package    auth_userkey
+ * @copyright  2016 Dmitrii Metelkin (dmitriim@catalyst-au.net)
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class auth_userkey_external extends external_api {
 
     /**

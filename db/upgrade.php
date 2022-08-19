@@ -22,6 +22,12 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+/**
+ * Upgrade hook.
+ *
+ * @param string $oldversion Old version of the plugin.
+ * @return bool
+ */
 function xmldb_auth_userkey_upgrade($oldversion) {
     global $DB;
 

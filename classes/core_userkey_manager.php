@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+namespace auth_userkey;
+
 /**
  * Key manager class.
  *
@@ -21,9 +23,6 @@
  * @copyright  2016 Dmitrii Metelkin (dmitriim@catalyst-au.net)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
-namespace auth_userkey;
-
 class core_userkey_manager implements userkey_manager_interface {
 
     /**

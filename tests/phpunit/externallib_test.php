@@ -21,7 +21,6 @@
  * @copyright  2016 Dmitrii Metelkin (dmitriim@catalyst-au.net)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
 class auth_userkey_externallib_testcase extends advanced_testcase {
     /**
      * User object.
