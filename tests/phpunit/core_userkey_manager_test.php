@@ -154,9 +154,6 @@ class core_userkey_manager_testcase extends advanced_testcase {
 
     /**
      * Test that IP address mismatch exception gets thrown if incorrect IP and outside whitelist.
-     *
-     * @expectedException moodle_exception
-     * @expectedExceptionMessage Client IP address mismatch
      */
     public function test_exception_if_ip_is_outside_whitelist() {
         global $DB;
@@ -168,6 +165,9 @@ class core_userkey_manager_testcase extends advanced_testcase {
         $value = $manager->create_key($this->user->id, '193.168.1.1');
 
         $_SERVER['HTTP_CLIENT_IP'] = '193.168.1.2';
+
+        $this->expectException(moodle_exception::class);
+        $this->expectExceptionMessage('Client IP address mismatch');
 
         $manager->validate_key($value);
     }

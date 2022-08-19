@@ -50,9 +50,6 @@ class auth_userkey_externallib_testcase extends advanced_testcase {
 
     /**
      * Test call with incorrect required parameter.
-     *
-     * @expectedException webservice_access_exception
-     * @expectedExceptionMessage Access control exception (The userkey authentication plugin is disabled.)
      */
     public function test_throwing_plugin_disabled_exception() {
         $this->setAdminUser();
@@ -60,6 +57,10 @@ class auth_userkey_externallib_testcase extends advanced_testcase {
         $params = array(
             'bla' => 'exists@test.com',
         );
+
+        $this->expectException(webservice_access_exception::class);
+        $this->expectExceptionMessage('Access control exception (The userkey authentication plugin is disabled.)');
+
         // Simulate the web service server.
         $result = auth_userkey_external::request_login_url($params);
         $result = external_api::clean_returnvalue(auth_userkey_external::request_login_url_returns(), $result);
@@ -146,9 +147,6 @@ class auth_userkey_externallib_testcase extends advanced_testcase {
 
     /**
      * Test call with missing email required parameter.
-     *
-     * @expectedException invalid_parameter_exception
-     * @expectedExceptionMessage Invalid parameter value detected (Required field "email" is not set or empty.)
      */
     public function test_exception_thrown_if_required_parameter_email_is_not_set() {
         global $CFG;
@@ -160,14 +158,14 @@ class auth_userkey_externallib_testcase extends advanced_testcase {
             'bla' => 'exists@test.com',
         );
 
+        $this->expectException(invalid_parameter_exception::class);
+        $this->expectExceptionMessage('Invalid parameter value detected (Required field "email" is not set or empty.)');
+
         auth_userkey_external::request_login_url($params);
     }
 
     /**
      * Test call with missing ip required parameter.
-     *
-     * @expectedException invalid_parameter_exception
-     * @expectedExceptionMessage Invalid parameter value detected (Required parameter "ip" is not set.)
      */
     public function test_exception_thrown_if_required_parameter_op_is_not_set() {
         global $CFG;
@@ -181,14 +179,14 @@ class auth_userkey_externallib_testcase extends advanced_testcase {
             'email' => 'exists@test.com',
         );
 
+        $this->expectException(invalid_parameter_exception::class);
+        $this->expectExceptionMessage('Invalid parameter value detected (Required parameter "ip" is not set.)');
+
         auth_userkey_external::request_login_url($params);
     }
 
     /**
      * Test request for a user who is not exist.
-     *
-     * @expectedException invalid_parameter_exception
-     * @expectedExceptionMessage Invalid parameter value detected (User is not exist)
      */
     public function test_request_not_existing_user() {
         global $CFG;
@@ -200,6 +198,9 @@ class auth_userkey_externallib_testcase extends advanced_testcase {
             'email' => 'notexists@test.com',
         );
 
+        $this->expectException(invalid_parameter_exception::class);
+        $this->expectExceptionMessage('Invalid parameter value detected (User is not exist)');
+
         // Simulate the web service server.
         $result = auth_userkey_external::request_login_url($params);
         $result = external_api::clean_returnvalue(auth_userkey_external::request_login_url_returns(), $result);
@@ -207,9 +208,6 @@ class auth_userkey_externallib_testcase extends advanced_testcase {
 
     /**
      * Test that permission exception gets thrown if user doesn't have required permissions.
-     *
-     * @expectedException required_capability_exception
-     * @expectedExceptionMessage Sorry, but you do not currently have permissions to do that (Generate login user key)
      */
     public function test_throwing_of_permission_exception() {
         global $CFG;
@@ -220,6 +218,9 @@ class auth_userkey_externallib_testcase extends advanced_testcase {
         $params = array(
             'email' => 'notexists@test.com',
         );
+
+        $this->expectException(required_capability_exception::class);
+        $this->expectExceptionMessage('Sorry, but you do not currently have permissions to do that (Generate login user key)');
 
         // Simulate the web service server.
         $result = auth_userkey_external::request_login_url($params);
