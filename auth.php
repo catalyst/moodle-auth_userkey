@@ -172,6 +172,16 @@ class auth_plugin_userkey extends auth_plugin_base {
         $this->userkeymanager->delete_keys($key->userid);
 
         $user = get_complete_user_data('id', $key->userid);
+        if (!empty($user->suspended)) {
+            $failurereason = AUTH_LOGIN_SUSPENDED;
+
+            // Trigger login failed event.
+            $event = \core\event\user_login_failed::create(array('userid' => $user->id,
+                'other' => array('username' => $user->username, 'reason' => $failurereason)));
+            $event->trigger();
+            error_log('[client '.getremoteaddr()."]  $CFG->wwwroot  Suspended Login:  $user->username  ".$_SERVER['HTTP_USER_AGENT']);
+            throw new invalid_parameter_exception('User suspended');
+        }
         complete_user_login($user);
 
         // Identify this session as using user key auth method.
