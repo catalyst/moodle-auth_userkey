@@ -54,3 +54,6 @@ $string['redirecterrordetected'] = 'Unsupported redirect to {$a} detected, execu
 $string['noip'] = 'Unable to fetch IP address of client.';
 $string['privacy:metadata'] = 'User key authentication plugin does not store any personal data.';
 $string['incorrectlogout'] = 'Incorrect logout request';
+$string['onboardingurl'] = 'Onboarding URL';
+$string['onboardingurl_desc'] = 'Onboarding URL to redirect users';
+$string['userid'] = 'User ID';

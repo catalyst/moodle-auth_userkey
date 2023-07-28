@@ -144,6 +144,7 @@ class auth_plugin_userkey extends auth_plugin_base {
 
         if (!empty($wantsurl)) {
             $redirecturl = $wantsurl;
+
         } else {
             $redirecturl = $CFG->wwwroot;
         }
@@ -164,12 +165,12 @@ class auth_plugin_userkey extends auth_plugin_base {
                 require_logout();
             } else {
                 // Don't process further if the user is already logged in.
-                $this->userkeymanager->delete_keys($key->userid);
+                //$this->userkeymanager->delete_keys($key->userid);
                 $this->redirect($redirecturl);
             }
         }
 
-        $this->userkeymanager->delete_keys($key->userid);
+        //$this->userkeymanager->delete_keys($key->userid);
 
         $user = get_complete_user_data('id', $key->userid);
         complete_user_login($user);
@@ -177,6 +178,40 @@ class auth_plugin_userkey extends auth_plugin_base {
         // Identify this session as using user key auth method.
         $SESSION->userkey = true;
 
+       $this->check_onboarding_completed($user);
+            
+    }
+
+    /**
+     * Onboarding completion check
+     * Check if the onboarding has been completed if not
+     * redirect to defined page
+     *
+     * @param object $user user object, later used for $USER
+     * @param string $password plain text password (with system magic quotes)
+     *
+     */
+
+    public function check_onboarding_completed($user) {
+    	global $CFG, $SESSION;
+        require_once($CFG->dirroot . "/login/lib.php");
+
+        if (!empty($this->config->onboardingurl)) {
+            $redirecturl = $this->config->onboardingurl;
+        } else {
+            $redirecturl = $CFG->wwwroot;
+        }
+
+        // Check if onboarding is completed.
+        $completed = get_user_preferences('onboarding_completed', 0, $user->id);
+        
+        if (empty($completed) || $completed == -1) {
+
+            set_user_preference('onboarding_completed', -1, $user->id);
+        }
+
+        // Redirect when done.
+        $SESSION->wantsurl = $redirecturl;
         $this->redirect($redirecturl);
     }
 
@@ -477,6 +512,7 @@ class auth_plugin_userkey extends auth_plugin_base {
      */
     public function get_allowed_mapping_fields() {
         return array(
+            'id' => get_string('userid', 'auth_userkey'),
             'username' => get_string('username'),
             'email' => get_string('email'),
             'idnumber' => get_string('idnumber'),
@@ -492,6 +528,14 @@ class auth_plugin_userkey extends auth_plugin_base {
         $mappingfield = $this->get_mapping_field();
 
         switch ($mappingfield) {
+            case  'id':
+                $parameter = array(
+                    'id' => new external_value(
+                        PARAM_INT,
+                        'User ID'
+                    ),
+                );
+                break;
             case 'username':
                 $parameter = array(
                     'username' => new external_value(

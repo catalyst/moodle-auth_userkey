@@ -1098,4 +1098,40 @@ class auth_plugin_test extends advanced_testcase {
         }
     }
 
+    /**
+     * Test onboarding complete and redirect
+     */
+    public function test_check_onboarding_completed() {
+        global $CFG, $SESSION, $USER;
+    
+        $this->create_user_private_key();
+        $CFG->wwwroot = 'http://www.example.com/moodle';
+        $_POST['key'] = 'TestKey';
+
+        // Mock the onboardingurl in the config.
+        set_config('onboardingurl', 'http://example.com/onboarding', 'auth_userkey');
+
+        // Assert that the the user will be redirected to the onboarding URL.
+        $this->expectException(moodle_exception::class);
+        $this->expectExceptionMessage('Unsupported redirect to http://example.com/onboarding detected, execution terminated');
+
+        $this->auth = new auth_plugin_userkey();
+    
+        // Set_user_preference to incompleted
+        set_user_preference('onboarding_completed', -1, $USER->id);
+    
+        @$this->auth->user_login_userkey();
+    
+
+        // Set_user_preference to incompleted
+        set_user_preference('onboarding_completed', 1, $USER->id);
+
+        // Assert that the the user will be redirected to the root URL.
+        $this->expectException(moodle_exception::class);
+        $this->expectExceptionMessage('Unsupported redirect to http://www.example.com/moodle detected, execution terminated');
+
+        @$this->auth->user_login_userkey();
+
+    }
+
 }

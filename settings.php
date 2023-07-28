@@ -48,6 +48,10 @@ if ($ADMIN->fulltree) {
             get_string('redirecturl_desc', 'auth_userkey', 'auth'),
             '', PARAM_URL));
 
+    $settings->add(new admin_setting_configtext('auth_userkey/onboardingurl', get_string('onboardingurl', 'auth_userkey'),
+        get_string('onboardingurl_desc', 'auth_userkey', 'auth'),
+        '', PARAM_URL));
+
     $settings->add(new admin_setting_configtext('auth_userkey/ssourl', get_string('ssourl', 'auth_userkey'),
             get_string('ssourl_desc', 'auth_userkey', 'auth'),
             '', PARAM_URL));
