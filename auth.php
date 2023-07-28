@@ -159,18 +159,25 @@ class auth_plugin_userkey extends auth_plugin_base {
             throw $exception;
         }
 
+        /**
+        * Delete the key now. Either:
+        * - the user is logged in
+        * - we log in the user
+        * - run into an error while logging in
+        *
+        * In all cases, we want to delete the key.
+        **/
+        $this->userkeymanager->delete_keys($key->userid);
+
         if (isloggedin()) {
             if ($USER->id != $key->userid) {
                 // Logout the current user if it's different to one that associated to the valid key.
                 require_logout();
             } else {
                 // Don't process further if the user is already logged in.
-                //$this->userkeymanager->delete_keys($key->userid);
                 $this->redirect($redirecturl);
             }
         }
-
-        //$this->userkeymanager->delete_keys($key->userid);
 
         $user = get_complete_user_data('id', $key->userid);
         complete_user_login($user);
@@ -178,8 +185,7 @@ class auth_plugin_userkey extends auth_plugin_base {
         // Identify this session as using user key auth method.
         $SESSION->userkey = true;
 
-       $this->check_onboarding_completed($user);
-            
+        $this->check_onboarding_completed($user);
     }
 
     /**
