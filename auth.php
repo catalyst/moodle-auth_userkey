@@ -179,7 +179,6 @@ class auth_plugin_userkey extends auth_plugin_base {
             $event = \core\event\user_login_failed::create(array('userid' => $user->id,
                 'other' => array('username' => $user->username, 'reason' => $failurereason)));
             $event->trigger();
-            error_log('[client '.getremoteaddr()."]  $CFG->wwwroot  Suspended Login:  $user->username  ".$_SERVER['HTTP_USER_AGENT']);
             throw new invalid_parameter_exception('User suspended');
         }
         complete_user_login($user);
