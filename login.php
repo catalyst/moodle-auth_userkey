@@ -22,10 +22,16 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require_once(dirname(__FILE__) . '/../../config.php');
+require_once(__DIR__ . '/../../config.php');
+
+$key = required_param('key', PARAM_INT);
+
+$PAGE->set_context(context_system::instance());
+$PAGE->set_url(new moodle_url('/auth/userkey/login.php', ['key' => $key]));
+
 
 if (!is_enabled_auth('userkey')) {
     throw new moodle_exception(get_string('pluginisdisabled', 'auth_userkey'));
 }
 
-get_auth_plugin('userkey')->user_login_userkey();
+get_auth_plugin('userkey')->user_login_userkey(); 

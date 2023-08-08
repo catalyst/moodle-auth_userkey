@@ -57,3 +57,5 @@ $string['incorrectlogout'] = 'Incorrect logout request';
 $string['onboardingurl'] = 'Onboarding URL';
 $string['onboardingurl_desc'] = 'Onboarding URL to redirect users';
 $string['userid'] = 'User ID';
+$string['error_siteadmin'] = 'Cannot reset passwords for siteadmins';
+
