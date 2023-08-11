@@ -1101,7 +1101,7 @@ class auth_plugin_test extends advanced_testcase {
     /**
      * Test onboarding complete and redirect
      */
-    public function test_check_onboarding_completed() {
+    public function test_redirect_to_onboarding() {
         global $CFG, $SESSION, $USER;
     
         $this->create_user_private_key();
@@ -1113,7 +1113,7 @@ class auth_plugin_test extends advanced_testcase {
 
         // Assert that the the user will be redirected to the onboarding URL.
         $this->expectException(moodle_exception::class);
-        $this->expectExceptionMessage('Unsupported redirect to http://example.com/onboarding detected, execution terminated');
+        $this->expectExceptionMessage('Unsupported redirect to http://example.com/onboarding?token=TestKey detected, execution terminated');
 
         $this->auth = new auth_plugin_userkey();
     

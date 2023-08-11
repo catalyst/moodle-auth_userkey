@@ -111,12 +111,12 @@ class auth_plugin_userkey extends auth_plugin_base {
      *
      * @throws \moodle_exception If gets running via CLI or AJAX call.
      */
-    protected function redirect($url) {
+    protected function redirect($url, $message = null) {
         if (CLI_SCRIPT || AJAX_SCRIPT) {
             throw new moodle_exception('redirecterrordetected', 'auth_userkey', '', $url);
         }
 
-        redirect($url);
+        redirect($url, $message);
     }
 
     /**
@@ -144,7 +144,8 @@ class auth_plugin_userkey extends auth_plugin_base {
 
         if (!empty($wantsurl)) {
             $redirecturl = $wantsurl;
-
+        } if (!empty($this->config->onboardingurl)) {
+            $redirecturl = $this->config->onboardingurl.'?token='.$keyvalue;
         } else {
             $redirecturl = $CFG->wwwroot;
         }
@@ -156,18 +157,11 @@ class auth_plugin_userkey extends auth_plugin_base {
             if (isloggedin()) {
                 require_logout();
             }
-            throw $exception;
-        }
 
-        /**
-        * Delete the key now. Either:
-        * - the user is logged in
-        * - we log in the user
-        * - run into an error while logging in
-        *
-        * In all cases, we want to delete the key.
-        **/
-        $this->userkeymanager->delete_keys($key->userid);
+            // try to redirect with moodle redirect function
+            $this->redirect($CFG->wwwroot . '/login/index.php', get_string('expired_key', 'auth_userkey'));
+
+        }
 
         if (isloggedin()) {
             if ($USER->id != $key->userid) {
@@ -185,7 +179,7 @@ class auth_plugin_userkey extends auth_plugin_base {
         // Identify this session as using user key auth method.
         $SESSION->userkey = true;
 
-        $this->check_onboarding_completed($user);
+        $this->redirect_to_onboarding($user, $keyvalue);
     }
 
     /**
@@ -198,12 +192,12 @@ class auth_plugin_userkey extends auth_plugin_base {
      *
      */
 
-    public function check_onboarding_completed($user) {
+    public function redirect_to_onboarding($user, $keyvalue) {
     	global $CFG, $SESSION;
         require_once($CFG->dirroot . "/login/lib.php");
 
         if (!empty($this->config->onboardingurl)) {
-            $redirecturl = $this->config->onboardingurl;
+            $redirecturl = $this->config->onboardingurl.'?token='.$keyvalue;
         } else {
             $redirecturl = $CFG->wwwroot;
         }

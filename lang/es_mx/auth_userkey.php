@@ -58,5 +58,5 @@ $string['onboardingurl'] = 'Onboarding URL';
 $string['onboardingurl_desc'] = 'Onboarding URL to redirect users';
 $string['userid'] = 'User ID';
 $string['error_siteadmin'] = 'Cannot reset passwords for siteadmins';
-$string['expired_key'] = 'Your key has expired';
+$string['expired_key'] = 'Su clave ha expirado, por favor solicite una nueva o intente iniciar sesión';
 
