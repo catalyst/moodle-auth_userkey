@@ -13,15 +13,17 @@ URL to be log in to Moodle without typing username and password.
 Using
 -----
 1. Install the plugin as usual.
-2. Enable and configure just installed plugin. Set required Mapping field, User key life time, IP restriction and Logout redirect URL.
-3. Enable web service advance feature (Admin > Advanced features), more info http://docs.moodle.org/en/Web_services
-4. Enable one of the supported protocols (Admin > Plugins > Web services > Manage protocols)
-5. Create a token for a specific user and for the service 'User key authentication web service' (Admin > Plugins > Web services > Manage tokens)
-6. Make sure that the "web service" user has 'auth/userkey:generatekey' capability.
-7. Authorise the "web service" user: Admin > Plugins > Web services > External services, select 'Authorised users' for the web service, and add the user.
-8. Enable the userkey authentication plugin issue #93, more info https://github.com/catalyst/moodle-auth_userkey/issues/93#issuecomment-1669268077
-9. Configure your external application to make a web call to get login URL.
-10. Redirect your users to this URL to be logged in to Moodle.
+2. Enable the userkey authentication plugin (Site administration -> Plugins -> Authentication and then enable User key).
+3. Configure the plugin. Set required Mapping field, User key life time, IP restriction and Logout redirect URL.
+3. Enable and configure just installed plugin. Set required Mapping field, User key life time, IP restriction and Logout redirect URL.
+4. Enable web service advance feature (Admin > Advanced features), more info http://docs.moodle.org/en/Web_services
+5. Enable one of the supported protocols (Admin > Plugins > Web services > Manage protocols)
+6. Create a token for a specific user and for the service 'User key authentication web service' (Admin > Plugins > Web services > Manage tokens)
+7. Make sure that the "web service" user has 'auth/userkey:generatekey' capability.
+8. Authorise the "web service" user: Admin > Plugins > Web services > External services, select 'Authorised users' for the web service, and add the user.
+9. Enable the userkey authentication plugin issue #93, more info https://github.com/catalyst/moodle-auth_userkey/issues/93#issuecomment-1669268077
+10. Configure your external application to make a web call to get login URL.
+11. Redirect your users to this URL to be logged in to Moodle.
 
 Configuration
 -------------
