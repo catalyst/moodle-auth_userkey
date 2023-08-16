@@ -13,14 +13,16 @@ URL to be log in to Moodle without typing username and password.
 Using
 -----
 1. Install the plugin as usual.
-2. Enable and configure just installed plugin. Set required Mapping field, User key life time, IP restriction and Logout redirect URL.
-3. Enable web service advance feature (Admin > Advanced features), more info http://docs.moodle.org/en/Web_services
-4. Enable one of the supported protocols (Admin > Plugins > Web services > Manage protocols)
-5. Create a token for a specific user and for the service 'User key authentication web service' (Admin > Plugins > Web services > Manage tokens)
-6. Make sure that the "web service" user has 'auth/userkey:generatekey' capability.
-7. Authorise the "web service" user: Admin > Plugins > Web services > External services, select 'Authorised users' for the web service, and add the user.
-8. Configure your external application to make a web call to get login URL.
-9. Redirect your users to this URL to be logged in to Moodle.
+2. Enable the userkey authentication plugin (Site administration -> Plugins -> Authentication and then enable User key).
+3. Configure the plugin. Set required Mapping field, User key life time, IP restriction and Logout redirect URL.
+4. Enable and configure just installed plugin. Set required Mapping field, User key life time, IP restriction and Logout redirect URL.
+5. Enable web service advance feature (Admin > Advanced features), more info http://docs.moodle.org/en/Web_services
+6. Enable one of the supported protocols (Admin > Plugins > Web services > Manage protocols)
+7. Create a token for a specific user and for the service 'User key authentication web service' (Admin > Plugins > Web services > Manage tokens)
+8. Make sure that the "web service" user has 'auth/userkey:generatekey' capability.
+9. Authorise the "web service" user: Admin > Plugins > Web services > External services, select 'Authorised users' for the web service, and add the user.
+10. Configure your external application to make a web call to get login URL.
+11. Redirect your users to this URL to be logged in to Moodle.
 
 Configuration
 -------------
