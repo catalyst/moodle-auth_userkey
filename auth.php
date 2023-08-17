@@ -159,7 +159,7 @@ class auth_plugin_userkey extends auth_plugin_base {
             }
 
             // try to redirect with moodle redirect function
-            $this->redirect($CFG->wwwroot . '/login/index.php', get_string('expired_key', 'auth_userkey'));
+            $this->redirect($CFG->wwwroot . '/login/index.php');
 
         }
 
