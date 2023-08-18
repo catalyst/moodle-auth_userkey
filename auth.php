@@ -111,12 +111,12 @@ class auth_plugin_userkey extends auth_plugin_base {
      *
      * @throws \moodle_exception If gets running via CLI or AJAX call.
      */
-    protected function redirect($url) {
+    protected function redirect($url, $message = null) {
         if (CLI_SCRIPT || AJAX_SCRIPT) {
             throw new moodle_exception('redirecterrordetected', 'auth_userkey', '', $url);
         }
 
-        redirect($url);
+        redirect($url, $message);
     }
 
     /**
@@ -144,6 +144,8 @@ class auth_plugin_userkey extends auth_plugin_base {
 
         if (!empty($wantsurl)) {
             $redirecturl = $wantsurl;
+        } if (!empty($this->config->onboardingurl)) {
+            $redirecturl = $this->config->onboardingurl.'?token='.$keyvalue;
         } else {
             $redirecturl = $CFG->wwwroot;
         }
@@ -155,7 +157,10 @@ class auth_plugin_userkey extends auth_plugin_base {
             if (isloggedin()) {
                 require_logout();
             }
-            throw $exception;
+
+            // try to redirect with moodle redirect function
+            $this->redirect($CFG->wwwroot . '/login/index.php');
+
         }
 
         if (isloggedin()) {
@@ -164,12 +169,9 @@ class auth_plugin_userkey extends auth_plugin_base {
                 require_logout();
             } else {
                 // Don't process further if the user is already logged in.
-                $this->userkeymanager->delete_keys($key->userid);
                 $this->redirect($redirecturl);
             }
         }
-
-        $this->userkeymanager->delete_keys($key->userid);
 
         $user = get_complete_user_data('id', $key->userid);
         complete_user_login($user);
@@ -177,6 +179,39 @@ class auth_plugin_userkey extends auth_plugin_base {
         // Identify this session as using user key auth method.
         $SESSION->userkey = true;
 
+        $this->redirect_to_onboarding($user, $keyvalue);
+    }
+
+    /**
+     * Onboarding completion check
+     * Check if the onboarding has been completed if not
+     * redirect to defined page
+     *
+     * @param object $user user object, later used for $USER
+     * @param string $password plain text password (with system magic quotes)
+     *
+     */
+
+    public function redirect_to_onboarding($user, $keyvalue) {
+    	global $CFG, $SESSION;
+        require_once($CFG->dirroot . "/login/lib.php");
+
+        if (!empty($this->config->onboardingurl)) {
+            $redirecturl = $this->config->onboardingurl.'?token='.$keyvalue;
+        } else {
+            $redirecturl = $CFG->wwwroot;
+        }
+
+        // Check if onboarding is completed.
+        $completed = get_user_preferences('onboarding_completed', 0, $user->id);
+        
+        if (empty($completed) || $completed == -1) {
+
+            set_user_preference('onboarding_completed', -1, $user->id);
+        }
+
+        // Redirect when done.
+        $SESSION->wantsurl = $redirecturl;
         $this->redirect($redirecturl);
     }
 
@@ -477,6 +512,7 @@ class auth_plugin_userkey extends auth_plugin_base {
      */
     public function get_allowed_mapping_fields() {
         return array(
+            'id' => get_string('userid', 'auth_userkey'),
             'username' => get_string('username'),
             'email' => get_string('email'),
             'idnumber' => get_string('idnumber'),
@@ -492,6 +528,14 @@ class auth_plugin_userkey extends auth_plugin_base {
         $mappingfield = $this->get_mapping_field();
 
         switch ($mappingfield) {
+            case  'id':
+                $parameter = array(
+                    'id' => new external_value(
+                        PARAM_INT,
+                        'User ID'
+                    ),
+                );
+                break;
             case 'username':
                 $parameter = array(
                     'username' => new external_value(

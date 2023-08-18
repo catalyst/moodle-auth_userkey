@@ -68,6 +68,10 @@ class auth_userkey_external extends external_api {
             throw new webservice_access_exception(get_string('pluginisdisabled', 'auth_userkey'));
         }
 
+        if (is_siteadmin($user)) {
+            throw new \invalid_parameter_exception(get_string('error_siteadmin', 'auth_userkey'));
+        }
+
         $context = context_system::instance();
         require_capability('auth/userkey:generatekey', $context);
 
