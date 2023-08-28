@@ -444,6 +444,10 @@ class auth_plugin_userkey extends auth_plugin_base {
 
         $user = $DB->get_record('user', $params);
 
+        if (is_siteadmin($user)) {
+            throw new invalid_parameter_exception(get_string('error_siteadmin', 'auth_userkey'));
+        }
+
         if (empty($user)) {
             if ($this->should_create_user()) {
                 $user = $this->create_user($data);
