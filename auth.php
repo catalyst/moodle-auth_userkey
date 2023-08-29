@@ -26,6 +26,7 @@ defined('MOODLE_INTERNAL') || die();
 
 use auth_userkey\core_userkey_manager;
 use auth_userkey\userkey_manager_interface;
+use local_aprende\primary_diplomado;
 
 require_once($CFG->libdir . "/externallib.php");
 require_once($CFG->libdir.'/authlib.php');
@@ -204,10 +205,17 @@ class auth_plugin_userkey extends auth_plugin_base {
 
         // Check if onboarding is completed.
         $completed = get_user_preferences('onboarding_completed', 0, $user->id);
+
+        // Added primary diplomado check
+        $primarydiplomado = primary_diplomado::get_value($user->id);
         
-        if (empty($completed) || $completed == -1) {
+        if ((empty($completed) || $completed == -1) && empty($primarydiplomado)) {
 
             set_user_preference('onboarding_completed', -1, $user->id);
+        } else {
+            // log the user out and redirect to the reset password page.
+            require_logout();
+            $this->redirect(get_config('local_onboarding', 'reset_password_url'));
         }
 
         // Redirect when done.
