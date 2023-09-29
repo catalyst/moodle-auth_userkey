@@ -175,6 +175,7 @@ class auth_plugin_userkey extends auth_plugin_base {
         }
 
         $user = get_complete_user_data('id', $key->userid);
+        
         complete_user_login($user);
 
         // Identify this session as using user key auth method.
@@ -194,7 +195,7 @@ class auth_plugin_userkey extends auth_plugin_base {
      */
 
     public function redirect_to_onboarding($user, $keyvalue) {
-    	global $CFG, $SESSION;
+    	global $CFG, $SESSION, $USER;
         require_once($CFG->dirroot . "/login/lib.php");
 
         if (!empty($this->config->onboardingurl)) {
@@ -208,8 +209,8 @@ class auth_plugin_userkey extends auth_plugin_base {
 
         // Added primary diplomado check
         $primarydiplomado = primary_diplomado::get_value($user->id);
-        
-        if ((empty($completed) || $completed == -1) && empty($primarydiplomado)) {
+
+        if ((empty($completed) || $completed == -1) && ($USER->firstaccess == time()) ) {
 
             set_user_preference('onboarding_completed', -1, $user->id);
         } else {
