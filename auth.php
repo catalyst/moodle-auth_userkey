@@ -208,8 +208,10 @@ class auth_plugin_userkey extends auth_plugin_base {
 
         // Added primary diplomado check
         $primarydiplomado = primary_diplomado::get_value($user->id);
-        
-        if ((empty($completed) || $completed == -1) && empty($primarydiplomado)) {
+
+        $firstaccessdate = date('Y-m-d', $USER->firstaccess);
+
+        if ((empty($completed) || $completed == -1) && $firstaccessdate == date('Y-m-d') ) {
 
             set_user_preference('onboarding_completed', -1, $user->id);
         } else {
