@@ -207,18 +207,16 @@ class auth_plugin_userkey extends auth_plugin_base {
         // Check if onboarding is completed.
         $completed = get_user_preferences('onboarding_completed', 0, $user->id);
 
-        // Added primary diplomado check
-        $primarydiplomado = primary_diplomado::get_value($user->id);
-
         $firstaccessdate = date('Y-m-d', $USER->firstaccess);
 
-        if ((empty($completed) || $completed == -1) && $firstaccessdate == date('Y-m-d') ) {
+        $isfirstaccess = $firstaccessdate == date('Y-m-d') ? true : false;
 
+        if ((empty($completed) || $completed == -1) && $isfirstaccess ) {
+            // Mark onboarding as uncomplete.
             set_user_preference('onboarding_completed', -1, $user->id);
         } else {
-            // log the user out and redirect to the reset password page.
-            require_logout();
-            $this->redirect(get_config('local_onboarding', 'reset_password_url'));
+            // Add change password flag.
+            $redirecturl .= '&changepassword=1';
         }
 
         // Redirect when done.
