@@ -639,23 +639,10 @@ class auth_plugin_userkey extends auth_plugin_base {
     /**
      * Log out user and redirect.
      */
-    public function validate_url() {
-        return filter_var($this->config->redirecturl, FILTER_VALIDATE_URL);
-    }
-
-    public function define_redirect() {
-        global $CFG;
-
-        if (!$this->validate_url()) {
-            return $CFG->wwwroot;
-        }
-        return $this->config->redirecturl;
-    }
-    
     public function user_logout_userkey() {
         global $CFG, $USER;
 
-        $redirect = $this->define_redirect();
+        $redirect = required_param('return', PARAM_LOCALURL);
 
         // We redirect when user's session in Moodle already has expired
         // or the user is still logged in using "userkey" auth type.
