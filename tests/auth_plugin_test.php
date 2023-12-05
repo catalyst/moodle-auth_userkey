@@ -46,6 +46,12 @@ class auth_plugin_test extends advanced_testcase {
     protected $user;
 
     /**
+     * Path used for the redirection.
+     * @var string
+     */
+    const REDIRECTION_PATH = "/redirection";
+
+    /**
      * Initial set up.
      */
     public function setUp(): void {
@@ -392,7 +398,7 @@ class auth_plugin_test extends advanced_testcase {
 
         self::getDataGenerator()->create_user($originaluser);
 
-        $duplicateuser = clone($originaluser);
+        $duplicateuser = clone ($originaluser);
         $duplicateuser->email = 'duplicateuser@test.com';
 
         $this->expectException(invalid_parameter_exception::class);
@@ -422,7 +428,7 @@ class auth_plugin_test extends advanced_testcase {
 
         self::getDataGenerator()->create_user($originaluser);
 
-        $duplicateuser = clone($originaluser);
+        $duplicateuser = clone ($originaluser);
         $duplicateuser->username = 'duplicateuser';
 
         $this->expectException(invalid_parameter_exception::class);
@@ -1039,10 +1045,12 @@ class auth_plugin_test extends advanced_testcase {
      * Test when try to logout, but user is not logged in.
      */
     public function test_user_logout_userkey_when_user_is_not_logged_in() {
-        $_POST['return'] = 'http://google.com';
+        $_POST['return'] = self::REDIRECTION_PATH;
 
         $this->expectException(moodle_exception::class);
-        $this->expectExceptionMessage('Unsupported redirect to http://google.com detected, execution terminated.');
+        $this->expectExceptionMessage(
+            sprintf("Unsupported redirect to %s detected, execution terminated.", SELF::REDIRECTION_PATH)
+        );
 
         $this->auth->user_logout_userkey();
     }
@@ -1053,7 +1061,7 @@ class auth_plugin_test extends advanced_testcase {
     public function test_user_logout_userkey_when_user_logged_in_with_different_auth() {
         global $USER;
 
-        $_POST['return'] = 'http://google.com';
+        $_POST['return'] = self::REDIRECTION_PATH;
 
         $this->setUser($this->user);
         try {
@@ -1088,14 +1096,16 @@ class auth_plugin_test extends advanced_testcase {
 
         $this->setUser($this->user);
         $USER->auth = 'userkey';
-        $_POST['return'] = 'http://google.com';
+        $_POST['return'] = self::REDIRECTION_PATH;
 
         try {
             $this->auth->user_logout_userkey();
         } catch (moodle_exception $e) {
             $this->assertFalse(isloggedin());
-            $this->assertEquals('Unsupported redirect to http://google.com detected, execution terminated.', $e->getMessage());
+            $this->assertEquals(
+                sprintf('Unsupported redirect to %s detected, execution terminated.', self::REDIRECTION_PATH),
+                $e->getMessage()
+            );
         }
     }
-
 }
