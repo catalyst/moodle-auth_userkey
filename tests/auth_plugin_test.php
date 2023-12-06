@@ -1049,7 +1049,7 @@ class auth_plugin_test extends advanced_testcase {
 
         $this->expectException(moodle_exception::class);
         $this->expectExceptionMessage(
-            sprintf("Unsupported redirect to %s detected, execution terminated.", SELF::REDIRECTION_PATH)
+            sprintf("Unsupported redirect to %s detected, execution terminated.", self::REDIRECTION_PATH)
         );
 
         $this->auth->user_logout_userkey();
