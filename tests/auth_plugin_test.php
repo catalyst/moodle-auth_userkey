@@ -243,6 +243,25 @@ class auth_plugin_test extends advanced_testcase {
         $this->expectExceptionMessage('Invalid parameter value detected (User is not exist)');
         $actual = $this->auth->get_login_url($user);
     }
+    /**
+     * Test that auth plugin throws correct exception if we trying to request not existing user.
+     */
+    public function test_throwing_exception_if_user_is_suspended() {
+        global $USER, $SESSION;
+
+        $user = $this->getDataGenerator()->create_user();
+        $user->suspended = 1;
+        $this->setUser($user);
+        $this->assertEquals($USER->id, $user->id);
+
+        $this->create_user_private_key();
+        $_POST['key'] = 'TestKey';
+
+        $this->expectException(invalid_parameter_exception::class);
+        $this->expectExceptionMessage('Invalid parameter value detected (User is suspended)');
+
+        $this->auth->user_login_userkey();
+    }
 
     /**
      * Test that auth plugin throws correct exception if we trying to request user,
