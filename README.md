@@ -1,5 +1,4 @@
-![GitHub Workflow Status (branch)](https://img.shields.io/github/workflow/status/catalyst/moodle-auth_userkey/ci/MOODLE_33PLUS)
-
+[![ci](https://github.com/catalyst/moodle-auth_userkey/actions/workflows/ci.yml/badge.svg?branch=MOODLE_405_STABLE)](https://github.com/catalyst/moodle-auth_userkey/actions/workflows/ci.yml?branch=MOODLE_405_STABLE)
 
 Log in to Moodle using one time user key.
 =========================================
@@ -13,8 +12,8 @@ URL to be log in to Moodle without typing username and password.
 
 | Moodle Version   | Branch            | 
 |------------------|-------------------|
-| Moodle 3.3 - 4.1 | MOODLE_33PLUS     | 
 | Moodle 4.5+      | MOODLE_405_STABLE | 
+| Moodle 3.3 - 4.1 | MOODLE_33PLUS     |
 
 Using
 -----
