@@ -1024,7 +1024,37 @@ final class auth_plugin_test extends advanced_testcase {
     }
 
     /**
-     * Test that if one user logged, he will be logged out before a new one is authorised.
+     * Test that if one user logged, he will be logged out and redirected back to the login endpoint.
+     */
+    public function test_that_different_authorised_user_is_logged_out_and_redirected_back(): void {
+        global $USER;
+
+        $user = $this->getDataGenerator()->create_user();
+        $this->setUser($user);
+        $this->assertEquals($USER->id, $user->id);
+
+        $this->create_user_private_key();
+
+        $_POST['key'] = 'TestKey';
+        $_POST['wantsurl'] = self::REDIRECTION_PATH;
+
+        try {
+            // Using @ is the only way to test this. Thanks moodle!
+            @$this->auth->user_login_userkey();
+            $this->fail('A redirect back to the login endpoint was expected.');
+        } catch (moodle_exception $e) {
+            // The other user is logged out, and the login is not completed in this request:
+            // require_logout() has closed the session, so complete_user_login() could not
+            // regenerate the session id here. The key is untouched and used on the next request.
+            $this->assertFalse(isloggedin());
+            $this->assertStringContainsString('/auth/userkey/login.php', $e->getMessage());
+            $this->assertStringContainsString('key=TestKey', $e->getMessage());
+            $this->assertStringContainsString('wantsurl=' . rawurlencode(self::REDIRECTION_PATH), $e->getMessage());
+        }
+    }
+
+    /**
+     * Test that the key still logs the new user in on the request following the logout redirect.
      */
     public function test_that_different_authorised_user_is_logged_out_and_new_one_logged_in(): void {
         global $USER, $SESSION;
@@ -1037,9 +1067,20 @@ final class auth_plugin_test extends advanced_testcase {
 
         $_POST['key'] = 'TestKey';
 
+        // First request: logs the other user out and redirects back to the login endpoint.
         try {
             // Using @ is the only way to test this. Thanks moodle!
             @$this->auth->user_login_userkey();
+            $this->fail('A redirect back to the login endpoint was expected.');
+        } catch (moodle_exception $e) {
+            $this->assertFalse(isloggedin());
+        }
+
+        // Second request: the key was not consumed above, so it now logs the key's user in.
+        try {
+            // Using @ is the only way to test this. Thanks moodle!
+            @$this->auth->user_login_userkey();
+            $this->fail('A redirect to the target url was expected.');
         } catch (moodle_exception $e) {
             $this->assertEquals($this->user->id, $USER->id);
             $this->assertSame(sesskey(), $USER->sesskey);

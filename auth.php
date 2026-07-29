@@ -159,8 +159,22 @@ class auth_plugin_userkey extends auth_plugin_base {
 
         if (isloggedin()) {
             if ($USER->id != $key->userid) {
-                // Logout the current user if it's different to one that associated to the valid key.
+                // A different user is currently logged in. require_logout() closes the PHP
+                // session; continuing the login in the same request would then make
+                // complete_user_login()'s session_regenerate_id() run against a closed
+                // session (the "Session ID cannot be regenerated when there is no active
+                // session" warning plus the "mutated the session after it was closed"
+                // notice). Instead, log the old user out and bounce back to this same
+                // endpoint so the key login runs on a clean, logged-out session. The key
+                // is not consumed until below, so it is still valid on the second pass.
                 require_logout();
+
+                $params = ['key' => $keyvalue];
+                if (!empty($wantsurl)) {
+                    $params['wantsurl'] = $wantsurl;
+                }
+                $loginurl = new moodle_url('/auth/userkey/login.php', $params);
+                $this->redirect($loginurl->out(false));
             } else {
                 // Don't process further if the user is already logged in.
                 $this->userkeymanager->delete_keys($key->userid);
