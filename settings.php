@@ -69,6 +69,14 @@ if ($ADMIN->fulltree) {
     ));
 
     $settings->add(new admin_setting_configtext(
+        'auth_userkey/allowedredirecthosts',
+        get_string('allowedredirecthosts', 'auth_userkey'),
+        get_string('allowedredirecthosts_desc', 'auth_userkey'),
+        '',
+        PARAM_TEXT
+    ));
+
+    $settings->add(new admin_setting_configtext(
         'auth_userkey/ssourl',
         get_string('ssourl', 'auth_userkey'),
         get_string('ssourl_desc', 'auth_userkey', 'auth'),

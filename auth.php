@@ -140,12 +140,7 @@ class auth_plugin_userkey extends auth_plugin_base {
 
         $keyvalue = required_param('key', PARAM_ALPHANUM);
         $wantsurl = optional_param('wantsurl', '', PARAM_URL);
-
-        if (!empty($wantsurl)) {
-            $redirecturl = $wantsurl;
-        } else {
-            $redirecturl = $CFG->wwwroot;
-        }
+        $redirecturl = $this->get_redirect_url($wantsurl);
 
         try {
             $key = $this->userkeymanager->validate_key($keyvalue);
@@ -671,5 +666,50 @@ class auth_plugin_userkey extends auth_plugin_base {
             // If logged in with different auth type, then display an error.
             throw new moodle_exception('incorrectlogout', 'auth_userkey', $CFG->wwwroot);
         }
+    }
+
+    /**
+     * Returns a safe redirect URL.
+     *
+     * Local Moodle URLs are always allowed. External URLs are allowed only if
+     * their host is included in the configured list of allowed redirect hosts.
+     *
+     * @param string $wantsurl Requested redirect URL.
+     * @return string Safe redirect URL.
+     */
+    protected function get_redirect_url(string $wantsurl): string {
+        global $CFG;
+
+        if (empty($wantsurl)) {
+            return $CFG->wwwroot;
+        }
+
+        $redirecthost = parse_url($wantsurl, PHP_URL_HOST);
+        $localhost = parse_url($CFG->wwwroot, PHP_URL_HOST);
+
+        if (empty($redirecthost) || empty($localhost)) {
+            return $CFG->wwwroot;
+        }
+
+        // Local Moodle URLs are always allowed.
+        if (strcasecmp($redirecthost, $localhost) === 0) {
+            return $wantsurl;
+        }
+
+        if (empty($this->config->allowedredirecthosts)) {
+            return $CFG->wwwroot;
+        }
+
+        $allowedhosts = explode(';', $this->config->allowedredirecthosts);
+
+        foreach ($allowedhosts as $allowedhost) {
+            $allowedhost = trim($allowedhost);
+
+            if ($allowedhost !== '' && strcasecmp($redirecthost, $allowedhost) === 0) {
+                return $wantsurl;
+            }
+        }
+
+        return $CFG->wwwroot;
     }
 }
