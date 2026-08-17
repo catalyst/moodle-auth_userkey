@@ -86,7 +86,13 @@ You can amend login URL by "wantsurl" parameter to redirect user after they logg
 
 E.g. http://yourmoodle.com/auth/userkey/login.php?key=uniquekey&wantsurl=http://yourmoodle.com/course/view.php?id=3
 
-Wantsurl maybe internal and external.
+The "wantsurl" parameter can point to a local Moodle URL. External URLs are only allowed when their host is explicitly configured in the "Allowed redirect hosts" setting.
+
+To allow redirects to external URLs, add the trusted hosts to the "Allowed redirect hosts" setting. Multiple hosts must be separated by semicolons.
+
+E.g. example.com;example.org
+
+Only host names should be provided, without the protocol or path. If an external "wantsurl" uses a host that is not configured in the allowlist, the user will be redirected to the Moodle site URL instead.
 
 
 **User key life time**

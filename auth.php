@@ -684,6 +684,11 @@ class auth_plugin_userkey extends auth_plugin_base {
             return $CFG->wwwroot;
         }
 
+        // Allow local relative URLs, but not protocol-relative URLs.
+        if (str_starts_with($wantsurl, '/') && !str_starts_with($wantsurl, '//')) {
+            return $wantsurl;
+        }
+
         $redirecthost = parse_url($wantsurl, PHP_URL_HOST);
         $localhost = parse_url($CFG->wwwroot, PHP_URL_HOST);
 

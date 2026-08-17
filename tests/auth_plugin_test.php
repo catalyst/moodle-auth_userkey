@@ -922,9 +922,11 @@ final class auth_plugin_test extends advanced_testcase {
     }
 
     /**
-     * Test that a user gets redirected to external wantsurl URL successful log in.
+     * Test that external wantsurl is blocked by default.
      */
-    public function test_that_user_gets_redirected_to_external_wantsurl(): void {
+    public function test_that_external_wantsurl_is_blocked_by_default(): void {
+        global $CFG;
+
         $this->create_user_private_key();
 
         $_POST['key'] = 'TestKey';
@@ -932,7 +934,47 @@ final class auth_plugin_test extends advanced_testcase {
 
         $this->expectException(moodle_exception::class);
         $this->expectExceptionMessage(
+            "Unsupported redirect to {$CFG->wwwroot} detected, execution terminated"
+        );
+
+        // Using @ is the only way to test this. Thanks moodle!
+        @$this->auth->user_login_userkey();
+    }
+
+    /**
+     * Test that a user gets redirected to an allowed external wantsurl.
+     */
+    public function test_that_user_gets_redirected_to_allowed_external_wantsurl(): void {
+        $this->create_user_private_key();
+
+        $this->auth->config->allowedredirecthosts = 'test.com';
+
+        $_POST['key'] = 'TestKey';
+        $_POST['wantsurl'] = 'http://test.com/course/index.php?id=12&key=134';
+
+        $this->expectException(moodle_exception::class);
+        $this->expectExceptionMessage(
             'Unsupported redirect to http://test.com/course/index.php?id=12&key=134 detected, execution terminated'
+        );
+
+        // Using @ is the only way to test this. Thanks moodle!
+        @$this->auth->user_login_userkey();
+    }
+
+    /**
+     * Test that a protocol-relative wantsurl is blocked.
+     */
+    public function test_that_protocol_relative_wantsurl_is_blocked(): void {
+        global $CFG;
+
+        $this->create_user_private_key();
+
+        $_POST['key'] = 'TestKey';
+        $_POST['wantsurl'] = '//evil.example.com/course/index.php?id=12';
+
+        $this->expectException(moodle_exception::class);
+        $this->expectExceptionMessage(
+            "Unsupported redirect to {$CFG->wwwroot} detected, execution terminated"
         );
 
         // Using @ is the only way to test this. Thanks moodle!
