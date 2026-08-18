@@ -49,9 +49,9 @@ $string['redirecterrordetected'] = 'Unsupported redirect to {$a} detected, execu
 $string['redirecturl'] = 'Logout redirect URL';
 $string['redirecturl_desc'] = 'Optionally you can redirect users to this URL after they logged out from LMS.';
 $string['allowedredirecthosts'] = 'Allowed redirect hosts';
-$string['allowedredirecthosts_desc'] = "Semicolon-separated list of external hosts that users may be redirected to after key-based authentication. 
-\nEnter host names only, without the protocol or path. For example: portal.example.com;app.example.org. 
-\nLeave empty to prevent redirects to external hosts.";
+$string['allowedredirecthosts_desc'] = 'Semicolon-separated list of external hosts that users may be redirected to after key-based authentication. '
+    . 'Enter host names only, without the protocol or path. For example: portal.example.com;app.example.org. '
+    . 'Leave empty to prevent redirects to external hosts.';
 $string['ssourl'] = 'URL of SSO host';
 $string['ssourl_desc'] = 'URL of the SSO host to redirect users to. If defined users will be redirected here on login instead of the Moodle Login page';
 $string['updateuser'] = 'Update user?';
