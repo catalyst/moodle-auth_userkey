@@ -1024,7 +1024,7 @@ final class auth_plugin_test extends advanced_testcase {
     }
 
     /**
-     * Test that if one user logged, he will be logged out and redirected back to the login endpoint.
+     * Test that if one user is logged in, they will be logged out and redirected back to the login endpoint.
      */
     public function test_that_different_authorised_user_is_logged_out_and_redirected_back(): void {
         global $USER;
