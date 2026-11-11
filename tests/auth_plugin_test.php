@@ -956,6 +956,61 @@ final class auth_plugin_test extends advanced_testcase {
     }
 
     /**
+     * Test that login hook passes the requested URL to the SSO host when enabled.
+     */
+    public function test_loginpage_hook_passes_wantsurl_to_ssourl_when_enabled(): void {
+        global $SESSION, $CFG;
+
+        $SESSION->enrolkey_skipsso = 0;
+        $SESSION->wantsurl = $CFG->wwwroot . '/admin/tool/mobile/launch.php?service=moodle_mobile_app&passport=123';
+        set_config('ssourl', 'http://google.com/sso', 'auth_userkey');
+        set_config('ssourlwantsurl', 1, 'auth_userkey');
+        $this->auth = new auth_plugin_userkey();
+
+        $expected = (new moodle_url('http://google.com/sso', ['wantsurl' => $SESSION->wantsurl]))->out(false);
+        $this->expectException(moodle_exception::class);
+        $this->expectExceptionMessage('Unsupported redirect to ' . $expected . ' detected, execution terminated.');
+
+        $this->auth->loginpage_hook();
+    }
+
+    /**
+     * Test that login hook does not pass the requested URL when the setting is disabled.
+     */
+    public function test_loginpage_hook_does_not_pass_wantsurl_when_disabled(): void {
+        global $SESSION, $CFG;
+
+        $SESSION->enrolkey_skipsso = 0;
+        $SESSION->wantsurl = $CFG->wwwroot . '/course/view.php?id=2';
+        set_config('ssourl', 'http://google.com', 'auth_userkey');
+        set_config('ssourlwantsurl', 0, 'auth_userkey');
+        $this->auth = new auth_plugin_userkey();
+
+        $this->expectException(moodle_exception::class);
+        $this->expectExceptionMessage('Unsupported redirect to http://google.com detected, execution terminated.');
+
+        $this->auth->loginpage_hook();
+    }
+
+    /**
+     * Test that login hook never passes an external URL to the SSO host.
+     */
+    public function test_loginpage_hook_does_not_pass_external_wantsurl(): void {
+        global $SESSION;
+
+        $SESSION->enrolkey_skipsso = 0;
+        $SESSION->wantsurl = 'http://evil.example.com/';
+        set_config('ssourl', 'http://google.com', 'auth_userkey');
+        set_config('ssourlwantsurl', 1, 'auth_userkey');
+        $this->auth = new auth_plugin_userkey();
+
+        $this->expectException(moodle_exception::class);
+        $this->expectExceptionMessage('Unsupported redirect to http://google.com detected, execution terminated.');
+
+        $this->auth->loginpage_hook();
+    }
+
+    /**
      * Test that login hook does not redirect a user if skipsso not set and ssourl is not set.
      */
     public function test_loginpage_hook_does_not_redirect_if_skipsso_not_set_and_ssourl_not_set(): void {
