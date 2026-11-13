@@ -59,6 +59,7 @@ class auth_plugin_userkey extends auth_plugin_base {
         'ipwhitelist' => '',
         'redirecturl' => '',
         'ssourl' => '',
+        'ssourlwantsurl' => false,
         'createuser' => false,
         'updateuser' => false,
     ];
@@ -97,10 +98,38 @@ class auth_plugin_userkey extends auth_plugin_base {
      */
     public function loginpage_hook() {
         if ($this->should_login_redirect()) {
-            $this->redirect($this->config->ssourl);
+            $this->redirect($this->get_sso_url());
         }
 
         return true;
+    }
+
+    /**
+     * Returns the SSO URL to redirect to.
+     *
+     * When "ssourlwantsurl" is enabled and Moodle knows where the user was going
+     * ($SESSION->wantsurl, e.g. set by tool_mobile/launch.php for the Moodle app),
+     * that URL is passed to the SSO host as a "wantsurl" parameter, so the SSO host
+     * can hand it back to login.php once the key is generated.
+     *
+     * @return string
+     */
+    protected function get_sso_url() {
+        global $SESSION;
+
+        $ssourl = $this->config->ssourl;
+
+        if (empty($this->config->ssourlwantsurl) || empty($SESSION->wantsurl)) {
+            return $ssourl;
+        }
+
+        $wantsurl = clean_param($SESSION->wantsurl, PARAM_LOCALURL);
+        if (empty($wantsurl)) {
+            return $ssourl;
+        }
+
+        $url = new moodle_url($ssourl, ['wantsurl' => $wantsurl]);
+        return $url->out(false);
     }
 
     /**

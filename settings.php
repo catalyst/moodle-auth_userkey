@@ -77,6 +77,14 @@ if ($ADMIN->fulltree) {
     ));
 
     $settings->add(new admin_setting_configselect(
+        'auth_userkey/ssourlwantsurl',
+        new lang_string('ssourlwantsurl', 'auth_userkey'),
+        new lang_string('ssourlwantsurl_desc', 'auth_userkey'),
+        0,
+        $yesno
+    ));
+
+    $settings->add(new admin_setting_configselect(
         'auth_userkey/createuser',
         new lang_string('createuser', 'auth_userkey'),
         new lang_string('createuser_desc', 'auth_userkey'),
